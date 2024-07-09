@@ -12,12 +12,12 @@ class ImageController extends Controller
     {
         $images = Image::all();
 
-        return view('images.index', compact('images'));
+        return view('image.index', compact('images'));
     }
 
     public function create()
     {
-        return view('images.create');
+        return view('image.create');
     }
 
     public function store(Request $request)
@@ -30,7 +30,7 @@ class ImageController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time().'_'.$file->getClientOriginalName();
-            $filePath = $file->storeAs('images', $fileName, 'public');
+            $filePath = $file->storeAs('image', $fileName, 'public');
 
             $image = Image::create([
                 'name' => $request->name,
@@ -40,7 +40,7 @@ class ImageController extends Controller
                 'file_size' => $file->getSize(),
             ]);
 
-            return redirect()->route('images.show', $image->id)->with('success', 'Image uploaded successfully');
+            return redirect()->route('image.show', $image->id)->with('success', 'Image uploaded successfully');
         }
 
         return back()->with('error', 'Image upload failed');
@@ -48,12 +48,12 @@ class ImageController extends Controller
 
     public function show(Image $image)
     {
-        return view('images.show', compact('image'));
+        return view('image.show', compact('image'));
     }
 
     public function edit(Image $image)
     {
-        return view('images.edit', compact('image'));
+        return view('image.edit', compact('image'));
     }
 
     public function update(Request $request, Image $image)
@@ -66,7 +66,7 @@ class ImageController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->route('images.show', $image->id)->with('success', 'Image updated successfully');
+        return redirect()->route('image.show', $image->id)->with('success', 'Image updated successfully');
     }
 
     public function destroy(Image $image)
@@ -74,6 +74,6 @@ class ImageController extends Controller
         Storage::disk('public')->delete($image->file_path);
         $image->delete();
 
-        return redirect()->route('images.index')->with('success', 'Image deleted successfully');
+        return redirect()->route('image.index')->with('success', 'Image deleted successfully');
     }
 }

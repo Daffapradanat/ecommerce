@@ -7,7 +7,7 @@
             <h1 class="display-4">Image Gallery</h1>
         </div>
         <div class="col-md-6 text-md-end">
-            <a href="{{ route('images.create') }}" class="btn btn-primary">
+            <a href="{{ route('image.create') }}" class="btn btn-primary">
                 <i class="fas fa-upload"></i> Upload New Image
             </a>
         </div>
@@ -36,13 +36,13 @@
                     </div>
                     <div class="card-footer bg-transparent">
                         <div class="btn-group w-100" role="group">
-                            <a href="{{ route('images.show', $image->id) }}" class="btn btn-sm btn-outline-info">
+                            <a href="{{ route('image.show', $image->id) }}" class="btn btn-sm btn-outline-info">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <a href="{{ route('images.edit', $image->id) }}" class="btn btn-sm btn-outline-warning">
+                            <a href="{{ route('image.edit', $image->id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <form action="{{ route('images.destroy', $image->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                            <form action="{{ route('image.destroy', $image->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this image?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">

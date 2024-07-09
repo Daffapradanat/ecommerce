@@ -7,7 +7,7 @@
             <div class="card shadow">
                 <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                     <h1 class="h3 mb-0">Image Details</h1>
-                    <a href="{{ route('images.index') }}" class="btn btn-light btn-sm">
+                    <a href="{{ route('image.index') }}" class="btn btn-light btn-sm">
                         <i class="fas fa-arrow-left"></i> Back to Gallery
                     </a>
                 </div>
@@ -41,10 +41,10 @@
                     </dl>
 
                     <div class="d-flex justify-content-end mt-4">
-                        <a href="{{ route('images.edit', $image->id) }}" class="btn btn-warning me-2">
+                        <a href="{{ route('image.edit', $image->id) }}" class="btn btn-warning me-2">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <form action="{{ route('images.destroy', $image->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                        <form action="{{ route('image.destroy', $image->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this image?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger">
