@@ -27,7 +27,7 @@
                             <input type="text" class="form-control" id="name" name="name" value="{{ $image->name }}" required>
                         </div>
                         <div class="text-end">
-                            <a href="{{ route('images.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                            <a href="{{ route('image.index') }}" class="btn btn-secondary me-2">Cancel</a>
                             <button type="submit" class="btn btn-warning">
                                 <i class="fas fa-save"></i> Update
                             </button>

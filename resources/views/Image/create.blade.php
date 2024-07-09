@@ -30,7 +30,7 @@
                             <input type="file" class="form-control" id="image" name="image" required>
                         </div>
                         <div class="text-end">
-                            <a href="{{ route('images.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                            <a href="{{ route('image.index') }}" class="btn btn-secondary me-2">Cancel</a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload"></i> Upload
                             </button>
