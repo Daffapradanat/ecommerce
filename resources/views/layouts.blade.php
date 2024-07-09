@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>E-commerce</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('images/Logo1.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('public/images/Logo.ico') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -77,7 +77,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <a class="navbar-brand" href="#">
-                <img src="{{ asset('images/Logo.png') }}" alt="Logo" height="50" class="d-inline-block align-text-top me-2">
+                <img src="{{ asset('public/images/Logo.png') }}" alt="Logo" height="50" class="d-inline-block align-text-top me-2">
                 E-commerce
             </a>
             <div class="navbar-nav ms-auto">
