@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-center">
         <div class="col-md-6">
             <h1 class="display-4">Products</h1>
         </div>
@@ -13,12 +13,12 @@
         </div>
     </div>
 
-        @if(session('notification'))
-        <div class="alert alert-{{ session('notification')['type'] }} alert-dismissible fade show" role="alert">
-            {{ session('notification')['message'] }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        @endif
+    @if(session('notification'))
+    <div class="alert alert-{{ session('notification')['type'] }} alert-dismissible fade show" role="alert">
+        {{ session('notification')['message'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 
     <div class="card shadow">
         <div class="card-body">
@@ -38,7 +38,11 @@
                         @foreach($products as $product)
                         <tr>
                             <td>
-                                <img src="{{ $product->image->url }}" alt="{{ $product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                @if($product->images && count($product->images) > 0)
+                                    <img src="{{ asset('storage/' . $product->images[0]) }}" alt="{{ $product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                @else
+                                    <span class="text-muted">No image</span>
+                                @endif
                             </td>
                             <td>{{ $product->name }}</td>
                             <td>${{ number_format($product->price, 2) }}</td>
@@ -46,14 +50,14 @@
                             <td>{{ $product->category->name }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i> View
                                     </a>
-                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Edit
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}">
-                                        <i class="fas fa-trash"></i>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}">
+                                        <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </div>
                                 <!-- Delete Confirmation Modal -->
@@ -87,7 +91,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('styles')
@@ -105,19 +108,61 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+    const table = document.getElementById('productsTable');
+    const headers = table.querySelectorAll('th');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
 
-    const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
-        v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+    const directions = Array.from(headers).map(function(header) {
+        return '';
+    });
 
-    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
-        const table = th.closest('table');
-        const tbody = table.querySelector('tbody');
-        Array.from(tbody.querySelectorAll('tr'))
-            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-            .forEach(tr => tbody.appendChild(tr) );
-    })));
+    const transform = function(index, content) {
+        const type = headers[index].getAttribute('data-type');
+        switch (type) {
+            case 'number':
+                return parseFloat(content);
+            case 'string':
+            default:
+                return content;
+        }
+    };
+
+    const sortColumn = function(index) {
+        const direction = directions[index] || 'asc';
+        const multiplier = (direction === 'asc') ? 1 : -1;
+        const newRows = Array.from(rows);
+
+        newRows.sort(function(rowA, rowB) {
+            const cellA = rowA.querySelectorAll('td')[index].textContent;
+            const cellB = rowB.querySelectorAll('td')[index].textContent;
+
+            const a = transform(index, cellA);
+            const b = transform(index, cellB);
+
+            switch (true) {
+                case a > b: return 1 * multiplier;
+                case a < b: return -1 * multiplier;
+                case a === b: return 0;
+            }
+        });
+
+        [].forEach.call(rows, function(row) {
+            tableBody.removeChild(row);
+        });
+
+        newRows.forEach(function(newRow) {
+            tableBody.appendChild(newRow);
+        });
+
+        directions[index] = direction === 'asc' ? 'desc' : 'asc';
+    };
+
+    [].forEach.call(headers, function(header, index) {
+        header.addEventListener('click', function() {
+            sortColumn(index);
+        });
+    });
 
     const alert = document.querySelector('.alert');
     if (alert) {

@@ -42,6 +42,18 @@ class ShoppingController extends Controller
             ->with('product')
             ->get();
 
+        $cartItems = $cartItems->map(function ($item) {
+            $product = $item->product;
+
+            $product->image_urls = collect($product->images)->map(function ($image) {
+                return url('storage/'.$image);
+            });
+
+            unset($product->images);
+
+            return $item;
+        });
+
         $total = $cartItems->sum(function ($item) {
             return $item->quantity * $item->product->price;
         });
@@ -136,6 +148,22 @@ class ShoppingController extends Controller
             ->with('orderItems.product')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $orders = $orders->map(function ($order) {
+            $order->orderItems = $order->orderItems->map(function ($item) {
+                $product = $item->product;
+
+                $product->image_urls = collect($product->images)->map(function ($image) {
+                    return url('storage/'.$image);
+                });
+
+                unset($product->images);
+
+                return $item;
+            });
+
+            return $order;
+        });
 
         return response()->json(['orders' => $orders]);
     }

@@ -4,31 +4,38 @@
 <div class="container">
     <h1 class="mb-4">All Orders</h1>
     @foreach($orders as $order)
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-                <span>Order #{{ $order->id }} - {{ $order->created_at->format('d M Y H:i') }}</span>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap">
+                <span class="fw-bold">Order #{{ $order->id }}</span>
+                <span class="text-muted">{{ $order->created_at->format('d M Y H:i') }}</span>
                 <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : 'success' }} mt-2 mt-md-0">{{ ucfirst($order->status) }}</span>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-8">
-                        <h5 class="card-title">Total: ${{ number_format($order->total_price, 2) }}</h5>
+                        <h5 class="card-title text-primary">Total: ${{ number_format($order->total_price, 2) }}</h5>
                         <div class="d-flex align-items-center">
-                            @if($order->user->avatar)
-                                <img src="{{ asset('storage/'.$order->user->avatar) }}" alt="{{ $order->user->name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                            @else
-                                <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2" style="width: 40px; height: 40px;">
-                                    {{ strtoupper(substr($order->user->name, 0, 1)) }}
-                                </div>
-                            @endif
-                            <p class="card-text mb-0">{{ $order->user->name }} ({{ $order->user->email }})</p>
+                            <div class="me-3">
+                                @if($order->user->image)
+                                    <img src="{{ asset('storage/users/'.$order->user->image) }}" alt="{{ $order->user->name }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                @else
+                                    <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="card-text mb-0 fw-bold">{{ $order->user->name }}</p>
+                                <p class="card-text text-muted mb-0">{{ $order->user->email }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
+                                <th>Image</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
                                 <th>Price</th>
@@ -37,6 +44,15 @@
                         <tbody>
                             @foreach($order->orderItems as $item)
                                 <tr>
+                                    <td>
+                                        @if($item->product->images && count($item->product->images) > 0)
+                                            <img src="{{ asset('storage/' . $item->product->images[0]) }}" alt="{{ $item->product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                No Image
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td>{{ $item->product->name }}</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>${{ number_format($item->price, 2) }}</td>

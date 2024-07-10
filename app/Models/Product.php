@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'image_id',
+        'images',
         'name',
         'description',
         'price',
@@ -18,10 +18,9 @@ class Product extends Model
         'category_id',
     ];
 
-    public function image()
-    {
-        return $this->belongsTo(Image::class);
-    }
+    protected $casts = [
+        'images' => 'array',
+    ];
 
     public function category()
     {

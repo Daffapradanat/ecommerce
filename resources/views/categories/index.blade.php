@@ -38,16 +38,12 @@
                                 <td>{{ $category->slug }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-warning">
+                                        <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-outline-warning">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category?')">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $category->id }}">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -63,3 +59,26 @@
     </div>
 </div>
 @endsection
+
+<div class="modal fade" id="deleteModal{{ $category->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $category->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ $category->id }}">Delete Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this category?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    

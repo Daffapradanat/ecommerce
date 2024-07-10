@@ -133,9 +133,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('categories.index') }}">Categories</a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link" href="{{ route('image.index') }}">Images</a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('users.index') }}">Users</a>
                 </li>
