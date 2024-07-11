@@ -9,16 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('file_name');
-            $table->string('file_path');
-            $table->string('mime_type');
-            $table->integer('file_size');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('path');
             $table->timestamps();
+
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
 

@@ -9,38 +9,40 @@
                 <div class="card-header bg-info text-white">
                     <h1 class="h3 mb-0">Product Details</h1>
                 </div>
+
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            @if($product->images && count($product->images) > 0)
-                                <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        @foreach($product->images as $index => $image)
-                                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                                <img src="{{ asset('storage/' . $image) }}" class="d-block w-100 rounded product-image" alt="{{ $product->name }}">
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    @if(count($product->images) > 1)
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
-                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                            <span class="visually-hidden">Previous</span>
-                                        </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
-                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                            <span class="visually-hidden">Next</span>
-                                        </button>
-                                    @endif
+                            @if($product->image->isNotEmpty())
+                            <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    @foreach($product->image as $index => $images)
+                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                            <img src="{{ asset('storage/' . $images->path) }}" alt="{{ $product->name }}" class="d-block w-100 product-image">
+                                        </div>
+                                    @endforeach
                                 </div>
+                                @if($product->image->count() > 1)
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                @endif
+                            </div>
                             @else
                                 <div class="bg-light text-center p-5 rounded">
                                     <span class="text-muted">No image available</span>
                                 </div>
                             @endif
                         </div>
+
                         <div class="col-md-6">
                             <h2 class="h4 mb-3">{{ $product->name }}</h2>
-                            <p class="text-muted mb-3">{{ $product->description }}</p>
+                            <p class="text-muted mb-4">{{ $product->description }}</p>
                             <table class="table table-sm">
                                 <tr>
                                     <th class="w-35">Price:</th>
@@ -108,48 +110,73 @@
 
 @push('styles')
 <style>
-    .product-image {
-        width: 100%;
-        height: 350px; /* Slightly reduced height */
-        object-fit: contain;
-        background-color: #f8f9fa;
+    .card-body {
+        padding: 2rem;
     }
+
+    #productImageCarousel {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        width: 100%;
+        height: 400px;
+    }
+
+    .carousel-inner {
+        display: flex;
+        height: 400px;
+    }
+
+    .carousel-item {
+        flex: 0 0 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
     #productImageCarousel .carousel-control-prev,
     #productImageCarousel .carousel-control-next {
+        background-color: rgba(0, 0, 0, 0.5);
+        width: 10%;
         opacity: 0;
         transition: opacity 0.15s ease;
     }
+
     #productImageCarousel:hover .carousel-control-prev,
     #productImageCarousel:hover .carousel-control-next {
-        opacity: 0.5;
-    }
-    #productImageCarousel .carousel-control-prev:hover,
-    #productImageCarousel .carousel-control-next:hover {
         opacity: 1;
     }
+
+    .table.table-sm {
+        margin-top: 1.5rem;
+    }
+
     .table.table-sm th {
         width: 35%;
+        font-weight: 600;
     }
+
     .table.table-sm td, .table.table-sm th {
-        padding: 0.5rem;
+        padding: 0.75rem;
+        vertical-align: middle;
     }
-    .carousel-inner {
-        display: flex;
-        transition: transform 0.3s ease-in-out;
-    }
-    .carousel-item {
-        flex: 0 0 100%;
-    }
-    .product-image {
-        width: 100%;
-        height: 350px;
-        object-fit: contain;
-        background-color: #f8f9fa;
-        user-select: none;
-    }
-    #productImageCarousel {
-        overflow: hidden;
-        touch-action: pan-y;
+
+    @media (max-width: 768px) {
+        .card-body {
+            height: 300px;
+        }
+
+        #productImageCarousel, .carousel-inner {
+            max-height: 300px;
+            height: 300px;
+        }
     }
 </style>
 @endpush

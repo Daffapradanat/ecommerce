@@ -38,10 +38,10 @@
                         @foreach($products as $product)
                         <tr>
                             <td>
-                                @if($product->images && count($product->images) > 0)
-                                    <img src="{{ asset('storage/' . $product->images[0]) }}" alt="{{ $product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                @if($product->image->isNotEmpty())
+                                    <img src="{{ asset('storage/' . $product->image->first()->path) }}" alt="{{ $product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
                                 @else
-                                    <span class="text-muted">No image</span>
+                                    <span class="text-muted">No image available</span>
                                 @endif
                             </td>
                             <td>{{ $product->name }}</td>

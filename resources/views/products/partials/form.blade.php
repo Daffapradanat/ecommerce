@@ -49,7 +49,7 @@
     <label for="images">Images</label>
     <div id="drop-area" class="drop-area">
         <p>Drag and drop images here or click to select files</p>
-        <input type="file" id="fileElem" name="images[]" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+        <input type="file" id="fileElem" name="images[]" multiple accept="image/*" style="display:none">
     </div>
     <div id="gallery" class="image-preview"></div>
     @error('images')
@@ -57,16 +57,16 @@
     @enderror
 </div>
 
-@if(isset($product) && $product->images)
-    <div class="form-group">
+@if(isset($product) && $product->image->isNotEmpty())
+    <div class="form-group mt-3">
         <label>Current Images</label>
-        <div id="current-images" class="row">
-            @foreach($product->images as $image)
+        <div class="row">
+            @foreach($product->image as $images)
                 <div class="col-md-3 mb-3">
                     <div class="image-container">
-                        <img src="{{ asset('storage/' . $image) }}" alt="Product Image" class="img-thumbnail">
+                        <img src="{{ asset('storage/' . $images->path) }}" alt="Product Image" class="img-thumbnail">
                         <div class="image-overlay">
-                            <input type="checkbox" name="remove_images[]" value="{{ $image }}" id="remove_image_{{ $loop->index }}">
+                            <input type="checkbox" name="remove_images[]" value="{{ $images->id }}" id="remove_image_{{ $loop->index }}">
                             <label for="remove_image_{{ $loop->index }}">Remove</label>
                         </div>
                     </div>
@@ -181,30 +181,57 @@
 
     dropArea.addEventListener('click', () => fileElem.click());
 
+    fileElem.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
     function handleFiles(files) {
-        ([...files]).forEach(uploadFile);
+    gallery.innerHTML = '';
+
+    let dataTransfer = new DataTransfer();
+
+    ([...files]).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            uploadFile(file);
+            dataTransfer.items.add(file);
+        }
+    });
+
+    fileElem.files = dataTransfer.files;
     }
 
     function uploadFile(file) {
-        let container = document.createElement('div');
-        container.className = 'image-container';
+    let container = document.createElement('div');
+    container.className = 'image-container';
 
-        let img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.onload = function() {
-            URL.revokeObjectURL(this.src);
-        }
-        container.appendChild(img);
+    let img = document.createElement('img');
+    img.file = file;
+    img.src = URL.createObjectURL(file);
+    img.onload = function() {
+        URL.revokeObjectURL(this.src);
+    }
+    container.appendChild(img);
 
-        let removeBtn = document.createElement('span');
-        removeBtn.innerHTML = '&times;';
-        removeBtn.className = 'remove-image';
-        removeBtn.onclick = function() {
-            gallery.removeChild(container);
-        }
-        container.appendChild(removeBtn);
+    let removeBtn = document.createElement('span');
+    removeBtn.innerHTML = '&times;';
+    removeBtn.className = 'remove-image';
+    removeBtn.onclick = function() {
+        gallery.removeChild(container);
+        updateFileInput(file);
+    }
+    container.appendChild(removeBtn);
 
-        gallery.appendChild(container);
+    gallery.appendChild(container);
+    }
 
+    function updateFileInput(fileToRemove) {
+    let dt = new DataTransfer();
+    let files = fileElem.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file !== fileToRemove)
+            dt.items.add(file);
+    }
+    fileElem.files = dt.files;
     }
 </script>
