@@ -20,6 +20,13 @@
     </div>
     @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <div class="card shadow">
         <div class="card-body">
             <div class="table-responsive">
@@ -28,6 +35,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Slug</th>
+                            <th>Product Count</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -36,6 +44,7 @@
                         <tr>
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->slug }}</td>
+                            <td>{{ $category->products_count }}</td>
                             <td>
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-outline-warning">
@@ -56,13 +65,17 @@
                                             </div>
                                             <div class="modal-body">
                                                 Are you sure you want to delete the category "{{ $category->name }}"?
+                                                @if($category->products_count > 0)
+                                                    <br><br>
+                                                    <strong class="text-danger">Warning:</strong> This category is currently used by {{ $category->products_count }} product(s). Deleting this category may affect these products.
+                                                @endif
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                                 <form action="{{ route('categories.destroy', $category->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                    <button type="submit" class="btn btn-danger" {{ $category->products_count > 0 ? 'disabled' : '' }}>Delete</button>
                                                 </form>
                                             </div>
                                         </div>

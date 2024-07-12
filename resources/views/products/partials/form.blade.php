@@ -66,8 +66,11 @@
                     <div class="image-container">
                         <img src="{{ asset('storage/' . $images->path) }}" alt="Product Image" class="img-thumbnail">
                         <div class="image-overlay">
-                            <input type="checkbox" name="remove_images[]" value="{{ $images->id }}" id="remove_image_{{ $loop->index }}">
-                            <label for="remove_image_{{ $loop->index }}">Remove</label>
+                            <input type="checkbox" name="remove_images[]" value="{{ $images->id }}" id="remove_image_{{ $loop->index }}" class="remove-checkbox">
+                            <label for="remove_image_{{ $loop->index }}" class="remove-label">
+                                <span class="checkbox-custom"></span>
+                                Remove
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -138,6 +141,87 @@
         cursor: pointer;
         font-size: 18px;
         line-height: 1;
+    }
+
+    .image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .image-container img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .image-container:hover .image-overlay {
+        opacity: 1;
+    }
+
+    .image-container:hover img {
+        transform: scale(1.1);
+    }
+
+    .remove-checkbox {
+        display: none;
+    }
+
+    .remove-label {
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-custom {
+        width: 18px;
+        height: 18px;
+        border: 2px solid white;
+        border-radius: 3px;
+        display: inline-block;
+        margin-right: 8px;
+        position: relative;
+    }
+
+    .remove-checkbox:checked + .remove-label .checkbox-custom::after {
+        content: '\2714';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+    .remove-checkbox:checked + .remove-label {
+        color: #ff6b6b;
+    }
+
+    .remove-checkbox:checked + .remove-label .checkbox-custom {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+
+    .image-container.to-be-removed img {
+    filter: grayscale(100%) brightness(50%);
     }
 </style>
 
@@ -234,4 +318,15 @@
     }
     fileElem.files = dt.files;
     }
+
+    document.querySelectorAll('.remove-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const container = this.closest('.image-container');
+        if (this.checked) {
+            container.classList.add('to-be-removed');
+        } else {
+            container.classList.remove('to-be-removed');
+        }
+    });
+});
 </script>

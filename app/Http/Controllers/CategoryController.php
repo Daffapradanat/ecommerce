@@ -10,7 +10,8 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('products')->get();
+
         return view('categories.index', compact('categories'));
     }
 
@@ -70,7 +71,13 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        if ($category->products()->count() > 0) {
+            return redirect()->route('categories.index')
+                ->with('error', 'Cannot delete this category. It is still being used by one or more products.');
+        }
+
         $category->delete();
+
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
     }
 }
