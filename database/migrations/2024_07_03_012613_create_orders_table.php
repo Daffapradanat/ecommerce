@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('buyer_id')->constrained()->onDelete('cascade');
             $table->string('status');
-            $table->decimal('total_price', 10, 2);
+            $table->decimal('total_price', 12, 2);
             $table->timestamps();
         });
     }

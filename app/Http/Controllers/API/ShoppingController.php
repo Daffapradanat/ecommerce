@@ -25,7 +25,7 @@ class ShoppingController extends Controller
 
         $cart = Cart::updateOrCreate(
             [
-                'user_id' => auth()->id(),
+                'buyer_id' => auth()->id(),
                 'product_id' => $request->product_id,
             ],
             [
@@ -38,7 +38,7 @@ class ShoppingController extends Controller
 
     public function showCart()
     {
-        $cartItems = Cart::where('user_id', auth()->id())
+        $cartItems = Cart::where('buyer_id', auth()->id())
             ->with('product')
             ->get();
 
@@ -71,7 +71,7 @@ class ShoppingController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cart = Cart::where('user_id', auth()->id())
+        $cart = Cart::where('buyer_id', auth()->id())
             ->where('product_id', $request->product_id)
             ->first();
 
@@ -86,7 +86,7 @@ class ShoppingController extends Controller
 
     public function removeFromCart($product_id)
     {
-        $deleted = Cart::where('user_id', auth()->id())
+        $deleted = Cart::where('buyer_id', auth()->id())
             ->where('product_id', $product_id)
             ->delete();
 
@@ -99,7 +99,7 @@ class ShoppingController extends Controller
 
     public function checkout()
     {
-        $cartItems = Cart::where('user_id', auth()->id())->with('product')->get();
+        $cartItems = Cart::where('buyer_id', auth()->id())->with('product')->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Cart is empty'], 400);
@@ -109,7 +109,7 @@ class ShoppingController extends Controller
 
         try {
             $order = Order::create([
-                'user_id' => auth()->id(),
+                'buyer_id' => auth()->id(),
                 'status' => 'pending',
                 'total_price' => 0,
             ]);
@@ -130,7 +130,7 @@ class ShoppingController extends Controller
 
             $order->update(['total_price' => $totalPrice]);
 
-            Cart::where('user_id', auth()->id())->delete();
+            Cart::where('buyer_id', auth()->id())->delete();
 
             DB::commit();
 
@@ -144,7 +144,7 @@ class ShoppingController extends Controller
 
     public function listOrders()
     {
-        $orders = Order::where('user_id', auth()->id())
+        $orders = Order::where('buyer_id', auth()->id())
             ->with('orderItems.product')
             ->orderBy('created_at', 'desc')
             ->get();

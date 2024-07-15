@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BuyerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,6 +35,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/lobby', [LobbyController::class, 'index'])->name('lobby.index');
     Route::get('/home', [AuthController::class, 'layouts'])->name('home');
     Route::resource('users', UserController::class);
+    Route::resource('buyer', BuyerController::class);
     Route::resource('image', ImageController::class);
     Route::resource('products', ProductController::class);
     Route::resource('categories', CategoryController::class);
