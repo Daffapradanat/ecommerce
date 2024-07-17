@@ -11,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class BuyerController extends Controller
 {
+
+    
     public function update(Request $request)
     {
         $buyer = Auth::user();

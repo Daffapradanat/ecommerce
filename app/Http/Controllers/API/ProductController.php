@@ -9,11 +9,11 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all()->map(function ($product) {
-            $product->image_urls = collect($product->image)->map(function ($image) {
-                return url('storage/' . $image);
+        $products = Product::with('image')->get()->map(function ($product) {
+            $product->image_urls = $product->image->map(function ($image) {
+                return url('storage/' . $image->path);
             });
-            unset($product->images);
+            unset($product->image);
 
             return $product;
         });

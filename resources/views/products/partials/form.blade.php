@@ -15,11 +15,15 @@
 </div>
 
 <div class="form-group">
-    <label for="price">Price</label>
-    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price ?? '') }}" required>
+    <label for="price">Price (Rp)</label>
+    <div class="input-group">
+        <span class="input-group-text">Rp</span>
+        <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price ?? '') }}" required>
+    </div>
     @error('price')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
+    <p id="totalDisplay" class="text-muted mt-1 mb-0"></p>
 </div>
 
 <div class="form-group">
@@ -328,5 +332,25 @@
             container.classList.remove('to-be-removed');
         }
     });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const priceInput = document.getElementById('price');
+    const totalDisplay = document.getElementById('totalDisplay');
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function updateTotal() {
+        const price = parseFloat(priceInput.value) || 0;
+        totalDisplay.textContent = `Total: Rp ${formatNumber(price)}`;
+    }
+
+    priceInput.addEventListener('input', updateTotal);
+
+    // Initial update
+    updateTotal();
+
 });
 </script>

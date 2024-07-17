@@ -12,6 +12,7 @@ class BuyerController extends Controller
     public function index()
     {
         $buyers = Buyer::all();
+
         return view('buyers.index', compact('buyers'));
     }
 
@@ -41,7 +42,7 @@ class BuyerController extends Controller
 
         $buyer->save();
 
-        return redirect()->route('buyer.index')->with('success', 'buyer created successfully.');
+        return redirect()->route('buyers.index')->with('success', 'buyer created successfully.');
     }
 
     public function show(buyer $buyer)

@@ -8,12 +8,19 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class ShoppingController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:sanctum');
+
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
     }
 
     public function addToCart(Request $request)
@@ -39,17 +46,21 @@ class ShoppingController extends Controller
     public function showCart()
     {
         $cartItems = Cart::where('buyer_id', auth()->id())
-            ->with('product')
+            ->with('product.image')
             ->get();
 
         $cartItems = $cartItems->map(function ($item) {
             $product = $item->product;
 
-            $product->image_urls = collect($product->images)->map(function ($image) {
-                return url('storage/'.$image);
-            });
+            if ($product->image) {
+                $product->image_urls = $product->image->map(function ($image) {
+                    return url('storage/'.$image->path);
+                });
+            } else {
+                $product->image_urls = collect();
+            }
 
-            unset($product->images);
+            unset($product->image);
 
             return $item;
         });
@@ -97,9 +108,23 @@ class ShoppingController extends Controller
         }
     }
 
-    public function checkout()
+    public function checkout(Request $request)
     {
-        $cartItems = Cart::where('buyer_id', auth()->id())->with('product')->get();
+        $request->validate([
+            'payment_method' => 'required|in:bank_transfer,credit_card,gopay,shopeepay',
+            'phone' => 'required|string|max:20',
+            'city' => 'required|string|max:255',
+            'address' => 'required|string',
+            'postal_code' => 'required|string|max:10',
+        ]);
+
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        $buyer = auth()->user();
+        $cartItems = Cart::where('buyer_id', $buyer->id)->with('product')->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Cart is empty'], 400);
@@ -108,36 +133,82 @@ class ShoppingController extends Controller
         DB::beginTransaction();
 
         try {
+            $totalPrice = 0;
+            $items = [];
+
             $order = Order::create([
-                'buyer_id' => auth()->id(),
+                'buyer_id' => $buyer->id,
                 'status' => 'pending',
                 'total_price' => 0,
+                'payment_method' => $request->payment_method,
+                'payment_status' => 'pending',
+                'email' => $buyer->email,
+                'phone' => $request->phone,
+                'city' => $request->city,
+                'address' => $request->address,
+                'postal_code' => $request->postal_code,
             ]);
 
-            $totalPrice = 0;
-
             foreach ($cartItems as $item) {
-                $orderItem = OrderItem::create([
+                $itemPrice = $item->quantity * $item->product->price;
+                $totalPrice += $itemPrice;
+
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'price' => $item->product->price,
                 ]);
 
-                $totalPrice += $item->quantity * $item->product->price;
                 $item->product->decrement('stock', $item->quantity);
+
+                $items[] = [
+                    'id' => $item->product_id,
+                    'price' => $item->product->price,
+                    'quantity' => $item->quantity,
+                    'name' => $item->product->name,
+                ];
             }
 
             $order->update(['total_price' => $totalPrice]);
 
-            Cart::where('buyer_id', auth()->id())->delete();
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->id,
+                    'gross_amount' => $totalPrice,
+                ],
+                'item_details' => $items,
+                'customer_details' => [
+                    'email' => $buyer->email,
+                    'phone' => $request->phone,
+                    'billing_address' => [
+                        'city' => $request->city,
+                        'postal_code' => $request->postal_code,
+                        'address' => $request->address,
+                    ],
+                    'shipping_address' => [
+                        'city' => $request->city,
+                        'postal_code' => $request->postal_code,
+                        'address' => $request->address,
+                    ],
+                ],
+                'enabled_payments' => [$request->payment_method],
+            ];
+
+            $snapToken = Snap::getSnapToken($params);
+            $order->update(['payment_token' => $snapToken]);
+
+            Cart::where('buyer_id', $buyer->id)->delete();
 
             DB::commit();
 
-            return response()->json(['message' => 'Order created successfully', 'order' => $order], 201);
+            return response()->json([
+                'message' => 'Order created successfully',
+                'order' => $order,
+                'payment_token' => $snapToken
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
         }
     }
@@ -145,7 +216,7 @@ class ShoppingController extends Controller
     public function listOrders()
     {
         $orders = Order::where('buyer_id', auth()->id())
-            ->with('orderItems.product')
+            ->with('orderItems.product.image')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -153,11 +224,15 @@ class ShoppingController extends Controller
             $order->orderItems = $order->orderItems->map(function ($item) {
                 $product = $item->product;
 
-                $product->image_urls = collect($product->images)->map(function ($image) {
-                    return url('storage/'.$image);
-                });
+                if ($product->image) {
+                    $product->image_urls = $product->image->map(function ($image) {
+                        return url('storage/'.$image->path);
+                    });
+                } else {
+                    $product->image_urls = collect();
+                }
 
-                unset($product->images);
+                unset($product->image);
 
                 return $item;
             });
