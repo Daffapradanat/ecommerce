@@ -4,7 +4,6 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ShoppingController;
 use App\Http\Controllers\API\BuyerController;
-use App\Http\Controllers\API\PaymentNotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,8 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/checkout', [ShoppingController::class, 'checkout']);
 
     Route::get('/orders', [ShoppingController::class, 'listOrders']);
+    Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
 
-    Route::post('payment/notification', [PaymentNotificationController::class, 'handle']);
+    Route::post('payment/notification', [ShoppingController::class, 'handlePaymentNotification']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

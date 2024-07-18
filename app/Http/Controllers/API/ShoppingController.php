@@ -118,11 +118,6 @@ class ShoppingController extends Controller
             'postal_code' => 'required|string|max:10',
         ]);
 
-        Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
-
         $buyer = auth()->user();
         $cartItems = Cart::where('buyer_id', $buyer->id)->with('product')->get();
 
@@ -133,13 +128,14 @@ class ShoppingController extends Controller
         DB::beginTransaction();
 
         try {
-            $totalPrice = 0;
-            $items = [];
+            $totalPrice = $cartItems->sum(function ($item) {
+                return $item->quantity * $item->product->price;
+            });
 
             $order = Order::create([
                 'buyer_id' => $buyer->id,
                 'status' => 'pending',
-                'total_price' => 0,
+                'total_price' => $totalPrice,
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'pending',
                 'email' => $buyer->email,
@@ -149,11 +145,8 @@ class ShoppingController extends Controller
                 'postal_code' => $request->postal_code,
             ]);
 
-            foreach ($cartItems as $item) {
-                $itemPrice = $item->quantity * $item->product->price;
-                $totalPrice += $itemPrice;
-
-                OrderItem::create([
+            $orderItems = $cartItems->map(function ($item) use ($order) {
+                $orderItem = new OrderItem([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
@@ -162,23 +155,26 @@ class ShoppingController extends Controller
 
                 $item->product->decrement('stock', $item->quantity);
 
-                $items[] = [
-                    'id' => $item->product_id,
-                    'price' => $item->product->price,
-                    'quantity' => $item->quantity,
-                    'name' => $item->product->name,
-                ];
-            }
+                return $orderItem;
+            });
 
-            $order->update(['total_price' => $totalPrice]);
+            $order->orderItems()->saveMany($orderItems);
 
             $params = [
                 'transaction_details' => [
                     'order_id' => $order->id,
                     'gross_amount' => $totalPrice,
                 ],
-                'item_details' => $items,
+                'item_details' => $orderItems->map(function ($item) {
+                    return [
+                        'id' => $item->product_id,
+                        'price' => $item->price,
+                        'quantity' => $item->quantity,
+                        'name' => $item->product->name,
+                    ];
+                }),
                 'customer_details' => [
+                    'first_name' => $buyer->name,
                     'email' => $buyer->email,
                     'phone' => $request->phone,
                     'billing_address' => [
@@ -204,13 +200,41 @@ class ShoppingController extends Controller
 
             return response()->json([
                 'message' => 'Order created successfully',
-                'order' => $order,
-                'payment_token' => $snapToken
+                'order' => $order->load('orderItems.product'),
+                'payment_token' => $snapToken,
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/'.$snapToken,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function handlePaymentNotification(Request $request)
+    {
+        $notificationBody = json_decode($request->getContent(), true);
+        $transactionStatus = $notificationBody['transaction_status'];
+        $fraudStatus = $notificationBody['fraud_status'];
+        $orderId = $notificationBody['order_id'];
+
+        $order = Order::findOrFail($orderId);
+
+        if ($transactionStatus == 'capture') {
+            if ($fraudStatus == 'challenge') {
+                $order->setStatusPending();
+            } elseif ($fraudStatus == 'accept') {
+                $order->setStatusSuccess();
+            }
+        } elseif ($transactionStatus == 'settlement') {
+            $order->setStatusSuccess();
+        } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
+            $order->setStatusFailed();
+        } elseif ($transactionStatus == 'pending') {
+            $order->setStatusPending();
+        }
+
+        return response('OK', 200);
     }
 
     public function listOrders()
@@ -242,4 +266,31 @@ class ShoppingController extends Controller
 
         return response()->json(['orders' => $orders]);
     }
+
+    public function getPaymentLink($orderId)
+{
+    $order = Order::findOrFail($orderId);
+
+    if ($order->payment_status !== 'pending') {
+        return response()->json(['error' => 'This order is not pending payment'], 400);
+    }
+
+    // Ambil payment token dari order
+    $paymentToken = $order->payment_token;
+
+    if (!$paymentToken) {
+        return response()->json(['error' => 'Payment token not found'], 404);
+    }
+
+    // Gunakan Midtrans SDK untuk mendapatkan redirect URL
+    Config::$serverKey = config('services.midtrans.server_key');
+    Config::$isProduction = config('services.midtrans.is_production');
+
+    try {
+        $paymentUrl = Snap::getTransactionRedirectUrl($paymentToken);
+        return response()->json(['payment_url' => $paymentUrl]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to get payment URL: ' . $e->getMessage()], 500);
+    }
+}
 }

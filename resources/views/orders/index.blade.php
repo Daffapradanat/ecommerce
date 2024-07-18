@@ -4,11 +4,13 @@
 <div class="container">
     <h1 class="mb-4">All Orders</h1>
     @forelse($orders as $order)
-        <div class="card mb-4 shadow-sm">
+        <div class="card mb-4 shadow-sm" data-order-id="{{ $order->id }}">
             <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap">
                 <span class="fw-bold">Order #{{ $order->id }}</span>
                 <span class="text-muted">{{ $order->created_at->format('d M Y H:i') }}</span>
-                <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'completed' ? 'success' : 'danger') }} mt-2 mt-md-0">{{ ucfirst($order->status) }}</span>
+                <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' : ($order->payment_status === 'paid' ? 'success' : 'danger') }} mt-2 mt-md-0 payment-status-badge">
+                    {{ ucfirst($order->payment_status) }}
+                </span>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -30,18 +32,6 @@
                                 <p class="card-text text-muted mb-0">{{ $order->phone }}</p>
                             </div>
                         </div>
-                        <div>
-                            <h6 class="fw-bold">Shipping Address:</h6>
-                            <p class="mb-0">{{ $order->address }}</p>
-                            <p class="mb-0">{{ $order->city }}, {{ $order->postal_code }}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mt-3 mt-md-0">
-                        <p class="mb-1"><strong>Payment Status:</strong> {{ ucfirst($order->payment_status) }}</p>
-                        <p class="mb-1"><strong>Payment Method:</strong> {{ ucfirst(str_replace('_', ' ', $order->payment_method ?? 'Not available')) }}</p>
-                        @if($order->payment_token && $order->payment_status == 'pending')
-                            <button class="btn btn-primary btn-sm mt-2" onclick="payNow('{{ $order->payment_token }}')">Pay Now</button>
-                        @endif
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -67,32 +57,88 @@
                     </table>
                 </div>
             </div>
+            <div class="card-footer">
+                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-primary btn-sm">Show Details</a>
+                <button class="btn btn-danger btn-sm delete-order" data-order-id="{{ $order->id }}">Delete Order</button>
+            </div>
         </div>
     @empty
         <div class="alert alert-info">No orders found.</div>
     @endforelse
 </div>
 
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this order?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
+<script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function payNow(token) {
-        snap.pay(token, {
-            onSuccess: function(result){
-                alert("Payment success!");
-                location.reload();
-            },
-            onPending: function(result){
-                alert("Waiting for your payment!");
-            },
-            onError: function(result){
-                alert("Payment failed!");
-            },
-            onClose: function(){
-                alert('You closed the popup without finishing the payment');
+    document.addEventListener('DOMContentLoaded', function() {
+        let deleteOrderButtons = document.querySelectorAll('.delete-order');
+        let deleteConfirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+        let confirmDeleteButton = document.getElementById('confirmDelete');
+        let orderIdToDelete;
+
+        deleteOrderButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                orderIdToDelete = this.getAttribute('data-order-id');
+                deleteConfirmationModal.show();
+            });
+        });
+
+        confirmDeleteButton.addEventListener('click', function() {
+            if (orderIdToDelete) {
+                // Send delete request
+                fetch(`/api/orders/${orderIdToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the order card from the DOM
+                        let orderCard = document.querySelector(`[data-order-id="${orderIdToDelete}"]`);
+                        if (orderCard) {
+                            orderCard.remove();
+                        }
+                        // Show success message
+                        alert('Order deleted successfully');
+                    } else {
+                        // Show error message
+                        alert('Failed to delete order');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the order');
+                })
+                .finally(() => {
+                    deleteConfirmationModal.hide();
+                });
             }
         });
-    }
+    });
 </script>
 @endpush
 
