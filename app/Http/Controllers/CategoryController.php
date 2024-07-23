@@ -8,9 +8,19 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::query();
+
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $categories->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        $categories = $categories->paginate(10);
 
         return view('categories.index', compact('categories'));
     }

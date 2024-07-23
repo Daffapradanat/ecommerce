@@ -1,145 +1,181 @@
 @extends('layouts')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">All Orders</h1>
-    @forelse($orders as $order)
-        <div class="card mb-4 shadow-sm" data-order-id="{{ $order->id }}">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap">
-                <span class="fw-bold">Order #{{ $order->id }}</span>
-                <span class="text-muted">{{ $order->created_at->format('d M Y H:i') }}</span>
-                <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' : ($order->payment_status === 'paid' ? 'success' : 'danger') }} mt-2 mt-md-0 payment-status-badge">
-                    {{ ucfirst($order->payment_status) }}
-                </span>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <h5 class="card-title text-primary">Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}</h5>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                @if($order->buyer->image)
-                                    <img src="{{ asset('storage/buyers/'.$order->buyer->image) }}" alt="{{ $order->buyer->name }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                                @else
-                                    <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                                        {{ strtoupper(substr($order->buyer->name, 0, 1)) }}
-                                    </div>
-                                @endif
-                            </div>
-                            <div>
-                                <p class="card-text mb-0 fw-bold">{{ $order->name }}</p>
-                                <p class="card-text text-muted mb-0">{{ $order->email }}</p>
-                                <p class="card-text text-muted mb-0">{{ $order->phone }}</p>
-                            </div>
-                        </div>
+<div class="container-fluid px-4">
+    <h1 class="mt-4 mb-4">Order Management</h1>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ route('orders.index') }}" method="GET" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Search by Order ID or Customer" value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($order->orderItems as $item)
-                                <tr>
-                                    <td>{{ $item->product->name }}</td>
-                                    <td>{{ $item->quantity }}</td>
-                                    <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                                    <td>Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                {{-- <div class="col-md-3">
+                    <select name="payment_status" class="form-select">
+                        <option value="">All Payment Status</option>
+                        @foreach(['pending', 'awaiting_payment', 'paid', 'failed'] as $status)
+                            <option value="{{ $status }}" {{ request('payment_status') == $status ? 'selected' : '' }}>
+                                {{ ucfirst(str_replace('_', ' ', $status)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div> --}}
+                <div class="col-md-3">
+                    <input type="date" name="date" class="form-control" value="{{ request('date') }}">
                 </div>
-            </div>
-            <div class="card-footer">
-                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-primary btn-sm">Show Details</a>
-                <button class="btn btn-danger btn-sm delete-order" data-order-id="{{ $order->id }}">Delete Order</button>
-            </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+            </form>
         </div>
-    @empty
-        <div class="alert alert-info">No orders found.</div>
-    @endforelse
-</div>
+    </div>
 
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this order?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+    <!-- Order Tabs -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="orderTabs" role="tablist">
+                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed'] as $status)
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                id="{{ Str::slug($status) }}-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#{{ Str::slug($status) }}"
+                                type="button"
+                                role="tab"
+                                aria-controls="{{ Str::slug($status) }}"
+                                aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                            {{ $status }}
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="orderTabsContent">
+                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed'] as $status)
+                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                         id="{{ Str::slug($status) }}"
+                         role="tabpanel"
+                         aria-labelledby="{{ Str::slug($status) }}-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($orders->filter(function($order) use ($status) {
+                                        return $status === 'All' || strtolower($order->payment_status) === strtolower(str_replace(' ', '_', $status));
+                                    }) as $order)
+                                        <tr>
+                                            <td>{{ $order->order_id }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if($order->buyer->image)
+                                                        <img src="{{ asset('storage/buyers/'.$order->buyer->image) }}" alt="{{ $order->buyer->name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                    @else
+                                                        <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2" style="width: 40px; height: 40px;">
+                                                            {{ strtoupper(substr($order->buyer->name, 0, 1)) }}
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <div class="fw-bold">{{ $order->buyer->name }}</div>
+                                                        <div class="text-muted small">{{ $order->email }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' : ($order->payment_status === 'awaiting_payment' ? 'info' : ($order->payment_status === 'paid' ? 'success' : 'danger')) }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $order->created_at->format('d M Y H:i') }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if($order->payment_status === 'pending')
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $order->id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center">No orders found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center">
+        {{ $orders->links() }}
+    </div>
 </div>
 
-@push('scripts')
-<script src="https://js.pusher.com/7.0/pusher.min.js"></script>
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let deleteOrderButtons = document.querySelectorAll('.delete-order');
-        let deleteConfirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-        let confirmDeleteButton = document.getElementById('confirmDelete');
-        let orderIdToDelete;
-
-        deleteOrderButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                orderIdToDelete = this.getAttribute('data-order-id');
-                deleteConfirmationModal.show();
-            });
-        });
-
-        confirmDeleteButton.addEventListener('click', function() {
-            if (orderIdToDelete) {
-                // Send delete request
-                fetch(`/api/orders/${orderIdToDelete}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remove the order card from the DOM
-                        let orderCard = document.querySelector(`[data-order-id="${orderIdToDelete}"]`);
-                        if (orderCard) {
-                            orderCard.remove();
-                        }
-                        // Show success message
-                        alert('Order deleted successfully');
-                    } else {
-                        // Show error message
-                        alert('Failed to delete order');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the order');
-                })
-                .finally(() => {
-                    deleteConfirmationModal.hide();
-                });
-            }
-        });
-    });
-</script>
-@endpush
+@foreach($orders as $order)
+    <!-- Delete Modal for each order -->
+    <div class="modal fade" id="deleteModal{{ $order->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $order->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel{{ $order->id }}">Confirm Order Cancellation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to cancel Order #{{ $order->order_id }}?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmCancel({{ $order->id }})">Cancel Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
 
 @endsection
+
+@push('scripts')
+<script>
+    function refreshOrders() {
+        $.ajax({
+            url: '{{ route('orders.index') }}',
+            method: 'GET',
+            success: function(response) {
+                $('#orderTabsContent').html($(response).find('#orderTabsContent').html());
+            }
+        });
+    }
+
+    // Refresh the orders every 30 seconds
+    setInterval(refreshOrders, 30000);
+
+    function confirmCancel(orderId) {
+        if (confirm('Are you sure you want to cancel this order?')) {
+            window.location.href = "{{ url('orders') }}/" + orderId + "/cancel";
+        }
+    }
+</script>
+@endpush

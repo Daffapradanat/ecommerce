@@ -15,10 +15,15 @@
                         <div class="col-md-6 mb-3 mb-md-0">
                             @if($product->image->isNotEmpty())
                             <div id="productImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    @foreach($product->image as $index => $image)
+                                        <button type="button" data-bs-target="#productImageCarousel" data-bs-slide-to="{{ $index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
+                                    @endforeach
+                                </div>
                                 <div class="carousel-inner">
-                                    @foreach($product->image as $index => $images)
+                                    @foreach($product->image as $index => $image)
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <img src="{{ asset('storage/' . $images->path) }}" alt="{{ $product->name }}" class="d-block w-100 product-image">
+                                            <img src="{{ asset('storage/' . $image->path) }}" alt="{{ $product->name }}" class="d-block w-100 product-image">
                                         </div>
                                     @endforeach
                                 </div>
@@ -118,25 +123,37 @@
         background-color: #f8f9fa;
         border-radius: 0.5rem;
         overflow: hidden;
-        width: 100%;
-        height: 400px;
+    }
+    .carousel-indicators {
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        padding: 10px 0;
+        margin: 0;
+    }
+
+    .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #fff;
+        opacity: 0.5;
+    }
+
+    .carousel-indicators button.active {
+        opacity: 1;
     }
 
     .carousel-inner {
-        display: flex;
-        height: 400px;
+        aspect-ratio: 1 / 1;
     }
 
     .carousel-item {
-        flex: 0 0 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: 100%;
     }
 
     .product-image {
-        max-width: 100%;
-        max-height: 100%;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
         object-position: center;
     }
@@ -169,13 +186,8 @@
     }
 
     @media (max-width: 768px) {
-        .card-body {
-            height: 300px;
-        }
-
-        #productImageCarousel, .carousel-inner {
-            max-height: 300px;
-            height: 300px;
+        .carousel-inner {
+            aspect-ratio: 4 / 3;
         }
     }
 </style>
@@ -189,10 +201,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var carouselElement = document.getElementById('productImageCarousel');
     var carousel = new bootstrap.Carousel(carouselElement, {
-        interval: false,
+        interval: 5000, // Ubah ini ke 5000 (5 detik) atau lebih jika Anda ingin lebih lambat
+        pause: 'hover', // Menghentikan slide saat kursor di atas carousel
         touch: true
     });
 
+    // Keyboard navigation
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
             carousel.prev();
@@ -201,49 +215,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    let isDragging = false;
-    let startPosition;
-    let currentTranslate = 0;
+    // Touch swipe functionality (tetap sama seperti sebelumnya)
+    let touchStartX = 0;
+    let touchEndX = 0;
 
-    carouselElement.addEventListener('mousedown', dragStart);
-    carouselElement.addEventListener('touchstart', dragStart);
-    carouselElement.addEventListener('mouseup', dragEnd);
-    carouselElement.addEventListener('touchend', dragEnd);
-    carouselElement.addEventListener('mousemove', drag);
-    carouselElement.addEventListener('touchmove', drag);
+    carouselElement.addEventListener('touchstart', function(event) {
+        touchStartX = event.changedTouches[0].screenX;
+    }, false);
 
-    function dragStart(event) {
-        if (event.type === 'touchstart') {
-            startPosition = event.touches[0].clientX;
-        } else {
-            startPosition = event.clientX;
-            event.preventDefault();
+    carouselElement.addEventListener('touchend', function(event) {
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX) {
+            carousel.next();
         }
-        isDragging = true;
-    }
-
-    function drag(event) {
-        if (isDragging) {
-            let currentPosition;
-            if (event.type === 'touchmove') {
-                currentPosition = event.touches[0].clientX;
-            } else {
-                currentPosition = event.clientX;
-            }
-            const diff = currentPosition - startPosition;
-            if (Math.abs(diff) > 100) {
-                if (diff > 0) {
-                    carousel.prev();
-                } else {
-                    carousel.next();
-                }
-                isDragging = false;
-            }
+        if (touchEndX > touchStartX) {
+            carousel.prev();
         }
-    }
-
-    function dragEnd() {
-        isDragging = false;
     }
 });
 </script>

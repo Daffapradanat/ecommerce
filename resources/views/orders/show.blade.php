@@ -4,12 +4,54 @@
 <div class="container my-5">
     <div class="row">
         <div class="col-lg-8 mx-auto">
-            <div class="card shadow">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Order #{{ $order->id }}</h4>
-                    <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' : ($order->payment_status === 'paid' ? 'success' : 'danger') }} fs-6">
-                        {{ ucfirst($order->payment_status) }}
-                    </span>
+                    <h4 class="mb-0">{{ $order->order_id }}</h4>
+                    <div>
+                        @php
+                            $orderStatusClasses = [
+                                'pending' => 'warning',
+                                'awaiting_payment' => 'info',
+                                'completed' => 'success',
+                                'failed' => 'danger'
+                            ];
+                            $orderStatusClass = $orderStatusClasses[$order->status] ?? 'secondary';
+
+                            $paymentStatusClasses = [
+                                'pending' => 'warning',
+                                'awaiting_payment' => 'info',
+                                'paid' => 'success',
+                                'failed' => 'danger'
+                            ];
+                            $paymentStatusClass = $paymentStatusClasses[$order->payment_status] ?? 'secondary';
+                        @endphp
+                        {{-- <span class="badge bg-{{ $orderStatusClass }} fs-6 me-2">
+                            Order: {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                        </span> --}}
+                        <span class="badge bg-{{ $paymentStatusClass }} fs-6">
+                            Payment Status: {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
@@ -66,16 +108,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light">
+                <div class="card-footer bg-white p-4">
                     <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <p class="mb-0"><strong>Payment Method:</strong> {{ ucfirst(str_replace('_', ' ', $order->payment_method ?? 'Not available')) }}</p>
+                        <div class="col-lg-6 mb-3 mb-lg-0">
+                            <p class="mb-0 fw-bold"><i class="fas fa-credit-card me-2"></i>Payment Method:
+                                <span class="fw-normal">{{ ucfirst(str_replace('_', ' ', $order->payment_method ?? 'Not available')) }}</span>
+                            </p>
                         </div>
-                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                            @if($order->payment_status == 'pending')
-                                <button class="btn btn-primary" onclick="payNow('{{ $order->id }}')">Pay Now</button>
+                        <div class="col-lg-6 text-lg-end">
+                            <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                            </a>
+                            @if($order->payment_status === 'pending' || $order->payment_status === 'awaiting_payment')
+                                <a href="{{ route('orders.pay', $order->id) }}" class="btn btn-primary">
+                                    <i class="fas fa-credit-card me-2"></i>Pay Now
+                                </a>
                             @endif
-                            <a href="{{ route('orders.index') }}" class="btn btn-secondary">Back to Orders</a>
                         </div>
                     </div>
                 </div>
@@ -83,26 +131,62 @@
         </div>
     </div>
 </div>
+@endsection
 
 @push('scripts')
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+@if(isset($snapToken))
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
-  function payNow(orderId) {
-        fetch(`/api/orders/${orderId}/payment-link`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.payment_url) {
-                    window.location.href = data.payment_url;
-                } else {
-                    alert('Failed to get payment link. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while getting the payment link.');
+    document.addEventListener('DOMContentLoaded', function () {
+        let payButton = document.getElementById('pay-button');
+        if (payButton) {
+            payButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                snap.pay('{{ $snapToken }}', {
+                    onSuccess: function(result){
+                        alert("Pembayaran berhasil!");
+                        console.log(result);
+                        window.location.reload();
+                    },
+                    onPending: function(result){
+                        alert("Pembayaran tertunda. Silakan selesaikan pembayaran Anda.");
+                        console.log(result);
+                        window.location.reload();
+                    },
+                    onError: function(result){
+                        alert("Pembayaran gagal!");
+                        console.log(result);
+                    },
+                    onClose: function(){
+                        alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                    }
+                });
             });
-    }
+        }
+    });
 </script>
+@endif
 @endpush
 
-@endsection
+@push('styles')
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df, #36b9cc);
+    }
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+    }
+    .table th, .table td {
+        padding: 1rem;
+    }
+    @media (max-width: 768px) {
+        .table th, .table td {
+            padding: 0.75rem;
+        }
+    }
+</style>
+@endpush

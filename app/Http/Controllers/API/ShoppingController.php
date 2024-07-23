@@ -8,14 +8,18 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
+use Midtrans\Transaction;
+
 
 class ShoppingController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:sanctum');
+        $this->middleware('throttle:60,1')->only(['cancelOrder']);
 
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production');
@@ -95,10 +99,14 @@ class ShoppingController extends Controller
         return response()->json(['message' => 'Cart updated', 'cart' => $cart]);
     }
 
-    public function removeFromCart($product_id)
+    public function removeFromCart(Request $request)
     {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+        ]);
+
         $deleted = Cart::where('buyer_id', auth()->id())
-            ->where('product_id', $product_id)
+            ->where('product_id', $request->product_id)
             ->delete();
 
         if ($deleted) {
@@ -106,6 +114,15 @@ class ShoppingController extends Controller
         } else {
             return response()->json(['message' => 'Product not found in cart'], 404);
         }
+    }
+
+    private function generateUniqueOrderId()
+    {
+        do {
+            $orderId = 'ORDER-'.strtoupper(Str::random(10));
+        } while (Order::where('order_id', $orderId)->exists());
+
+        return $orderId;
     }
 
     public function checkout(Request $request)
@@ -133,6 +150,7 @@ class ShoppingController extends Controller
             });
 
             $order = Order::create([
+                'order_id' => $this->generateUniqueOrderId(),
                 'buyer_id' => $buyer->id,
                 'status' => 'pending',
                 'total_price' => $totalPrice,
@@ -162,7 +180,7 @@ class ShoppingController extends Controller
 
             $params = [
                 'transaction_details' => [
-                    'order_id' => $order->id,
+                    'order_id' => $order->order_id,
                     'gross_amount' => $totalPrice,
                 ],
                 'item_details' => $orderItems->map(function ($item) {
@@ -218,7 +236,7 @@ class ShoppingController extends Controller
         $fraudStatus = $notificationBody['fraud_status'];
         $orderId = $notificationBody['order_id'];
 
-        $order = Order::findOrFail($orderId);
+        $order = Order::where('order_id', $orderId)->firstOrFail();
 
         if ($transactionStatus == 'capture') {
             if ($fraudStatus == 'challenge') {
@@ -267,30 +285,54 @@ class ShoppingController extends Controller
         return response()->json(['orders' => $orders]);
     }
 
+    public function cancelOrder(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,order_id'
+        ]);
+
+        $order = Order::where('order_id', $request->order_id)
+            ->where('buyer_id', auth()->id())
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found or you are not authorized to cancel this order'], 404);
+        }
+
+        if ($order->status !== 'pending') {
+            return response()->json(['message' => 'Only pending orders can be cancelled'], 400);
+        }
+
+        $order->setStatusFailed();
+
+        return response()->json(['message' => 'Order cancelled successfully', 'order' => $order]);
+    }
+
     public function getPaymentLink($orderId)
-{
-    $order = Order::findOrFail($orderId);
+    {
+        $order = Order::findOrFail($orderId);
 
-    if ($order->payment_status !== 'pending') {
-        return response()->json(['error' => 'This order is not pending payment'], 400);
+        if ($order->payment_status !== 'pending') {
+            return response()->json(['error' => 'This order is not pending payment'], 400);
+        }
+
+        // Ambil payment token dari order
+        $paymentToken = $order->payment_token;
+
+        if (! $paymentToken) {
+            return response()->json(['error' => 'Payment token not found'], 404);
+        }
+
+        // Gunakan Midtrans SDK untuk mendapatkan redirect URL
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+
+        try {
+            $paymentUrl = Snap::getTransactionRedirectUrl($paymentToken);
+
+            return response()->json(['payment_url' => $paymentUrl]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to get payment URL: '.$e->getMessage()], 500);
+        }
     }
-
-    // Ambil payment token dari order
-    $paymentToken = $order->payment_token;
-
-    if (!$paymentToken) {
-        return response()->json(['error' => 'Payment token not found'], 404);
-    }
-
-    // Gunakan Midtrans SDK untuk mendapatkan redirect URL
-    Config::$serverKey = config('services.midtrans.server_key');
-    Config::$isProduction = config('services.midtrans.is_production');
-
-    try {
-        $paymentUrl = Snap::getTransactionRedirectUrl($paymentToken);
-        return response()->json(['payment_url' => $paymentUrl]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Failed to get payment URL: ' . $e->getMessage()], 500);
-    }
-}
 }

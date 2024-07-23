@@ -11,10 +11,41 @@ use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['category', 'image'])->get();
-        return view('products.index', compact('products'));
+        $products = Product::query();
+
+        // Aplikasikan filter pencarian jika ada
+        if ($request->has('search')) {
+            $products->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Aplikasikan filter kategori jika ada
+        if ($request->has('category')) {
+            $products->where('category_id', $request->category);
+        }
+
+        // Aplikasikan filter status stok jika ada
+        if ($request->has('stock_status')) {
+            switch ($request->stock_status) {
+                case 'in_stock':
+                    $products->where('stock', '>', 10);
+                    break;
+                case 'low_stock':
+                    $products->whereBetween('stock', [1, 10]);
+                    break;
+                case 'out_of_stock':
+                    $products->where('stock', 0);
+                    break;
+            }
+        }
+
+        $products = $products->paginate(10);
+
+        // Ambil semua kategori
+        $categories = Category::all();
+
+        return view('products.index', compact('products', 'categories'));
     }
 
     public function create()

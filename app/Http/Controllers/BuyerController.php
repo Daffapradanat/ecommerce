@@ -9,9 +9,19 @@ use Illuminate\Support\Facades\Storage;
 
 class BuyerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $buyers = Buyer::all();
+        $query = Buyer::query();
+
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        $buyers = $query->paginate(10);
 
         return view('buyers.index', compact('buyers'));
     }

@@ -13,8 +13,17 @@
         </div>
     </div>
 
-    <div class="card shadow">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Buyer Account</h6>
+        </div>
         <div class="card-body">
+            <form action="{{ route('buyer.index') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search by name or email" value="{{ request('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-light">

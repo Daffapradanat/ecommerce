@@ -1,29 +1,17 @@
 @extends('layouts')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container py-4">
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <h1 class="display-4">Catagory List</h1>
+            <h1 class="display-4">Categories</h1>
         </div>
         <div class="col-md-6 text-md-end">
             <a href="{{ route('categories.create') }}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Create New Catagory
+                <i class="fas fa-plus"></i> Create New Category
             </a>
         </div>
     </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Catagory</h6>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('categories.index') }}" method="GET" class="mb-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search by name" value="{{ request('search') }}">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </div>
-            </form>
 
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">

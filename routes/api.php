@@ -29,14 +29,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/add', [ShoppingController::class, 'addToCart']);
     Route::get('/cart', [ShoppingController::class, 'showCart']);
     Route::post('/cart/edit', [ShoppingController::class, 'editCart']);
-    Route::delete('/cart/remove/{product_id}', [ShoppingController::class, 'removeFromCart']);
+    Route::post('/cart/remove', [ShoppingController::class, 'removeFromCart']);
 
     Route::post('/checkout', [ShoppingController::class, 'checkout']);
 
     Route::get('/orders', [ShoppingController::class, 'listOrders']);
     Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
+    Route::post('/cancel', [ShoppingController::class, 'cancelOrder']);
 
-    Route::post('payment/notification', [ShoppingController::class, 'handlePaymentNotification']);
+    Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

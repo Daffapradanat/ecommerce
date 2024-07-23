@@ -137,39 +137,38 @@
                 </div>
                 <div class="card-body">
                     @php
-                        $topSellingProducts = \App\Models\Product::withCount(['orderItems as sales' => function ($query) {
-                            $query->whereHas('order', function ($subQuery) {
-                                $subQuery->where('status', 'completed');
-                            });
-                        }])
-                        ->orderByDesc('sales')
-                        ->take(5)
-                        ->get();
+                        $topSellingProducts = \App\Models\Product::select('products.*')
+                            ->join('order_items', 'products.id', '=', 'order_items.product_id')
+                            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                            ->where('orders.status', 'completed')
+                            ->groupBy('products.id')
+                            ->orderByRaw('SUM(order_items.quantity) DESC')
+                            ->selectRaw('SUM(order_items.quantity) as total_quantity')
+                            ->take(5)
+                            ->get();
                     @endphp
 
-                    @if($topSellingProducts->isNotEmpty() && $topSellingProducts->sum('sales') > 0)
+                    @if($topSellingProducts->isNotEmpty() && $topSellingProducts->sum('total_quantity') > 0)
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Product</th>
-                                        <th class="text-end">Sales</th>
+                                        <th class="text-end">Total Quantity Sold</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($topSellingProducts as $product)
-                                        @if($product->sales > 0)
-                                            <tr>
-                                                <td>{{ $product->name }}</td>
-                                                <td class="text-end">{{ $product->sales }}</td>
-                                            </tr>
-                                        @endif
+                                        <tr>
+                                            <td>{{ $product->name }}</td>
+                                            <td class="text-end">{{ $product->total_quantity }}</td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <p class="text-center my-3">No product sales</p>
+                        <p class="text-center my-3">No product sales data available</p>
                     @endif
                 </div>
             </div>

@@ -40,4 +40,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('products', ProductController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('orders', OrderController::class);
+
+
+    Route::post('/midtrans-callback', [OrderController::class, 'midtransCallback']);
+    Route::get('/orders/{id}/check-payment', [OrderController::class, 'checkPaymentStatus'])->name('orders.check-payment');
+    Route::post('/orders/{id}/update-payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
+    Route::get('/orders/{id}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+    Route::post('/orders/{id}/complete-payment', [OrderController::class, 'completePayment'])->name('orders.complete-payment');
+    Route::post('orders/{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('orders.cancel-payment');
 });
