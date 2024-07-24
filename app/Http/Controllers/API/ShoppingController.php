@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -33,6 +34,14 @@ class ShoppingController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
         ]);
+
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock < $request->quantity) {
+            return response()->json([
+                'message' => "Product '{$product->name}' is out of stock or doesn't have enough stock. Available stock: {$product->stock}"
+            ], 400);
+        }
 
         $cart = Cart::updateOrCreate(
             [
@@ -79,12 +88,21 @@ class ShoppingController extends Controller
         ]);
     }
 
+
     public function editCart(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
         ]);
+
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock < $request->quantity) {
+            return response()->json([
+                'message' => "Product '{$product->name}' is out of stock or doesn't have enough stock. Available stock: {$product->stock}"
+            ], 400);
+        }
 
         $cart = Cart::where('buyer_id', auth()->id())
             ->where('product_id', $request->product_id)
@@ -128,7 +146,6 @@ class ShoppingController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:bank_transfer,credit_card,gopay,shopeepay',
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:255',
             'address' => 'required|string',
@@ -152,9 +169,7 @@ class ShoppingController extends Controller
             $order = Order::create([
                 'order_id' => $this->generateUniqueOrderId(),
                 'buyer_id' => $buyer->id,
-                'status' => 'pending',
                 'total_price' => $totalPrice,
-                'payment_method' => $request->payment_method,
                 'payment_status' => 'pending',
                 'email' => $buyer->email,
                 'phone' => $request->phone,
@@ -206,7 +221,6 @@ class ShoppingController extends Controller
                         'address' => $request->address,
                     ],
                 ],
-                'enabled_payments' => [$request->payment_method],
             ];
 
             $snapToken = Snap::getSnapToken($params);
@@ -258,25 +272,17 @@ class ShoppingController extends Controller
     public function listOrders()
     {
         $orders = Order::where('buyer_id', auth()->id())
-            ->with('orderItems.product.image')
+            ->with('orderItems.product')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $orders = $orders->map(function ($order) {
             $order->orderItems = $order->orderItems->map(function ($item) {
-                $product = $item->product;
-
-                if ($product->image) {
-                    $product->image_urls = $product->image->map(function ($image) {
-                        return url('storage/'.$image->path);
-                    });
-                } else {
-                    $product->image_urls = collect();
-                }
-
-                unset($product->image);
-
-                return $item;
+                return [
+                    'product_name' => $item->product->name,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                ];
             });
 
             return $order;
@@ -299,11 +305,16 @@ class ShoppingController extends Controller
             return response()->json(['message' => 'Order not found or you are not authorized to cancel this order'], 404);
         }
 
-        if ($order->status !== 'pending') {
-            return response()->json(['message' => 'Only pending orders can be cancelled'], 400);
+        if ($order->payment_status === 'paid') {
+            return response()->json(['message' => 'Paid orders cannot be cancelled'], 400);
         }
 
-        $order->setStatusFailed();
+        if ($order->payment_status === 'failed') {
+            return response()->json(['message' => 'This order is already cancelled or failed'], 400);
+        }
+
+        $order->payment_status = 'failed';
+        $order->save();
 
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order]);
     }

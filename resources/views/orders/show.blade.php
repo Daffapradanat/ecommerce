@@ -29,14 +29,6 @@
                     <h4 class="mb-0">{{ $order->order_id }}</h4>
                     <div>
                         @php
-                            $orderStatusClasses = [
-                                'pending' => 'warning',
-                                'awaiting_payment' => 'info',
-                                'completed' => 'success',
-                                'failed' => 'danger'
-                            ];
-                            $orderStatusClass = $orderStatusClasses[$order->status] ?? 'secondary';
-
                             $paymentStatusClasses = [
                                 'pending' => 'warning',
                                 'awaiting_payment' => 'info',
@@ -45,9 +37,6 @@
                             ];
                             $paymentStatusClass = $paymentStatusClasses[$order->payment_status] ?? 'secondary';
                         @endphp
-                        {{-- <span class="badge bg-{{ $orderStatusClass }} fs-6 me-2">
-                            Order: {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                        </span> --}}
                         <span class="badge bg-{{ $paymentStatusClass }} fs-6">
                             Payment Status: {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
                         </span>
@@ -137,36 +126,32 @@
 @if(isset($snapToken))
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let payButton = document.getElementById('pay-button');
-        if (payButton) {
-            payButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                snap.pay('{{ $snapToken }}', {
-                    onSuccess: function(result){
-                        alert("Pembayaran berhasil!");
-                        console.log(result);
-                        window.location.reload();
-                    },
-                    onPending: function(result){
-                        alert("Pembayaran tertunda. Silakan selesaikan pembayaran Anda.");
-                        console.log(result);
-                        window.location.reload();
-                    },
-                    onError: function(result){
-                        alert("Pembayaran gagal!");
-                        console.log(result);
-                    },
-                    onClose: function(){
-                        alert('Anda menutup popup tanpa menyelesaikan pembayaran');
-                    }
-                });
-            });
-        }
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    // Fungsi untuk memperbarui tampilan status
+    function updateStatusDisplay(newStatus) {
+        const statusBadge = document.querySelector('.badge');
+        const statusClasses = {
+            'pending': 'bg-warning',
+            'awaiting_payment': 'bg-info',
+            'paid': 'bg-success',
+            'failed': 'bg-danger'
+        };
+        statusBadge.className = `badge ${statusClasses[newStatus] || 'bg-secondary'} fs-6`;
+        statusBadge.textContent = `Payment Status: ${newStatus.replace('_', ' ').charAt(0).toUpperCase() + newStatus.slice(1)}`;
+    }
+
+    // Cek status pembayaran saat halaman dimuat
+    fetch("{{ route('orders.check-payment', $order->id) }}")
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== '{{ $order->payment_status }}') {
+                updateStatusDisplay(data.status);
+            }
+        });
+});
 </script>
-@endif
 @endpush
+@endif
 
 @push('styles')
 <style>

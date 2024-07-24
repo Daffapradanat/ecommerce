@@ -120,10 +120,11 @@
     }
 
     #productImageCarousel {
-        background-color: #f8f9fa;
-        border-radius: 0.5rem;
-        overflow: hidden;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    overflow: hidden;
     }
+
     .carousel-indicators {
         bottom: 0;
         background-color: rgba(0,0,0,0.5);
@@ -144,7 +145,7 @@
     }
 
     .carousel-inner {
-        aspect-ratio: 1 / 1;
+        height: 400px;
     }
 
     .carousel-item {
@@ -154,8 +155,9 @@
     .product-image {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         object-position: center;
+        background-color: #f8f9fa;
     }
 
     #productImageCarousel .carousel-control-prev,
@@ -171,23 +173,9 @@
         opacity: 1;
     }
 
-    .table.table-sm {
-        margin-top: 1.5rem;
-    }
-
-    .table.table-sm th {
-        width: 35%;
-        font-weight: 600;
-    }
-
-    .table.table-sm td, .table.table-sm th {
-        padding: 0.75rem;
-        vertical-align: middle;
-    }
-
     @media (max-width: 768px) {
         .carousel-inner {
-            aspect-ratio: 4 / 3;
+            height: 300px;
         }
     }
 </style>

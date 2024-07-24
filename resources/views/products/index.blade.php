@@ -36,14 +36,15 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                {{-- <div class="col-md-3">
                     <select name="stock_status" class="form-select">
                         <option value="">All Stock Status</option>
-                        <option value="in_stock" {{ request('stock_status') == 'in_stock' ? 'selected' : '' }}>In Stock</option>
+                        <option value="normal_stock" {{ request('stock_status') == 'normal_stock' ? 'selected' : '' }}>Normal Stock</option>
                         <option value="low_stock" {{ request('stock_status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
+                        <option value="very_low_stock" {{ request('stock_status') == 'very_low_stock' ? 'selected' : '' }}>Very Low Stock</option>
                         <option value="out_of_stock" {{ request('stock_status') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
                     </select>
-                </div>
+                </div> --}}
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
                 </div>
@@ -85,9 +86,15 @@
                                 <td>{{ $product->name }}</td>
                                 <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                                 <td>
-                                    <span class="badge bg-{{ $product->stock > 10 ? 'success' : ($product->stock > 0 ? 'warning' : 'danger') }}">
-                                        {{ $product->stock }}
-                                    </span>
+                                    @if($product->stock > 50)
+                                        <span class="badge bg-success">{{ $product->stock }}</span>
+                                    @elseif($product->stock > 10)
+                                        <span class="badge bg-warning">{{ $product->stock }}</span>
+                                    @elseif($product->stock > 0)
+                                        <span class="badge bg-danger">{{ $product->stock }}</span>
+                                    @else
+                                        <span class="badge bg-secondary">Out of Stock</span>
+                                    @endif
                                 </td>
                                 <td>{{ $product->category->name }}</td>
                                 <td>

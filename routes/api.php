@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/orders', [ShoppingController::class, 'listOrders']);
     Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
-    Route::post('/cancel', [ShoppingController::class, 'cancelOrder']);
+    Route::post('/orders/cancel', [ShoppingController::class, 'cancelOrder']);
 
     Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);
 

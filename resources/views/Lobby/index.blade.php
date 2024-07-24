@@ -130,7 +130,7 @@
             </div>
         </div>
 
-        <div class="col-md-6 mb-4">
+        {{-- <div class="col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">Top Selling Products</h5>
@@ -171,7 +171,7 @@
                         <p class="text-center my-3">No product sales data available</p>
                     @endif
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

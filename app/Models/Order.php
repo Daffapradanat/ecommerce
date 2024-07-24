@@ -17,7 +17,7 @@ class Order extends Model implements ShouldBroadcast
     use HasFactory, Dispatchable, InteractsWithSockets, SerializesModels;
 
     protected $fillable = [
-        'buyer_id', 'order_id', 'status', 'email', 'phone', 'city', 'address', 'postal_code', 'total_price', 'payment_token', 'payment_method', 'payment_status'
+        'buyer_id', 'order_id', 'email', 'phone', 'city', 'address', 'postal_code', 'total_price', 'payment_token', 'payment_method', 'payment_status'
     ];
     public function buyer()
     {
@@ -32,7 +32,7 @@ class Order extends Model implements ShouldBroadcast
     public function setStatusSuccess()
     {
         $this->update([
-            'status' => 'completed',
+            // 'status' => 'completed',
             'payment_status' => 'paid'
         ]);
     }
@@ -40,7 +40,7 @@ class Order extends Model implements ShouldBroadcast
     public function setStatusPending()
     {
         $this->update([
-            'status' => 'pending',
+            // 'status' => 'pending',
             'payment_status' => 'pending'
         ]);
     }
@@ -48,7 +48,7 @@ class Order extends Model implements ShouldBroadcast
     public function setStatusFailed()
     {
         $this->update([
-            'status' => 'cancelled',
+            // 'status' => 'cancelled',
             'payment_status' => 'failed'
         ]);
     }

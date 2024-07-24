@@ -31,4 +31,17 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function getStockStatusAttribute()
+    {
+        if ($this->stock == 0) {
+            return 'out_of_stock';
+        } elseif ($this->stock < 10) {
+            return 'very_low';
+        } elseif ($this->stock < 50) {
+            return 'low';
+        } else {
+            return 'normal';
+        }
+    }
 }

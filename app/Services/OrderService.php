@@ -43,16 +43,34 @@ class OrderService
         $order->delete();
     }
 
-    public function cancelOrder($id)
+    public function cancelPayment($id)
     {
         $order = Order::findOrFail($id);
 
-        if ($order->payment_status !== 'paid') {
-            $order->status = 'cancelled';
-            $order->save();
-            return ['status' => 'success', 'message' => 'Order cancelled successfully.'];
+        if (!in_array($order->payment_status, ['pending', 'awaiting_payment'])) {
+            return [
+                'status' => 'error',
+                'message' => 'This payment cannot be cancelled.'
+            ];
         }
 
-        return ['status' => 'error', 'message' => 'Paid orders cannot be cancelled.'];
+        try {
+
+            $order->update([
+                'payment_status' => 'cancelled',
+                'payment_token' => null
+            ]);
+
+            return [
+                'status' => 'success',
+                'message' => 'Payment has been cancelled successfully.'
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Payment cancellation error: ' . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'Failed to cancel payment. Please try again later.'
+            ];
+        }
     }
 }
