@@ -19,7 +19,6 @@ class ShoppingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
         $this->middleware('throttle:60,1')->only(['cancelOrder']);
 
         Config::$serverKey = config('services.midtrans.server_key');

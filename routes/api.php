@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
     Route::post('/orders/cancel', [ShoppingController::class, 'cancelOrder']);
 
-    Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);
-
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);
