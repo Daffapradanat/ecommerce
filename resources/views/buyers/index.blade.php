@@ -50,13 +50,13 @@
                                 <td class="align-middle">{{ $buyer->email }}</td>
                                 <td class="align-middle">
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('buyer.show', $buyer->id) }}" class="btn btn-sm btn-outline-info">
+                                        <a href="{{ route('buyer.show', $buyer->id) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i> View
                                         </a>
                                         <form action="{{ route('buyer.destroy', $buyer->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this buyer?')">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this buyer?')">
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>
                                         </form>

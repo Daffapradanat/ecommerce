@@ -101,11 +101,11 @@
                                             <td>{{ $order->created_at->format('d M Y H:i') }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if($order->payment_status === 'pending')
-                                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $order->id }}">
+                                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $order->id }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     @endif

@@ -78,34 +78,6 @@ class OrderController extends Controller
         }
     }
 
-    // public function pay($id)
-    // {
-    //     $order = Order::findOrFail($id);
-
-    //     if (!in_array($order->payment_status, ['pending', 'awaiting_payment'])) {
-    //         return redirect()->route('orders.show', $order->id)
-    //             ->with('error', 'This order cannot be paid.');
-    //     }
-
-    //     try {
-    //         $snapToken = $this->midtransService->getSnapToken($order);
-    //     } catch (\Exception $e) {
-    //         Log::error('Midtrans getSnapToken error: ' . $e->getMessage());
-    //         return redirect()->route('orders.show', $order->id)
-    //             ->with('error', 'Failed to generate payment token. Please try again later.');
-    //     }
-
-    //     $order->update([
-    //         'payment_token' => $snapToken,
-    //         'payment_status' => 'awaiting_payment',
-    //     ]);
-
-    //     $expirationTime = now()->addMinutes(5);
-    //     session(['payment_expires_at_' . $order->id => $expirationTime->timestamp]);
-
-    //     return view('orders.pay', compact('order', 'snapToken'));
-    // }
-
     public function checkPayment($id)
     {
         $order = Order::findOrFail($id);
@@ -199,26 +171,4 @@ class OrderController extends Controller
         return response('OK', 200);
     }
 
-    // public function getSnapToken(Order $order)
-    // {
-    //     try {
-    //         $params = [
-    //             'transaction_details' => [
-    //                 'order_id' => $order->order_id,
-    //                 'gross_amount' => $order->total_price,
-    //             ],
-    //             'customer_details' => [
-    //                 'first_name' => $order->name,
-    //                 'email' => $order->email,
-    //                 'phone' => $order->phone,
-    //             ],
-    //         ];
-
-    //         $snapToken = \Midtrans\Snap::getSnapToken($params);
-    //         return $snapToken;
-    //     } catch (\Exception $e) {
-    //         Log::error('Midtrans getSnapToken error: ' . $e->getMessage());
-    //         return null;
-    //     }
-    // }
 }

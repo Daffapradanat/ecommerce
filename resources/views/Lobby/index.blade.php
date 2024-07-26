@@ -10,7 +10,7 @@
 
     <div class="row mb-4">
         <div class="col-md col-sm-6 mb-4">
-            <div class="card bg-primary text-white h-100 shadow">
+            <div class="card bg-gradient-primary text-white h-100 shadow">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
                     <h5 class="card-title">Users</h5>
                     <p class="card-text display-4 mb-0">{{ \App\Models\User::count() }}</p>
@@ -18,15 +18,15 @@
             </div>
         </div>
         <div class="col-md col-sm-6 mb-4">
-            <div class="card bg-success text-white h-100 shadow">
+            <div class="card bg-gradient-purple text-white h-100 shadow">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                    <h5 class="card-title">Products</h5>
-                    <p class="card-text display-4 mb-0">{{ \App\Models\Product::count() }}</p>
+                    <h5 class="card-title">Buyers</h5>
+                    <p class="card-text display-4 mb-0">{{ \App\Models\Buyer::count() }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md col-sm-6 mb-4">
-            <div class="card bg-info text-white h-100 shadow">
+            <div class="card bg-gradient-info text-white h-100 shadow">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
                     <h5 class="card-title">Categories</h5>
                     <p class="card-text display-4 mb-0">{{ \App\Models\Category::count() }}</p>
@@ -34,18 +34,18 @@
             </div>
         </div>
         <div class="col-md col-sm-6 mb-4">
-            <div class="card bg-warning text-dark h-100 shadow">
+            <div class="card bg-gradient-success text-white h-100 shadow">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                    <h5 class="card-title">Orders</h5>
-                    <p class="card-text display-4 mb-0">{{ \App\Models\Order::count() }}</p>
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text display-4 mb-0">{{ \App\Models\Product::count() }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md col-sm-6 mb-4">
-            <div class="card bg-secondary text-white h-100 shadow">
+            <div class="card bg-gradient-warning text-white h-100 shadow">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                    <h5 class="card-title">Buyers</h5>
-                    <p class="card-text display-4 mb-0">{{ \App\Models\Buyer::count() }}</p>
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text display-4 mb-0">{{ \App\Models\Order::count() }}</p>
                 </div>
             </div>
         </div>
@@ -56,7 +56,6 @@
             <div class="card shadow h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Recent Activities</h5>
-                    <span class="badge bg-light text-primary">Last 24 hours</span>
                 </div>
                 <div class="card-body">
                     @php
@@ -138,7 +137,7 @@
                                                 @break
                                             @case('product')
                                                 <p class="mb-0">Product: {{ $activity['name'] }}</p>
-                                                <p class="mb-0">Price: ${{ number_format($activity['price'], 2) }}</p>
+                                                <p class="mb-0">Price: Rp. {{ number_format($activity['price'], 2) }}</p>
                                                 <p class="mb-0">Updated by: {{ $activity['updated_by'] }}</p>
                                                 @break
                                         @endswitch
@@ -246,6 +245,37 @@
             .card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            }
+        </style>
+        <style>
+            .bg-gradient-primary {
+                background: linear-gradient(45deg, #4e54c8, #8f94fb);
+            }
+            .bg-gradient-success {
+                background: linear-gradient(45deg, #11998e, #38ef7d);
+            }
+            .bg-gradient-info {
+                background: linear-gradient(45deg, #2193b0, #6dd5ed);
+            }
+            .bg-gradient-warning {
+                background: linear-gradient(45deg, #ff9966, #ff5e62);
+            }
+            .bg-gradient-purple {
+                background: linear-gradient(45deg, #834d9b, #d04ed6);
+            }
+            .card {
+                transition: all 0.3s ease;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+            .card-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+            .card-text {
+                font-weight: 700;
             }
         </style>
         @endsection

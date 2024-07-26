@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mt-4">Product Management</h1>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <h1 class="mt-4 mb-3 mb-md-0">Product Management</h1>
         <a href="{{ route('products.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add New Product
         </a>
@@ -19,14 +19,14 @@
     <!-- Search and Filter -->
     <div class="card mb-4">
         <div class="card-body">
-            <form action="{{ route('products.index') }}" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-4">
+            <form action="{{ route('products.index') }}" method="GET" class="row g-3">
+                <div class="col-12 col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" name="search" class="form-control" placeholder="Search products" value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <select name="category" class="form-select">
                         <option value="">All Categories</option>
                         @foreach($categories as $category)
@@ -36,16 +36,7 @@
                         @endforeach
                     </select>
                 </div>
-                {{-- <div class="col-md-3">
-                    <select name="stock_status" class="form-select">
-                        <option value="">All Stock Status</option>
-                        <option value="normal_stock" {{ request('stock_status') == 'normal_stock' ? 'selected' : '' }}>Normal Stock</option>
-                        <option value="low_stock" {{ request('stock_status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
-                        <option value="very_low_stock" {{ request('stock_status') == 'very_low_stock' ? 'selected' : '' }}>Very Low Stock</option>
-                        <option value="out_of_stock" {{ request('stock_status') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
-                    </select>
-                </div> --}}
-                <div class="col-md-2">
+                <div class="col-12 col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
                 </div>
             </form>
@@ -99,13 +90,13 @@
                                 <td>{{ $product->category->name }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-outline-warning">
+                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}">
+                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -163,6 +154,15 @@
     }
     .sort:hover {
         color: #007bff;
+    }
+
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+        #productsTable th, #productsTable td {
+            white-space: nowrap;
+        }
     }
 </style>
 @endpush
