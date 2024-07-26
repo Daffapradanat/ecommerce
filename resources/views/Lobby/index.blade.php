@@ -88,9 +88,9 @@
                             return [
                                 'type' => 'order',
                                 'message' => 'New order placed',
-                                'order_id' => $order->id,
+                                'order_id' => $order->order_id,
                                 'buyer_name' => $order->buyer->name,
-                                'total' => $order->total,
+                                'total_price' => $order->total_price,
                                 'time' => $order->created_at,
                                 'icon' => 'fas fa-file-invoice-dollar text-warning'
                             ];
@@ -132,9 +132,9 @@
                                                 <p class="mb-0">Email: {{ $activity['email'] }}</p>
                                                 @break
                                             @case('order')
-                                                <p class="mb-0">Order ID: #{{ $activity['order_id'] }}</p>
+                                                <p class="mb-0">ID: {{ $activity['order_id'] }}</p>
                                                 <p class="mb-0">Buyer: {{ $activity['buyer_name'] }}</p>
-                                                <p class="mb-0">Total: ${{ number_format($activity['total'], 2) }}</p>
+                                                <p class="mb-0">Total: Rp. {{ number_format($activity['total_price'], 2) }}</p>
                                                 @break
                                             @case('product')
                                                 <p class="mb-0">Product: {{ $activity['name'] }}</p>
@@ -166,16 +166,23 @@
                         $topSellingProducts = \App\Models\Product::select('products.*')
                             ->join('order_items', 'products.id', '=', 'order_items.product_id')
                             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-                            ->where('orders.payment_status', 'completed')
+                            ->where('orders.payment_status', 'paid')
                             ->groupBy('products.id')
                             ->orderByRaw('SUM(order_items.quantity) DESC')
                             ->selectRaw('SUM(order_items.quantity) as total_quantity')
                             ->selectRaw('SUM(order_items.quantity * products.price) as total_revenue')
                             ->take(5)
                             ->get();
+
+                        $totalSoldQuantity = $topSellingProducts->sum('total_quantity');
+                        $totalRevenue = $topSellingProducts->sum('total_revenue');
+
+                        $allSoldQuantity = \App\Models\OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+                            ->where('orders.payment_status', 'paid')
+                            ->sum('order_items.quantity');
                     @endphp
 
-                    @if($topSellingProducts->isNotEmpty() && $topSellingProducts->sum('total_quantity') > 0)
+                    @if($topSellingProducts->isNotEmpty() && $totalSoldQuantity > 0)
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead class="table-light">
@@ -187,39 +194,29 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php
-                                        $totalSales = $topSellingProducts->sum('total_quantity');
-                                        $totalRevenue = $topSellingProducts->sum('total_revenue');
-                                    @endphp
                                     @foreach($topSellingProducts as $product)
                                         <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    @if($product->image)
-                                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                                    @else
-                                                        <div class="bg-secondary me-2" style="width: 40px; height: 40px;"></div>
-                                                    @endif
-                                                    {{ $product->name }}
-                                                </div>
-                                            </td>
+                                            <td>{{ $product->name }}</td>
                                             <td class="text-end">{{ number_format($product->total_quantity) }}</td>
-                                            <td class="text-end">${{ number_format($product->total_revenue, 2) }}</td>
+                                            <td class="text-end">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</td>
                                             <td class="text-end">
-                                                {{ number_format(($product->total_quantity / $totalSales) * 100, 1) }}%
+                                                {{ number_format(($product->total_quantity / $totalSoldQuantity) * 100, 1) }}%
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
-                                        <th>Total</th>
-                                        <th class="text-end">{{ number_format($totalSales) }}</th>
-                                        <th class="text-end">${{ number_format($totalRevenue, 2) }}</th>
+                                        <th>Total (Top 5)</th>
+                                        <th class="text-end">{{ number_format($totalSoldQuantity) }}</th>
+                                        <th class="text-end">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</th>
                                         <th class="text-end">100%</th>
                                     </tr>
                                 </tfoot>
                             </table>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Total All Products Sold: {{ number_format($allSoldQuantity) }}</strong>
                         </div>
                     @else
                         <p class="text-center my-3">No product sales data available</p>

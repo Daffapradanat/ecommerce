@@ -14,16 +14,6 @@
                         <input type="text" name="search" class="form-control" placeholder="Search by Order ID or Customer" value="{{ request('search') }}">
                     </div>
                 </div>
-                {{-- <div class="col-md-3">
-                    <select name="payment_status" class="form-select">
-                        <option value="">All Payment Status</option>
-                        @foreach(['pending', 'awaiting_payment', 'paid', 'failed'] as $status)
-                            <option value="{{ $status }}" {{ request('payment_status') == $status ? 'selected' : '' }}>
-                                {{ ucfirst(str_replace('_', ' ', $status)) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div> --}}
                 <div class="col-md-3">
                     <input type="date" name="date" class="form-control" value="{{ request('date') }}">
                 </div>
@@ -38,7 +28,7 @@
     <div class="card mb-4">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs" id="orderTabs" role="tablist">
-                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed'] as $status)
+                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed & Cancelled'] as $status)
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {{ $loop->first ? 'active' : '' }}"
                                 id="{{ Str::slug($status) }}-tab"
@@ -56,7 +46,7 @@
         </div>
         <div class="card-body">
             <div class="tab-content" id="orderTabsContent">
-                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed'] as $status)
+                @foreach(['All', 'Pending', 'Awaiting Payment', 'Paid', 'Failed & Cancelled'] as $status)
                     <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
                          id="{{ Str::slug($status) }}"
                          role="tabpanel"
@@ -75,7 +65,13 @@
                                 </thead>
                                 <tbody>
                                     @forelse($orders->filter(function($order) use ($status) {
-                                        return $status === 'All' || strtolower($order->payment_status) === strtolower(str_replace(' ', '_', $status));
+                                        if ($status === 'All') {
+                                            return true;
+                                        } elseif ($status === 'Failed & Cancelled') {
+                                            return in_array(strtolower($order->payment_status), ['failed', 'cancelled']);
+                                        } else {
+                                            return strtolower($order->payment_status) === strtolower(str_replace(' ', '_', $status));
+                                        }
                                     }) as $order)
                                         <tr>
                                             <td>{{ $order->order_id }}</td>
@@ -96,7 +92,9 @@
                                             </td>
                                             <td>Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' : ($order->payment_status === 'awaiting_payment' ? 'info' : ($order->payment_status === 'paid' ? 'success' : 'danger')) }}">
+                                                <span class="badge bg-{{ $order->payment_status === 'pending' ? 'warning' :
+                                                                         ($order->payment_status === 'awaiting_payment' ? 'info' :
+                                                                         ($order->payment_status === 'paid' ? 'success' : 'danger')) }}">
                                                     {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
                                                 </span>
                                             </td>

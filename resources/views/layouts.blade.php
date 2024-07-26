@@ -174,7 +174,7 @@
         </footer>
     </div>
 
-    @if ($errors->any())
+    {{-- @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show alert-bottom-right" role="alert">
             @foreach ($errors->all() as $error)
                 {{ $error }}<br>
@@ -183,7 +183,7 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-    @endif
+    @endif --}}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
@@ -196,7 +196,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        
+
         $(document).ready(function() {
             $('.nav-sidebar .nav-link').each(function() {
                 if ($(this).attr('href') === window.location.href) {
