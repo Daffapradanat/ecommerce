@@ -120,28 +120,34 @@
     }
 
     #productImageCarousel {
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    overflow: hidden;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        position: relative;
     }
 
     .carousel-indicators {
         bottom: 0;
-        background-color: rgba(0,0,0,0.5);
+        background-color: rgba(0,0,0,0.7);
         padding: 10px 0;
         margin: 0;
+        border-radius: 0 0 0.5rem 0.5rem;
     }
 
     .carousel-indicators button {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         background-color: #fff;
-        opacity: 0.5;
+        opacity: 0.7;
+        margin: 0 6px;
+        border: 2px solid #fff;
     }
 
     .carousel-indicators button.active {
         opacity: 1;
+        background-color: #007bff;
     }
 
     .carousel-inner {
@@ -157,20 +163,41 @@
         height: 100%;
         object-fit: contain;
         object-position: center;
-        background-color: #f8f9fa;
     }
 
     #productImageCarousel .carousel-control-prev,
     #productImageCarousel .carousel-control-next {
         background-color: rgba(0, 0, 0, 0.5);
-        width: 10%;
+        width: 15%;
         opacity: 0;
-        transition: opacity 0.15s ease;
+        transition: opacity 0.3s ease;
     }
 
     #productImageCarousel:hover .carousel-control-prev,
     #productImageCarousel:hover .carousel-control-next {
         opacity: 1;
+    }
+
+    #productImageCarousel .carousel-control-prev-icon,
+    #productImageCarousel .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.8);
+        border-radius: 50%;
+        padding: 20px;
+        background-size: 50%;
+    }
+
+    .carousel-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom,
+            rgba(0,0,0,0.3) 0%,
+            rgba(0,0,0,0) 20%,
+            rgba(0,0,0,0) 80%,
+            rgba(0,0,0,0.3) 100%);
+        pointer-events: none;
     }
 
     @media (max-width: 768px) {

@@ -26,11 +26,40 @@ class OrderController extends Controller
             Config::$is3ds = config('midtrans.is_3ds');
         }
 
-    public function index(Request $request)
-    {
-        $orders = $this->orderService->getFilteredOrders($request);
-        return view('orders.index', compact('orders'));
-    }
+        public function index(Request $request)
+        {
+            $status = $request->input('status', 'All');
+            $search = $request->input('search');
+            $date = $request->input('date');
+
+            $query = Order::with('buyer');
+
+            if ($status !== 'All') {
+                if ($status === 'Failed & Cancelled') {
+                    $query->whereIn('payment_status', ['failed', 'cancelled']);
+                } else {
+                    $query->where('payment_status', strtolower(str_replace(' ', '_', $status)));
+                }
+            }
+
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('order_id', 'like', "%{$search}%")
+                    ->orWhereHas('buyer', function($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+                });
+            }
+
+            if ($date) {
+                $query->whereDate('created_at', $date);
+            }
+
+            $orders = $query->latest()->paginate(10);
+            $totalFilteredOrders = $orders->total();
+
+            return view('orders.index', compact('orders', 'totalFilteredOrders', 'status'));
+        }
 
     public function show($id)
     {

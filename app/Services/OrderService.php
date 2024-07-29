@@ -9,23 +9,24 @@ class OrderService
 {
     public function getFilteredOrders(Request $request)
     {
-        $query = Order::with(['orderItems.product', 'buyer']);
+        $query = Order::query();
 
-        if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if ($request->has('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                  ->orWhereHas('buyer', function ($subQ) use ($search) {
-                      $subQ->where('name', 'like', "%{$search}%");
+                $q->where('order_id', 'like', "%{$search}%")
+                  ->orWhereHas('buyer', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                   });
             });
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(10);
+        if ($request->has('date')) {
+            $query->whereDate('created_at', $request->input('date'));
+        }
+
+        return $query->paginate(10);
     }
 
     public function updateOrderStatus($id, $status)
