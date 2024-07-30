@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container-fluid py-4">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
             <h1 class="display-4">Buyer List</h1>
@@ -57,7 +63,7 @@
                                             <form action="{{ route('buyer.destroy', $buyer->id) }}" method="POST" class="m-0">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeletion({{ $buyer->id }})">
+                                                <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $buyer->id }}">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -72,6 +78,32 @@
         </div>
     </div>
 </div>
+
+@foreach($buyers as $buyer)
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal{{ $buyer->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $buyer->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ $buyer->id }}">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the buyer "{{ $buyer->name }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ route('buyer.destroy', $buyer->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
 @endsection
 
 @push('styles')
@@ -91,4 +123,15 @@
         }
     }
 </style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+            $(this).remove();
+        });
+    }, 5000);
+</script>
 @endpush
