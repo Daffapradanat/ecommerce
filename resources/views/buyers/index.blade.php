@@ -49,18 +49,20 @@
                                 <td class="align-middle">{{ $buyer->name }}</td>
                                 <td class="align-middle">{{ $buyer->email }}</td>
                                 <td class="align-middle">
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ route('buyer.show', $buyer->id) }}" class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <form action="{{ route('buyer.destroy', $buyer->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this buyer?')">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    </div>
+                                    <td>
+                                        <div class="d-flex justify-content-start align-items-center">
+                                            <a href="{{ route('buyer.show', $buyer->id) }}" class="btn btn-info btn-sm me-2">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <form action="{{ route('buyer.destroy', $buyer->id) }}" method="POST" class="m-0">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeletion({{ $buyer->id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </td>
                             </tr>
                         @endforeach

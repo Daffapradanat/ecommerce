@@ -59,11 +59,11 @@
                             <td>{{ $category->products_count }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Edit
+                                    <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCategoryModal{{ $category->id }}">
-                                        <i class="fas fa-trash"></i> Delete
+                                    <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteCategoryModal{{ $category->id }}">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
 

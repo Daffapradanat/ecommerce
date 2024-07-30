@@ -56,13 +56,13 @@
                             <td class="align-middle">{{ $user->role ?? 'Administrator' }}</td>
                             <td class="align-middle">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm">
+                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm me-2">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm me-2">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $user->id }}">
+                                    <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $user->id }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>

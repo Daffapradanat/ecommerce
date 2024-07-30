@@ -52,7 +52,7 @@ class BuyerController extends Controller
 
         $buyer->save();
 
-        return redirect()->route('buyers.index')->with('success', 'buyer created successfully.');
+        return redirect()->route('buyer.index')->with('success', 'buyer created successfully.');
     }
 
     public function show(buyer $buyer)
@@ -98,6 +98,6 @@ class BuyerController extends Controller
 
         $buyer->delete();
 
-        return redirect()->route('buyers.index')->with('success', 'buyer deleted successfully.');
+        return redirect()->route('buyer.index')->with('success', 'buyer deleted successfully.');
     }
 }

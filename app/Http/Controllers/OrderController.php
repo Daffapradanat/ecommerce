@@ -69,8 +69,12 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        $this->orderService->deleteOrder($id);
-        return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
+        $order = Order::findOrFail($id);
+        if ($order->payment_status !== 'pending') {
+            return response()->json(['message' => 'Only pending orders can be deleted.'], 400);
+        }
+        $order->delete();
+        return response()->json(['message' => 'Order deleted successfully.']);
     }
 
     public function cancel($id)
@@ -132,9 +136,15 @@ class OrderController extends Controller
         $result = $this->orderService->cancelPayment($id);
 
         if ($result['status'] === 'success') {
+            if (request()->ajax()) {
+                return response()->json(['message' => $result['message']], 200);
+            }
             return redirect()->route('orders.show', $id)
                 ->with('success', $result['message']);
         } else {
+            if (request()->ajax()) {
+                return response()->json(['message' => $result['message']], 400);
+            }
             return redirect()->route('orders.show', $id)
                 ->with('error', $result['message']);
         }

@@ -80,14 +80,18 @@
                             </td>
                             <td>{{ $order->created_at->format('d M Y H:i') }}</td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm">
+                                <div class="d-flex justify-content-start align-items-center">
+                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm me-2">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @if($order->payment_status === 'pending')
-                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $order->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                    @if($order->payment_status === 'awaiting_payment' || $order->payment_status === 'pending')
+                                        <form action="{{ route('orders.cancel-payment', $order->id) }}" method="POST" id="cancelForm{{ $order->id }}" class="m-0">
+                                            @csrf
+                                            @method('POST')
+                                            <button type="button" class="btn btn-danger btn-sm delete-order" onclick="confirmCancellation({{ $order->id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             </td>
@@ -137,7 +141,25 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+function confirmCancellation(orderId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to cancel this order. This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('cancelForm' + orderId).submit();
+        }
+    });
+}
+
     function refreshOrders() {
         $.ajax({
             url: '{{ route('orders.index') }}',
