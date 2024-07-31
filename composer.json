@@ -9,6 +9,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
+        "laravel/telescope": "^5.1",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.5",
         "midtrans/midtrans-php": "^2.5"
