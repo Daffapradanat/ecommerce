@@ -10,20 +10,12 @@ class Image extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'file_name',
-        'file_path',
-        'mime_type',
-        'file_size',
+        'product_id',
+        'path'
     ];
 
-    public function products()
+    public function product()
     {
-        return $this->hasMany(Product::class);
-    }
-
-    public function getUrlAttribute()
-    {
-        return asset('storage/'.$this->file_path);
+        return $this->belongsTo(Product::class);
     }
 }

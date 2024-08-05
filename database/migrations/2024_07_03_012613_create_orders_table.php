@@ -10,9 +10,18 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('status');
-            $table->decimal('total_price', 10, 2);
+            $table->string('order_id')->unique();
+            $table->foreignId('buyer_id')->constrained()->onDelete('cascade');
+            $table->string('payment_token')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->enum('payment_status', ['pending', 'awaiting_payment', 'paid', 'failed', 'cancelled'])->default('pending');
+            $table->decimal('total_price', 12, 2);
+            $table->string('email');
+            $table->string('phone');
+            $table->string('city');
+            $table->text('address');
+            $table->string('postal_code');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

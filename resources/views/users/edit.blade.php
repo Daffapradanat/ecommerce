@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h1 class="h3 mb-0">Edit User</h1>
+                    <h1 class="h3 mb-0">Edit Administrator</h1>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('users.update', $user->id) }}" method="POST" enctype="multipart/form-data">

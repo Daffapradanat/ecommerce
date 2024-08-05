@@ -1,68 +1,99 @@
 @extends('layouts')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">All Orders</h1>
-    @foreach($orders as $order)
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap">
-                <span class="fw-bold">Order #{{ $order->id }}</span>
-                <span class="text-muted">{{ $order->created_at->format('d M Y H:i') }}</span>
-                <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : 'success' }} mt-2 mt-md-0">{{ ucfirst($order->status) }}</span>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <h5 class="card-title text-primary">Total: ${{ number_format($order->total_price, 2) }}</h5>
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                @if($order->user->image)
-                                    <img src="{{ asset('storage/users/'.$order->user->image) }}" alt="{{ $order->user->name }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                                @else
-                                    <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
-                                    </div>
-                                @endif
-                            </div>
-                            <div>
-                                <p class="card-text mb-0 fw-bold">{{ $order->user->name }}</p>
-                                <p class="card-text text-muted mb-0">{{ $order->user->email }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Image</th>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($order->orderItems as $item)
-                                <tr>
-                                    <td>
-                                        @if($item->product->images && count($item->product->images) > 0)
-                                            <img src="{{ asset('storage/' . $item->product->images[0]) }}" alt="{{ $item->product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                        @else
-                                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                                No Image
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td>{{ $item->product->name }}</td>
-                                    <td>{{ $item->quantity }}</td>
-                                    <td>${{ number_format($item->price, 2) }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+<div class="container-fluid px-4">
+    <h1 class="mt-4 mb-4">Order Management</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
-    @endforeach
+    </div>
 </div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Order Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel this order?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelButton">Cancel Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+@endpush
+
+@push('scripts')
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#ordersTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('orders.index') }}",
+        columns: [
+            {data: 'order_id', name: 'order_id'},
+            {data: 'buyer.name', name: 'buyer.name'},
+            {data: 'total_price', name: 'total_price'},
+            {data: 'payment_status', name: 'payment_status', searchable: false},
+            {data: 'created_at', name: 'created_at'},
+            {data: 'action', name: 'action', orderable: false, searchable: false}
+        ]
+    });
+
+    $('#ordersTable').on('click', '.delete-order', function() {
+        var orderId = $(this).data('id');
+        $('#deleteModal').modal('show');
+        $('#confirmCancelButton').data('id', orderId);
+    });
+
+    $('#confirmCancelButton').on('click', function() {
+        var orderId = $(this).data('id');
+        $.ajax({
+            url: "{{ url('orders') }}/" + orderId + "/cancel",
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                $('#deleteModal').modal('hide');
+                table.ajax.reload();
+                Swal.fire('Cancelled!', 'The order has been cancelled.', 'success');
+            },
+            error: function(xhr) {
+                $('#deleteModal').modal('hide');
+                Swal.fire('Error!', 'There was an error cancelling the order.', 'error');
+            }
+        });
+    });
+});
+</script>
+@endpush

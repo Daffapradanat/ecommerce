@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
-                    <h1 class="h3 mb-0">Create New User</h1>
+                    <h1 class="h3 mb-0">Create New Administrator</h1>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">

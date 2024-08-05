@@ -6,22 +6,74 @@ use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdateProductRequest;
+use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['category'])->get();
+        if ($request->ajax()) {
+            $query = Product::with(['category', 'image']);
 
-        return view('products.index', compact('products'));
+            return DataTables::of($query)
+                ->addColumn('image', function ($product) {
+                    if($product->image->isNotEmpty()) {
+                        return '<img src="' . asset('storage/' . $product->image->first()->path) . '" alt="' . $product->name . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
+                    } else {
+                        return '<div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;"><i class="fas fa-image"></i></div>';
+                    }
+                })
+                ->addColumn('price', function ($product) {
+                    return 'Rp ' . number_format($product->price, 0, ',', '.');
+                })
+                ->addColumn('stock', function ($product) {
+                    if($product->stock > 50) {
+                        return '<span class="badge bg-success">' . $product->stock . '</span>';
+                    } elseif($product->stock > 10) {
+                        return '<span class="badge bg-warning">' . $product->stock . '</span>';
+                    } elseif($product->stock > 0) {
+                        return '<span class="badge bg-danger">' . $product->stock . '</span>';
+                    } else {
+                        return '<span class="badge bg-secondary">Out of Stock</span>';
+                    }
+                })
+                ->addColumn('category', function ($product) {
+                    return $product->category->name;
+                })
+                ->addColumn('action', function ($product) {
+                    return '
+                        <div class="btn-group" role="group">
+                            <a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="' . route('products.edit', $product->id) . '" class="btn btn-warning btn-sm me-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $product->id . '">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    ';
+                })
+                ->filterColumn('category', function($query, $keyword) {
+                    $query->whereHas('category', function($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
+                })
+                ->rawColumns(['image', 'stock', 'action'])
+                ->make(true);
+        }
+
+        $categories = Category::all();
+        return view('products.index', compact('categories'));
     }
 
     public function create()
     {
         $categories = Category::all();
-        $images = Image::all();
-
-        return view('products.create', compact('categories', 'images'));
+        return view('products.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -29,46 +81,37 @@ class ProductController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'images' => 'sometimes|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $product = Product::create([
-            'name' => $validatedData['name'],
-            'description' => $validatedData['description'],
-            'price' => $validatedData['price'],
-            'stock' => $validatedData['stock'],
-            'category_id' => $validatedData['category_id'],
-        ]);
+        $product = Product::create($validatedData);
 
         if ($request->hasFile('images')) {
-            $imagePaths = [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('product_images', 'public');
-                $imagePaths[] = $path;
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('product_images', 'public');
+                $product->image()->create(['path' => $path]);
             }
-            $product->images = $imagePaths;
-            $product->save();
         }
 
-        return redirect()->route('products.show', $product->id)->with('notification', [
+        return redirect()->route('products.index')->with('notification', [
             'type' => 'success',
             'message' => 'Product created successfully',
         ]);
     }
 
-    public function show(Product $product)
+    public function show($id)
     {
+        $product = Product::with('image')->findOrFail($id);
         return view('products.show', compact('product'));
     }
+
 
     public function edit(Product $product)
     {
         $categories = Category::all();
-
         return view('products.edit', compact('product', 'categories'));
     }
 
@@ -77,41 +120,34 @@ class ProductController extends Controller
         $validatedData = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
-            'price' => 'sometimes|required|integer|min:0',
+            'price' => 'sometimes|required|numeric|min:0',
             'stock' => 'sometimes|required|integer|min:0',
             'category_id' => 'sometimes|required|exists:categories,id',
-            'images' => 'sometimes|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'remove_images' => 'sometimes|array',
-            'remove_images.*' => 'string',
+            'remove_images' => 'array',
+            'remove_images.*' => 'exists:images,id'
         ]);
 
         $product->update($validatedData);
 
-        if ($request->hasFile('images')) {
-            $currentImages = $product->images ?? [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('product_images', 'public');
-                $currentImages[] = $path;
-            }
-            $product->images = $currentImages;
-        }
-
         if ($request->has('remove_images')) {
-            $imagesToKeep = collect($product->images)->reject(function ($image) use ($request) {
-                return in_array($image, $request->remove_images);
-            })->values()->all();
-
-            foreach ($request->remove_images as $imageToRemove) {
-                Storage::disk('public')->delete($imageToRemove);
+            foreach ($request->remove_images as $imageId) {
+                $image = $product->image()->find($imageId);
+                if ($image) {
+                    Storage::disk('public')->delete($image->path);
+                    $image->delete();
+                }
             }
-
-            $product->images = $imagesToKeep;
         }
 
-        $product->save();
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('product_images', 'public');
+                $product->image()->create(['path' => $path]);
+            }
+        }
 
-        return redirect()->route('products.show', $product->id)->with('notification', [
+        return redirect()->route('products.index')->with('notification', [
             'type' => 'success',
             'message' => 'Product updated successfully',
         ]);
@@ -119,6 +155,11 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        foreach ($product->image as $images) {
+            Storage::disk('public')->delete($images->path);
+            $images->delete();
+        }
+
         $product->delete();
 
         session()->flash('notification', [
@@ -128,4 +169,5 @@ class ProductController extends Controller
 
         return redirect()->route('products.index');
     }
+
 }

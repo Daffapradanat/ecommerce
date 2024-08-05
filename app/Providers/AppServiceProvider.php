@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
+use App\Services\MidtransService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,7 +13,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(MidtransService::class, function ($app) {
+            return new MidtransService();
+        });
+
+        $this->app->bind(OrderService::class, function ($app) {
+            return new OrderService();
+        });
     }
 
     /**

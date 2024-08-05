@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Buyer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -14,20 +15,20 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'email' => 'required|string|email|max:255|unique:buyers',
+            'password' => 'required|string|min:8',
         ]);
 
-        $user = User::create([
+        $buyer = Buyer::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $buyer->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'buyer' => $buyer,
             'token' => $token,
         ], 201);
     }
@@ -39,17 +40,18 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $buyer = Buyer::where('email', $request->email)->first();
+
+        if (!$buyer || !Hash::check($request->password, $buyer->password)) {
             return response()->json([
-                'message' => 'Invalid login details',
+                'message' => 'The provided credentials are incorrect.'
             ], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $buyer->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'buyer' => $buyer,
             'token' => $token,
         ]);
     }
@@ -58,8 +60,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ]);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

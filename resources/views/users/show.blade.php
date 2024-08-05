@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h1 class="h3 mb-0">User Details</h1>
+                    <h1 class="h3 mb-0">Administrator Details</h1>
                 </div>
                 <div class="card-body">
                     <div class="row">

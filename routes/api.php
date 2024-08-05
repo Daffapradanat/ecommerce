@@ -3,7 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ShoppingController;
-use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\BuyerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,13 +21,23 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::put('/user', [UserController::class, 'update']);
+
+    Route::put('/buyer', [BuyerController::class, 'update']);
+
     Route::get('/products', [ProductController::class, 'index']);
+
     Route::post('/cart/add', [ShoppingController::class, 'addToCart']);
     Route::get('/cart', [ShoppingController::class, 'showCart']);
     Route::post('/cart/edit', [ShoppingController::class, 'editCart']);
-    Route::delete('/cart/remove/{product_id}', [ShoppingController::class, 'removeFromCart']);
+    Route::post('/cart/remove', [ShoppingController::class, 'removeFromCart']);
+
     Route::post('/checkout', [ShoppingController::class, 'checkout']);
+
     Route::get('/orders', [ShoppingController::class, 'listOrders']);
+    Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
+    Route::post('/orders/cancel', [ShoppingController::class, 'cancelOrder']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);

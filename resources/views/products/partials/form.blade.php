@@ -15,11 +15,15 @@
 </div>
 
 <div class="form-group">
-    <label for="price">Price</label>
-    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price ?? '') }}" required>
+    <label for="price">Price (Rp)</label>
+    <div class="input-group">
+        <span class="input-group-text">Rp</span>
+        <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price ?? '') }}" required>
+    </div>
     @error('price')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
+    <p id="totalDisplay" class="text-muted mt-1 mb-0"></p>
 </div>
 
 <div class="form-group">
@@ -49,7 +53,7 @@
     <label for="images">Images</label>
     <div id="drop-area" class="drop-area">
         <p>Drag and drop images here or click to select files</p>
-        <input type="file" id="fileElem" name="images[]" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+        <input type="file" id="fileElem" name="images[]" multiple accept="image/*" style="display:none">
     </div>
     <div id="gallery" class="image-preview"></div>
     @error('images')
@@ -57,17 +61,20 @@
     @enderror
 </div>
 
-@if(isset($product) && $product->images)
-    <div class="form-group">
+@if(isset($product) && $product->image->isNotEmpty())
+    <div class="form-group mt-3">
         <label>Current Images</label>
-        <div id="current-images" class="row">
-            @foreach($product->images as $image)
+        <div class="row">
+            @foreach($product->image as $images)
                 <div class="col-md-3 mb-3">
                     <div class="image-container">
-                        <img src="{{ asset('storage/' . $image) }}" alt="Product Image" class="img-thumbnail">
+                        <img src="{{ asset('storage/' . $images->path) }}" alt="Product Image" class="img-thumbnail">
                         <div class="image-overlay">
-                            <input type="checkbox" name="remove_images[]" value="{{ $image }}" id="remove_image_{{ $loop->index }}">
-                            <label for="remove_image_{{ $loop->index }}">Remove</label>
+                            <input type="checkbox" name="remove_images[]" value="{{ $images->id }}" id="remove_image_{{ $loop->index }}" class="remove-checkbox">
+                            <label for="remove_image_{{ $loop->index }}" class="remove-label">
+                                <span class="checkbox-custom"></span>
+                                Remove
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -139,6 +146,87 @@
         font-size: 18px;
         line-height: 1;
     }
+
+    .image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .image-container img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .image-container:hover .image-overlay {
+        opacity: 1;
+    }
+
+    .image-container:hover img {
+        transform: scale(1.1);
+    }
+
+    .remove-checkbox {
+        display: none;
+    }
+
+    .remove-label {
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-custom {
+        width: 18px;
+        height: 18px;
+        border: 2px solid white;
+        border-radius: 3px;
+        display: inline-block;
+        margin-right: 8px;
+        position: relative;
+    }
+
+    .remove-checkbox:checked + .remove-label .checkbox-custom::after {
+        content: '\2714';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+    .remove-checkbox:checked + .remove-label {
+        color: #ff6b6b;
+    }
+
+    .remove-checkbox:checked + .remove-label .checkbox-custom {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+
+    .image-container.to-be-removed img {
+    filter: grayscale(100%) brightness(50%);
+    }
 </style>
 
 <script>
@@ -181,30 +269,88 @@
 
     dropArea.addEventListener('click', () => fileElem.click());
 
+    fileElem.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
     function handleFiles(files) {
-        ([...files]).forEach(uploadFile);
+    gallery.innerHTML = '';
+
+    let dataTransfer = new DataTransfer();
+
+    ([...files]).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            uploadFile(file);
+            dataTransfer.items.add(file);
+        }
+    });
+
+    fileElem.files = dataTransfer.files;
     }
 
     function uploadFile(file) {
-        let container = document.createElement('div');
-        container.className = 'image-container';
+    let container = document.createElement('div');
+    container.className = 'image-container';
 
-        let img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.onload = function() {
-            URL.revokeObjectURL(this.src);
-        }
-        container.appendChild(img);
-
-        let removeBtn = document.createElement('span');
-        removeBtn.innerHTML = '&times;';
-        removeBtn.className = 'remove-image';
-        removeBtn.onclick = function() {
-            gallery.removeChild(container);
-        }
-        container.appendChild(removeBtn);
-
-        gallery.appendChild(container);
-
+    let img = document.createElement('img');
+    img.file = file;
+    img.src = URL.createObjectURL(file);
+    img.onload = function() {
+        URL.revokeObjectURL(this.src);
     }
+    container.appendChild(img);
+
+    let removeBtn = document.createElement('span');
+    removeBtn.innerHTML = '&times;';
+    removeBtn.className = 'remove-image';
+    removeBtn.onclick = function() {
+        gallery.removeChild(container);
+        updateFileInput(file);
+    }
+    container.appendChild(removeBtn);
+
+    gallery.appendChild(container);
+    }
+
+    function updateFileInput(fileToRemove) {
+    let dt = new DataTransfer();
+    let files = fileElem.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file !== fileToRemove)
+            dt.items.add(file);
+    }
+    fileElem.files = dt.files;
+    }
+
+    document.querySelectorAll('.remove-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const container = this.closest('.image-container');
+        if (this.checked) {
+            container.classList.add('to-be-removed');
+        } else {
+            container.classList.remove('to-be-removed');
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const priceInput = document.getElementById('price');
+    const totalDisplay = document.getElementById('totalDisplay');
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function updateTotal() {
+        const price = parseFloat(priceInput.value) || 0;
+        totalDisplay.textContent = `Total: Rp ${formatNumber(price)}`;
+    }
+
+    priceInput.addEventListener('input', updateTotal);
+
+    // Initial update
+    updateTotal();
+
+});
 </script>
