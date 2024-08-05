@@ -17,8 +17,12 @@ class BuyerController extends Controller
 
             return DataTables::of($query)
                 ->addColumn('image', function ($buyer) {
-                    if ($buyer->image && Storage::disk('public')->exists('buyers/' . $buyer->image)) {
-                        return '<img src="' . asset('storage/buyers/' . $buyer->image) . '" alt="' . $buyer->name . '" class="rounded-circle" width="50" height="50" style="object-fit: cover;">';
+                    if ($buyer->image) {
+                        if (filter_var($buyer->image, FILTER_VALIDATE_URL)) {
+                            return '<img src="' . $buyer->image . '" alt="' . $buyer->name . '" class="rounded-circle" width="50" height="50" style="object-fit: cover;">';
+                        } else {
+                            return '<img src="' . asset('storage/buyers/' . $buyer->image) . '" alt="' . $buyer->name . '" class="rounded-circle" width="50" height="50" style="object-fit: cover;">';
+                        }
                     } else {
                         return '<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 50px; height: 50px;">' . strtoupper(substr($buyer->name, 0, 1)) . '</div>';
                     }
@@ -52,6 +56,7 @@ class BuyerController extends Controller
             'email' => 'required|string|email|max:255|unique:buyers',
             'password' => 'required|string|min:8|confirmed',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|url',
         ]);
 
         $buyer = new buyer();
@@ -62,6 +67,8 @@ class BuyerController extends Controller
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
+        } elseif ($request->filled('image_url')) {
+            $buyer->image = $request->image_url;
         }
 
         $buyer->save();
@@ -85,18 +92,23 @@ class BuyerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers,email,'.$buyer->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|url',
         ]);
 
         $buyer->name = $request->name;
         $buyer->email = $request->email;
 
         if ($request->hasFile('image')) {
-            if ($buyer->image) {
+            if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
-
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
+        } elseif ($request->filled('image_url')) {
+            if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete('buyers/'.$buyer->image);
+            }
+            $buyer->image = $request->image_url;
         }
 
         $buyer->save();
