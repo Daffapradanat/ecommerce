@@ -13,7 +13,11 @@
                         <div class="col-md-4 mb-3 mb-md-0">
                             <div class="text-center">
                                 @if($buyer->image)
-                                    <img src="{{ asset('storage/buyers/' . $buyer->image) }}" alt="{{ $buyer->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    @if(filter_var($buyer->image, FILTER_VALIDATE_URL))
+                                        <img src="{{ $buyer->image }}" alt="{{ $buyer->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    @else
+                                        <img src="{{ asset('storage/buyers/' . $buyer->image) }}" alt="{{ $buyer->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    @endif
                                 @else
                                     <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
                                         <span class="text-white" style="font-size: 48px;">{{ strtoupper(substr($buyer->name, 0, 1)) }}</span>
