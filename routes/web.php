@@ -9,7 +9,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BuyerController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Telescope\Telescope;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,15 +57,3 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/{id}/complete-payment', [OrderController::class, 'completePayment'])->name('orders.complete-payment');
     });
 });
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

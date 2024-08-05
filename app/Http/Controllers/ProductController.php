@@ -8,42 +8,66 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\UpdateProductRequest;
+use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::query();
+        if ($request->ajax()) {
+            $query = Product::with(['category', 'image']);
 
-        if ($request->has('search')) {
-            $products->where('name', 'like', '%' . $request->search . '%');
+            return DataTables::of($query)
+                ->addColumn('image', function ($product) {
+                    if($product->image->isNotEmpty()) {
+                        return '<img src="' . asset('storage/' . $product->image->first()->path) . '" alt="' . $product->name . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
+                    } else {
+                        return '<div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;"><i class="fas fa-image"></i></div>';
+                    }
+                })
+                ->addColumn('price', function ($product) {
+                    return 'Rp ' . number_format($product->price, 0, ',', '.');
+                })
+                ->addColumn('stock', function ($product) {
+                    if($product->stock > 50) {
+                        return '<span class="badge bg-success">' . $product->stock . '</span>';
+                    } elseif($product->stock > 10) {
+                        return '<span class="badge bg-warning">' . $product->stock . '</span>';
+                    } elseif($product->stock > 0) {
+                        return '<span class="badge bg-danger">' . $product->stock . '</span>';
+                    } else {
+                        return '<span class="badge bg-secondary">Out of Stock</span>';
+                    }
+                })
+                ->addColumn('category', function ($product) {
+                    return $product->category->name;
+                })
+                ->addColumn('action', function ($product) {
+                    return '
+                        <div class="btn-group" role="group">
+                            <a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="' . route('products.edit', $product->id) . '" class="btn btn-warning btn-sm me-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $product->id . '">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    ';
+                })
+                ->filterColumn('category', function($query, $keyword) {
+                    $query->whereHas('category', function($q) use ($keyword) {
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
+                })
+                ->rawColumns(['image', 'stock', 'action'])
+                ->make(true);
         }
 
-        if ($request->has('category')) {
-            $products->where('category_id', $request->category);
-        }
-
-        if ($request->has('stock_status')) {
-            switch ($request->stock_status) {
-                case 'normal_stock':
-                    $products->where('stock', '>', 50);
-                    break;
-                case 'low_stock':
-                    $products->where('stock', '<=', 50)->where('stock', '>', 10);
-                    break;
-                case 'very_low_stock':
-                    $products->where('stock', '<=', 10)->where('stock', '>', 0);
-                    break;
-                case 'out_of_stock':
-                    $products->where('stock', '=', 0);
-                    break;
-            }
-        }
-
-        $products = $products->paginate(10);
         $categories = Category::all();
-
-        return view('products.index', compact('products', 'categories'));
+        return view('products.index', compact('categories'));
     }
 
     public function create()

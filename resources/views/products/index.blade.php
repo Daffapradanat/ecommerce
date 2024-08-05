@@ -16,33 +16,6 @@
     </div>
     @endif
 
-    <!-- Search and Filter -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ route('products.index') }}" method="GET" class="row g-3">
-                <div class="col-12 col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Search products" value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="col-12 col-md-3">
-                    <select name="category" class="form-select">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Products Table -->
     <div class="card mb-4">
         <div class="card-header">
@@ -54,123 +27,87 @@
                 <table class="table table-hover" id="productsTable">
                     <thead>
                         <tr>
-                            <th><a href="#" class="sort" data-sort="image">Image</a></th>
-                            <th><a href="#" class="sort" data-sort="name">Name</a></th>
-                            <th><a href="#" class="sort" data-sort="price">Price</a></th>
-                            <th><a href="#" class="sort" data-sort="stock">Stock</a></th>
-                            <th><a href="#" class="sort" data-sort="category">Category</a></th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Category</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($products as $product)
-                            <tr>
-                                <td>
-                                    @if($product->image->isNotEmpty())
-                                        <img src="{{ asset('storage/' . $product->image->first()->path) }}" alt="{{ $product->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                    @else
-                                        <div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                                            <i class="fas fa-image"></i>
-                                        </div>
-                                    @endif
-                                </td>
-                                <td>{{ $product->name }}</td>
-                                <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-                                <td>
-                                    @if($product->stock > 50)
-                                        <span class="badge bg-success">{{ $product->stock }}</span>
-                                    @elseif($product->stock > 10)
-                                        <span class="badge bg-warning">{{ $product->stock }}</span>
-                                    @elseif($product->stock > 0)
-                                        <span class="badge bg-danger">{{ $product->stock }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">Out of Stock</span>
-                                    @endif
-                                </td>
-                                <td>{{ $product->category->name }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm me-2">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm me-2">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center">No products found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center">
-        {{ $products->links() }}
-    </div>
 </div>
 
-@foreach($products as $product)
-    <!-- Delete Modal for each product -->
-    <div class="modal fade" id="deleteModal{{ $product->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $product->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel{{ $product->id }}">Confirm Product Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to delete the product "{{ $product->name }}"?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Delete Product</button>
-                    </form>
-                </div>
+<!-- Delete Modal template -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Product Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this product?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete Product</button>
+                </form>
             </div>
         </div>
     </div>
-@endforeach
+</div>
 
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 <style>
-    .sort {
-        color: #333;
-        text-decoration: none;
-    }
-    .sort:hover {
-        color: #007bff;
-    }
-
-    @media (max-width: 767.98px) {
-        .table-responsive {
-            overflow-x: auto;
-        }
-        #productsTable th, #productsTable td {
-            white-space: nowrap;
-        }
-    }
+    /* ... (existing styles) ... */
 </style>
 @endpush
 
 @push('scripts')
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ... (kode JavaScript yang sudah ada untuk sorting)
+$(document).ready(function() {
+    var table = $('#productsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('products.index') }}",
+            data: function (d) {
+                d.category = $('#category').val();
+                d.stock_status = $('#stock_status').val();
+            }
+        },
+        columns: [
+            {data: 'image', name: 'image', orderable: false, searchable: false},
+            {data: 'name', name: 'name'},
+            {data: 'price', name: 'price'},
+            {data: 'stock', name: 'stock'},
+            {data: 'category', name: 'category.name'},
+            {data: 'action', name: 'action', orderable: false, searchable: false}
+        ]
+    });
+
+    $('#category, #stock_status').change(function() {
+        table.draw();
+    });
+
+    // Delete modal functionality
+    $('#productsTable').on('click', '.btn-danger', function() {
+        var productId = $(this).data('id');
+        var deleteUrl = "{{ route('products.destroy', ':id') }}".replace(':id', productId);
+        $('#deleteForm').attr('action', deleteUrl);
+    });
 
     // Auto-hide alert
     const alert = document.querySelector('.alert');

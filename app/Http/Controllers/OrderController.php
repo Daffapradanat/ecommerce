@@ -9,6 +9,7 @@ use Midtrans\Snap;
 use Illuminate\Support\Facades\Log;
 use App\Services\OrderService;
 use App\Services\MidtransService;
+use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends Controller
 {
@@ -28,37 +29,40 @@ class OrderController extends Controller
 
         public function index(Request $request)
         {
-            $status = $request->input('status', 'All');
-            $search = $request->input('search');
-            $date = $request->input('date');
+            if ($request->ajax()) {
+                $query = Order::with('buyer');
 
-            $query = Order::with('buyer');
+                return DataTables::of($query)
+                    ->addColumn('action', function ($order) {
+                        $viewBtn = '<a href="' . route('orders.show', $order->id) . '" class="btn btn-info btn-sm me-2"><i class="fas fa-eye"></i></a>';
+                        $cancelBtn = '';
+                        if ($order->payment_status === 'awaiting_payment' || $order->payment_status === 'pending') {
+                            $cancelBtn = '<button type="button" class="btn btn-danger btn-sm delete-order" onclick="confirmCancellation(' . $order->id . ')"><i class="fas fa-trash"></i></button>';
+                        }
+                        return $viewBtn . $cancelBtn;
+                    })
+                    ->editColumn('total_price', function ($order) {
+                        return 'Rp ' . number_format($order->total_price, 0, ',', '.');
+                    })
+                    ->editColumn('payment_status', function ($order) {
+                        $statusClass = [
+                            'pending' => 'warning',
+                            'awaiting_payment' => 'info',
+                            'paid' => 'success',
+                            'failed' => 'danger',
+                            'cancelled' => 'danger'
+                        ][$order->payment_status] ?? 'secondary';
 
-            if ($status !== 'All') {
-                if ($status === 'Failed & Cancelled') {
-                    $query->whereIn('payment_status', ['failed', 'cancelled']);
-                } else {
-                    $query->where('payment_status', strtolower(str_replace(' ', '_', $status)));
-                }
+                        return '<span class="badge bg-' . $statusClass . '">' . ucfirst(str_replace('_', ' ', $order->payment_status)) . '</span>';
+                    })
+                    ->editColumn('created_at', function ($order) {
+                        return $order->created_at->format('d M Y H:i');
+                    })
+                    ->rawColumns(['action', 'payment_status'])
+                    ->make(true);
             }
 
-            if ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('order_id', 'like', "%{$search}%")
-                    ->orWhereHas('buyer', function($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-                });
-            }
-
-            if ($date) {
-                $query->whereDate('created_at', $date);
-            }
-
-            $orders = $query->latest()->paginate(10);
-            $totalFilteredOrders = $orders->total();
-
-            return view('orders.index', compact('orders', 'totalFilteredOrders', 'status'));
+            return view('orders.index');
         }
 
     public function show($id)

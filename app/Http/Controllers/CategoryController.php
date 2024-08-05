@@ -5,24 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class CategoryController extends Controller
 {
 
     public function index(Request $request)
     {
-        $categories = Category::withCount('products');
+        if ($request->ajax()) {
+            $categories = Category::withCount('products');
 
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $categories->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%");
-            });
+            return DataTables::of($categories)
+                ->addColumn('action', function ($category) {
+                    $editBtn = '<a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn-sm me-2"><i class="fas fa-edit"></i></a>';
+                    $deleteBtn = '<button type="button" class="btn btn-danger btn-sm me-0" data-id="' . $category->id . '"><i class="fas fa-trash"></i></button>';
+                    return $editBtn . $deleteBtn;
+                })
+                ->rawColumns(['action'])
+                ->filterColumn('name', function($query, $keyword) {
+                    $query->where('name', 'like', "%{$keyword}%");
+                })
+                ->filterColumn('slug', function($query, $keyword) {
+                    $query->where('slug', 'like', "%{$keyword}%");
+                })
+                ->make(true);
         }
 
-        $categories = $categories->paginate(10);
-
-        return view('categories.index', compact('categories'));
+        return view('categories.index');
     }
 
     public function create()

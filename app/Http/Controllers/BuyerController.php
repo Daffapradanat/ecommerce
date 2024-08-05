@@ -6,24 +6,38 @@ use App\Models\Buyer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class BuyerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Buyer::query();
+        if ($request->ajax()) {
+            $query = Buyer::query();
 
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-            });
+            return DataTables::of($query)
+                ->addColumn('image', function ($buyer) {
+                    if ($buyer->image) {
+                        return '<img src="' . asset('storage/buyers/' . $buyer->image) . '" alt="' . $buyer->name . '" class="rounded-circle" width="50" height="50" style="object-fit: cover;">';
+                    } else {
+                        return '<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 50px; height: 50px;">' . strtoupper(substr($buyer->name, 0, 1)) . '</div>';
+                    }
+                })
+                ->addColumn('action', function ($buyer) {
+                    return '<div class="d-flex justify-content-start align-items-center">
+                                <a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal' . $buyer->id . '">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>';
+                })
+                ->rawColumns(['image', 'action'])
+                ->make(true);
         }
 
-        $buyers = $query->paginate(10);
-
-        return view('buyers.index', compact('buyers'));
+        return view('buyers.index');
     }
 
     public function create()
