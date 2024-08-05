@@ -17,6 +17,24 @@ class ProductController extends Controller
         if ($request->ajax()) {
             $query = Product::with(['category', 'image']);
 
+            $columnIndex = $request->input('order.0.column', 0);
+            $direction = $request->input('order.0.dir', 'asc');
+
+            $columns = [
+                'image',
+                'name',
+                'price',
+                'stock',
+                'category',
+                'action',
+            ];
+
+            $sortColumn = $columns[$columnIndex] ?? null;
+
+            if ($sortColumn === 'price' || $sortColumn === 'stock') {
+                $query = $query->orderBy($sortColumn, $direction);
+            }
+
             return DataTables::of($query)
                 ->addColumn('image', function ($product) {
                     if($product->image->isNotEmpty()) {

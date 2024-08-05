@@ -98,8 +98,12 @@ $(document).ready(function() {
         ]
     });
 
+    // $('#category, #stock_status').change(function() {
+    //     table.draw();
+    // });
+
     $('#category, #stock_status').change(function() {
-        table.draw();
+        table.ajax.reload();
     });
 
     // Delete modal functionality
