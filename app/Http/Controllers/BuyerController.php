@@ -17,7 +17,7 @@ class BuyerController extends Controller
 
             return DataTables::of($query)
                 ->addColumn('image', function ($buyer) {
-                    if ($buyer->image) {
+                    if ($buyer->image && Storage::disk('public')->exists('buyers/' . $buyer->image)) {
                         return '<img src="' . asset('storage/buyers/' . $buyer->image) . '" alt="' . $buyer->name . '" class="rounded-circle" width="50" height="50" style="object-fit: cover;">';
                     } else {
                         return '<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 50px; height: 50px;">' . strtoupper(substr($buyer->name, 0, 1)) . '</div>';
