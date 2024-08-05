@@ -67,15 +67,12 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 <style>
     /* ... (existing styles) ... */
 </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
 <script>
 $(document).ready(function() {
     var table = $('#productsTable').DataTable({
