@@ -37,12 +37,10 @@
                         @foreach($users as $user)
                         <tr>
                             <td class="align-middle text-center">
-                                @if ($user->image)
-                                    <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                @if (filter_var($user->image, FILTER_VALIDATE_URL))
+                                    <img src="{{ $user->image }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
                                 @else
-                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white mx-auto" style="width: 50px; height: 50px;">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                    </div>
+                                    <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
                                 @endif
                             </td>
                             <td class="align-middle">{{ $user->name }}</td>

@@ -38,7 +38,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_type' => 'required|in:upload,url',
+            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_url' => 'required_if:image_type,url|url',
         ]);
 
         $user = new User();
@@ -46,9 +48,11 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
 
-        if ($request->hasFile('image')) {
+        if ($request->image_type === 'upload' && $request->hasFile('image')) {
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
+        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
+            $user->image = $request->image_url;
         }
 
         $user->save();
@@ -72,19 +76,23 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_url' => 'nullable|url',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
 
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($user->image) {
+            if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('users/'.$user->image);
             }
-
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
+        } elseif ($request->filled('image_url')) {
+            if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete('users/'.$user->image);
+            }
+            $user->image = $request->image_url;
         }
 
         $user->save();

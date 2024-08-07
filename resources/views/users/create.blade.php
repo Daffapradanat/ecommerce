@@ -37,9 +37,27 @@
                             <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                         </div>
                         <div class="mb-3">
-                            <label for="image" class="form-label">Profile Image</label>
+                            <label for="image_type" class="form-label">Profile Image Type</label>
+                            <select class="form-select @error('image_type') is-invalid @enderror" id="image_type" name="image_type">
+                                <option value="">Select image type</option>
+                                <option value="upload" {{ old('image_type') == 'upload' ? 'selected' : '' }}>Upload Image</option>
+                                <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>Image URL</option>
+                            </select>
+                            @error('image_type')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3" id="image_upload" style="display: none;">
+                            <label for="image" class="form-label">Upload Image</label>
                             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
                             @error('image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3" id="image_url" style="display: none;">
+                            <label for="image_url_input" class="form-label">Image URL</label>
+                            <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url_input" name="image_url" placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}">
+                            @error('image_url')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -54,3 +72,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('image_type').addEventListener('change', function() {
+        var uploadDiv = document.getElementById('image_upload');
+        var urlDiv = document.getElementById('image_url');
+        if (this.value === 'upload') {
+            uploadDiv.style.display = 'block';
+            urlDiv.style.display = 'none';
+        } else if (this.value === 'url') {
+            uploadDiv.style.display = 'none';
+            urlDiv.style.display = 'block';
+        } else {
+            uploadDiv.style.display = 'none';
+            urlDiv.style.display = 'none';
+        }
+    });
+</script>
+@endpush
