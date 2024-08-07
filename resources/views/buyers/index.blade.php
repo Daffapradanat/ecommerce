@@ -95,7 +95,7 @@
             var button = $(event.relatedTarget);
             var buyerId = button.data('buyer-id');
             var form = $('#deleteForm');
-            form.attr('action', '/buyers/' + buyerId);
+            form.attr('action', '/buyer/' + buyerId);
         });
 
         // Alert auto-close
