@@ -40,7 +40,13 @@
                                 @if (filter_var($user->image, FILTER_VALIDATE_URL))
                                     <img src="{{ $user->image }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
                                 @else
-                                    <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                    @if ($user->image)
+                                        <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <span class="text-white" style="font-size: 24px;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                        </div>
+                                    @endif
                                 @endif
                             </td>
                             <td class="align-middle">{{ $user->name }}</td>

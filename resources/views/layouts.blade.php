@@ -70,13 +70,21 @@
                     @auth
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png') }}" class="rounded-circle me-2" alt="User Image" style="width: 32px; height: 32px; object-fit: cover;">
+                            @php
+                                $imageUrl = Auth::user()->image;
+                                $isUrl = filter_var($imageUrl, FILTER_VALIDATE_URL);
+                                $image = $isUrl && preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $imageUrl) ? $imageUrl : (Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png'));
+                            @endphp
+                            <img src="{{ $image }}" class="rounded-circle me-2" alt="User Image" style="width: 32px; height: 32px; object-fit: cover;">
                             <span>{{ Auth::user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="width: 220px;">
                             <li class="px-3 py-2">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png') }}" class="rounded-circle me-2" alt="User Image" style="width: 48px; height: 48px; object-fit: cover;">
+                                    @php
+                                        $imageLarge = $isUrl && preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $imageUrl) ? $imageUrl : (Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png'));
+                                    @endphp
+                                    <img src="{{ $imageLarge }}" class="rounded-circle me-2" alt="User Image" style="width: 48px; height: 48px; object-fit: cover;">
                                     <div>
                                         <h6 class="mb-0">{{ Auth::user()->name }}</h6>
                                         <small class="text-muted">Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
@@ -230,6 +238,24 @@
                     toastr.error('{{ $error }}');
                 @endforeach
             @endif
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const imgElements = document.querySelectorAll('.nav-link img');
+
+            imgElements.forEach(img => {
+                const imgUrl = img.src;
+
+                function isImageUrl(url) {
+                    return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+                }
+
+                if (!isImageUrl(imgUrl)) {
+                    img.src = '{{ asset('default-avatar.png') }}';
+                    alert('The provided URL is not a valid image.');
+                }
+            });
         });
     </script>
 

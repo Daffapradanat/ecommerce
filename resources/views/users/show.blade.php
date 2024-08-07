@@ -13,16 +13,16 @@
                         <div class="col-md-4 mb-3 mb-md-0">
                             <div class="text-center">
                                 @if (filter_var($user->image, FILTER_VALIDATE_URL))
-                                <img src="{{ $user->image }}" alt="{{ $user->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
-                            @else
-                                @if ($user->image)
-                                    <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    <img src="{{ $user->image }}" alt="{{ $user->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
                                 @else
-                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
-                                        <span class="text-white" style="font-size: 48px;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                                    </div>
+                                    @if ($user->image)
+                                        <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                                            <span class="text-white" style="font-size: 48px;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                        </div>
+                                    @endif
                                 @endif
-                            @endif
                             </div>
                         </div>
                         <div class="col-md-8">

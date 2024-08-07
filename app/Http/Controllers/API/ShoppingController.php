@@ -178,11 +178,15 @@ class ShoppingController extends Controller
             ]);
 
             $orderItems = $cartItems->map(function ($item) use ($order) {
-                $orderItem = new OrderItem([
+                $product = $item->product;
+                return new OrderItem([
                     'order_id' => $order->id,
-                    'product_id' => $item->product_id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'product_description' => $product->description,
+                    'product_price' => $product->price,
                     'quantity' => $item->quantity,
-                    'price' => $item->product->price,
+                    'price' => $product->price * $item->quantity,
                 ]);
 
                 $item->product->decrement('stock', $item->quantity);
@@ -271,14 +275,16 @@ class ShoppingController extends Controller
     public function listOrders()
     {
         $orders = Order::where('buyer_id', auth()->id())
-            ->with('orderItems.product')
+            ->with('orderItems')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $orders = $orders->map(function ($order) {
             $order->orderItems = $order->orderItems->map(function ($item) {
                 return [
-                    'product_name' => $item->product->name,
+                    'name' => $item->product_name,
+                    'product_description' => $item->product_description,
+                    'product_price' => $item->product_price,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ];
