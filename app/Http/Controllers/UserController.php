@@ -40,11 +40,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'image_type' => 'required|in:upload,url',
             'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'required_if:image_type,url|url',
-        ], [
-            'image.required_if' => 'Please upload an image file.',
-            'image_url.required_if' => 'Please provide a valid image URL.',
-            'image_url.url' => 'The image URL must be a valid URL.',
+            'image_url' => 'required_if:image_type,url',  // Remove the 'url' validation
         ]);
 
         $user = new User();
@@ -57,7 +53,7 @@ class UserController extends Controller
             $user->image = basename($imagePath);
         } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
             if (!$this->isValidImageUrl($request->image_url)) {
-                return redirect()->back()->withInput()->with('error', 'The provided URL is not a valid image.');
+                return redirect()->back()->withInput()->with('error', 'The provided URL does not seem to be a valid image. Please check the URL and try again.');
             }
             $user->image = $request->image_url;
         }
@@ -84,11 +80,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'image_type' => 'required|in:keep,upload,url',
             'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'required_if:image_type,url|url',
-        ], [
-            'image.required_if' => 'Please upload an image file.',
-            'image_url.required_if' => 'Please provide a valid image URL.',
-            'image_url.url' => 'The image URL must be a valid URL.',
+            'image_url' => 'required_if:image_type,url', 
         ]);
 
         $user->name = $request->name;
