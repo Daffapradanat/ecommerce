@@ -37,7 +37,7 @@ class OrderController extends Controller
                         $viewBtn = '<a href="' . route('orders.show', $order->id) . '" class="btn btn-info btn-sm me-2"><i class="fas fa-eye"></i></a>';
                         $cancelBtn = '';
                         if ($order->payment_status === 'awaiting_payment' || $order->payment_status === 'pending') {
-                            $cancelBtn = '<button type="button" class="btn btn-danger btn-sm delete-order" onclick="confirmCancellation(' . $order->id . ')"><i class="fas fa-trash"></i></button>';
+                            $cancelBtn = '<button type="button" class="btn btn-danger btn-sm delete-order" data-id="' . $order->id . '"><i class="fas fa-trash"></i></button>';
                         }
                         return $viewBtn . $cancelBtn;
                     })
@@ -83,8 +83,16 @@ class OrderController extends Controller
 
     public function cancel($id)
     {
-        $result = $this->orderService->cancelOrder($id);
-        return redirect()->route('orders.index')->with($result['status'], $result['message']);
+        $order = Order::findOrFail($id);
+
+        if (!in_array($order->payment_status, ['awaiting_payment', 'pending'])) {
+            return response()->json(['message' => 'This order cannot be cancelled.'], 400);
+        }
+
+        $order->payment_status = 'cancelled';
+        $order->save();
+
+        return response()->json(['message' => 'Order cancelled successfully.']);
     }
 
     public function pay($id)

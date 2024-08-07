@@ -67,31 +67,45 @@ $(document).ready(function() {
         ]
     });
 
+    // $('#ordersTable').on('click', '.delete-order', function() {
+    //     var orderId = $(this).data('id');
+    //     $('#deleteModal').modal('show');
+    //     $('#confirmCancelButton').data('id', orderId);
+    // });
+
     $('#ordersTable').on('click', '.delete-order', function() {
         var orderId = $(this).data('id');
-        $('#deleteModal').modal('show');
-        $('#confirmCancelButton').data('id', orderId);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cancelOrder(orderId);
+            }
+        });
     });
 
-    $('#confirmCancelButton').on('click', function() {
-        var orderId = $(this).data('id');
+    function cancelOrder(orderId) {
         $.ajax({
-            url: "{{ url('orders') }}/" + orderId + "/cancel",
+            url: "{{ route('orders.cancel', ':id') }}".replace(':id', orderId),
             method: 'POST',
             data: {
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
-                $('#deleteModal').modal('hide');
                 table.ajax.reload();
-                Swal.fire('Cancelled!', 'The order has been cancelled.', 'success');
+                Swal.fire('Cancelled!', response.message, 'success');
             },
             error: function(xhr) {
-                $('#deleteModal').modal('hide');
-                Swal.fire('Error!', 'There was an error cancelling the order.', 'error');
+                Swal.fire('Error!', xhr.responseJSON.message || 'There was an error cancelling the order.', 'error');
             }
         });
-    });
+    }
 
     // Alert auto-close
     window.setTimeout(function() {
