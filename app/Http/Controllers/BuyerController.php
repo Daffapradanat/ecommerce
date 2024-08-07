@@ -13,7 +13,7 @@ class BuyerController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Buyer::query();
+            $query = Buyer::query('status', 'active');
 
             return DataTables::of($query)
                 ->addColumn('image', function ($buyer) {
@@ -122,8 +122,8 @@ class BuyerController extends Controller
             Storage::disk('public')->delete('buyers/'.$buyer->image);
         }
 
-        $buyer->delete();
+        $buyer->update(['status' => 'deleted']);
 
-        return redirect()->route('buyer.index')->with('success', 'Buyer deleted successfully.');
+        return redirect()->route('buyer.index')->with('success', 'Buyer marked as deleted successfully.');
     }
 }
