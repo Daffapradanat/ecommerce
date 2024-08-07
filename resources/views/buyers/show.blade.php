@@ -34,6 +34,13 @@
                                     <span class="badge bg-danger">Deleted</span>
                                 @endif
                             </h2>
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-3">Contact Information</h3>
+                                        <p><i class="fas fa-envelope me-2"></i> {{ $buyer->email }}</p>
+                                        <p><i class="fas fa-phone me-2"></i> {{ $buyer->phone ?? 'Not provided' }}</p>
+                                    </div>
+                                </div>
                             <div class="card">
                                 <div class="card-body">
                                     <h3 class="h5 mb-3">Account Details</h3>
