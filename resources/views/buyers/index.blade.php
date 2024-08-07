@@ -117,6 +117,17 @@
                 $(this).remove();
             });
         }, 5000);
+
+        // Disable delete button for deleted buyers
+        $('#buyers-table').on('draw.dt', function() {
+        $('.delete-btn').each(function() {
+            var tr = $(this).closest('tr');
+            var row = $('#buyers-table').DataTable().row(tr);
+            if (row.data().status === 'deleted') {
+                $(this).prop('disabled', true);
+            }
+        });
     });
+});
 </script>
 @endpush
