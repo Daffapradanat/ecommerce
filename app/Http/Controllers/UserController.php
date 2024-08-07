@@ -41,6 +41,10 @@ class UserController extends Controller
             'image_type' => 'required|in:upload,url',
             'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
             'image_url' => 'required_if:image_type,url|url',
+        ], [
+            'image.required_if' => 'Please upload an image file.',
+            'image_url.required_if' => 'Please provide a valid image URL.',
+            'image_url.url' => 'The image URL must be a valid URL.',
         ]);
 
         $user = new User();
@@ -52,6 +56,9 @@ class UserController extends Controller
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
         } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
+            if (!$this->isValidImageUrl($request->image_url)) {
+                return redirect()->back()->withInput()->with('error', 'The provided URL is not a valid image.');
+            }
             $user->image = $request->image_url;
         }
 
@@ -75,20 +82,28 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'nullable|url',
+            'image_type' => 'required|in:keep,upload,url',
+            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_url' => 'required_if:image_type,url|url',
+        ], [
+            'image.required_if' => 'Please upload an image file.',
+            'image_url.required_if' => 'Please provide a valid image URL.',
+            'image_url.url' => 'The image URL must be a valid URL.',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
 
-        if ($request->hasFile('image')) {
+        if ($request->image_type === 'upload' && $request->hasFile('image')) {
             if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('users/'.$user->image);
             }
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
-        } elseif ($request->filled('image_url')) {
+        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
+            if (!$this->isValidImageUrl($request->image_url)) {
+                return redirect()->back()->withInput()->with('error', 'The provided URL is not a valid image.');
+            }
             if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('users/'.$user->image);
             }
@@ -109,5 +124,16 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    private function isValidImageUrl($url)
+    {
+        try {
+            $response = Http::get($url);
+            $contentType = $response->header('Content-Type');
+            return str_starts_with($contentType, 'image/');
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
