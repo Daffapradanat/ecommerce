@@ -121,14 +121,31 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 
-    private function isValidImageUrl($url)
+    private function checkImageUrl($url)
     {
         try {
-            $response = Http::timeout(5)->get($url);
-            $contentType = $response->header('Content-Type');
-            return str_starts_with($contentType, 'image/');
+            $response = Http::timeout(10)->get($url);
+
+            if ($response->successful()) {
+                $contentType = $response->header('Content-Type');
+                if (str_starts_with($contentType, 'image/')) {
+                    return true;
+                } else {
+                    return "The URL does not point to a valid image. Content-Type: $contentType";
+                }
+            } else {
+                return "Failed to access the URL. Status code: " . $response->status();
+            }
         } catch (\Exception $e) {
-            return false;
+            Log::error("Error checking image URL: " . $e->getMessage());
+            return "Error checking the image URL: " . $e->getMessage();
+        }
+    }
+
+    private function deleteOldImage(User $user)
+    {
+        if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
+            Storage::disk('public')->delete('users/'.$user->image);
         }
     }
 }
