@@ -32,7 +32,7 @@ class BuyerController extends Controller
                                 <a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal' . $buyer->id . '">
+                                <button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>';
