@@ -28,14 +28,18 @@ class BuyerController extends Controller
                     }
                 })
                 ->addColumn('action', function ($buyer) {
-                    return '<div class="d-flex justify-content-start align-items-center">
-                                <a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
+                    $viewBtn = '<a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
                                     <i class="fas fa-eye"></i>
-                                </a>
-                                <button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>';
+                                </a>';
+
+                    $deleteBtn = '';
+                    if ($buyer->status !== 'deleted') {
+                        $deleteBtn = '<button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
+                                        <i class="fas fa-trash"></i>
+                                      </button>';
+                    }
+
+                    return '<div class="d-flex justify-content-start align-items-center">' . $viewBtn . $deleteBtn . '</div>';
                 })
                 ->rawColumns(['image', 'action'])
                 ->make(true);
@@ -55,19 +59,20 @@ class BuyerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers',
             'password' => 'required|string|min:8|confirmed',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image' => 'nullable|url',
+            'image_type' => 'required|in:upload,url',
+            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_url' => 'required_if:image_type,url|url',
         ]);
 
-        $buyer = new buyer();
+        $buyer = new Buyer();
         $buyer->name = $request->name;
         $buyer->email = $request->email;
         $buyer->password = Hash::make($request->password);
 
-        if ($request->hasFile('image')) {
+        if ($request->image_type === 'upload' && $request->hasFile('image')) {
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
-        } elseif ($request->filled('image_url')) {
+        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
             $buyer->image = $request->image_url;
         }
 
@@ -86,25 +91,26 @@ class BuyerController extends Controller
         return view('buyers.edit', compact('buyer'));
     }
 
-    public function update(Request $request, buyer $buyer)
+    public function update(Request $request, Buyer $buyer)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers,email,'.$buyer->id,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image' => 'nullable|url',
+            'image_type' => 'required|in:upload,url,keep',
+            'image.' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_url.' => 'required_if:image_type,url|url',
         ]);
 
         $buyer->name = $request->name;
         $buyer->email = $request->email;
 
-        if ($request->hasFile('image')) {
+        if ($request->image_type === 'upload' && $request->hasFile('image')) {
             if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
-        } elseif ($request->filled('image_url')) {
+        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
             if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
@@ -118,12 +124,16 @@ class BuyerController extends Controller
 
     public function destroy(Buyer $buyer)
     {
-        if ($buyer->image) {
-            Storage::disk('public')->delete('buyers/'.$buyer->image);
+        if ($buyer->status !== 'deleted') {
+            if ($buyer->image) {
+                Storage::disk('public')->delete('buyers/'.$buyer->image);
+            }
+
+            $buyer->update(['status' => 'deleted']);
+
+            return redirect()->route('buyer.index')->with('success', 'Buyer marked as deleted successfully.');
+        } else {
+            return redirect()->route('buyer.index')->with('error', 'Buyer is already deleted.');
         }
-
-        $buyer->update(['status' => 'deleted']);
-
-        return redirect()->route('buyer.index')->with('success', 'Buyer marked as deleted successfully.');
     }
 }
