@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
 
     // Order-related Routes
     Route::prefix('orders')->group(function () {
+        Route::patch('/buyer/{buyer}/restore', [BuyerController::class, 'restore'])->name('buyer.restore');
         Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])->name('midtrans.callback')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
         Route::get('/orders/{id}/check-payment', [OrderController::class, 'checkPayment'])->name('orders.check-payment');
         Route::get('{id}/pay', [OrderController::class, 'pay'])->name('orders.pay');

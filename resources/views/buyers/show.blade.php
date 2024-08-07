@@ -56,7 +56,15 @@
                         <a href="{{ route('buyer.index') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Back to List
                         </a>
-                        @if($buyer->status !== 'deleted')
+                        @if($buyer->status === 'deleted')
+                            <form action="{{ route('buyer.restore', $buyer->id) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-undo me-1"></i> Restore
+                                </button>
+                            </form>
+                        @else
                             <div>
                                 <a href="{{ route('buyer.edit', $buyer->id) }}" class="btn btn-warning me-2">
                                     <i class="fas fa-edit me-1"></i>

@@ -120,6 +120,16 @@ class BuyerController extends Controller
         return redirect()->route('buyer.index')->with('success', 'Buyer updated successfully.');
     }
 
+        public function restore(Buyer $buyer)
+    {
+        if ($buyer->status === 'deleted') {
+            $buyer->update(['status' => 'active']);
+            return redirect()->route('buyer.show', $buyer->id)->with('success', 'Buyer restored successfully.');
+        } else {
+            return redirect()->route('buyer.show', $buyer->id)->with('error', 'Buyer is not deleted.');
+        }
+    }
+
     public function destroy(Buyer $buyer)
     {
         if ($buyer->status !== 'deleted') {
