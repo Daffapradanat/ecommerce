@@ -91,26 +91,24 @@ class BuyerController extends Controller
         return view('buyers.edit', compact('buyer'));
     }
 
-    public function update(Request $request, Buyer $buyer)
+    public function update(Request $request, buyer $buyer)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers,email,'.$buyer->id,
-            'image_type' => 'required|in:upload,url,keep',
-            'image.' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url.' => 'required_if:image_type,url|url',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $buyer->name = $request->name;
         $buyer->email = $request->email;
 
-        if ($request->image_type === 'upload' && $request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
-        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
+        } elseif ($request->filled('image_url')) {
             if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
