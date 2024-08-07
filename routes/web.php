@@ -1,43 +1,35 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\LobbyController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ImageController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\BuyerController;
+use App\Http\Controllers\{
+    AuthController,
+    CategoryController,
+    LobbyController,
+    OrderController,
+    ImageController,
+    ProductController,
+    UserController,
+    BuyerController
+};
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// Public routes
+Route::view('/', 'layouts');
 
-Route::get('/', function () {
-    return view('layouts');
+// Authentication routes
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/register', 'showRegistrationForm')->name('register');
+    Route::post('/register', 'register')->name('register.post');
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'authenticate')->name('login.post');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
-// Authentication Routes
-Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Authenticated Routes
+// Authenticated routes
 Route::middleware('auth')->group(function () {
     Route::get('/lobby', [LobbyController::class, 'index'])->name('lobby.index');
     Route::get('/home', [AuthController::class, 'layouts'])->name('home');
 
-    // Resource Routes
+    // Resource routes
     Route::resources([
         'users' => UserController::class,
         'buyer' => BuyerController::class,
@@ -47,15 +39,20 @@ Route::middleware('auth')->group(function () {
         'orders' => OrderController::class,
     ]);
 
-    // Order-related Routes
-    Route::prefix('orders')->group(function () {
-        Route::patch('/buyer/{buyer}/restore', [BuyerController::class, 'restore'])->name('buyer.restore');
-        Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])->name('midtrans.callback')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-        Route::get('/orders/{id}/check-payment', [OrderController::class, 'checkPayment'])->name('orders.check-payment');
-        Route::get('{id}/pay', [OrderController::class, 'pay'])->name('orders.pay');
-        Route::post('/orders/{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('orders.cancel-payment');
-        Route::get('{id}/pay', [OrderController::class, 'pay'])->name('orders.pay');
-        Route::post('/orders/{id}/complete-payment', [OrderController::class, 'completePayment'])->name('orders.complete-payment');
+    // Buyer routes
+    Route::patch('/buyer/{buyer}/restore', [BuyerController::class, 'restore'])->name('buyer.restore');
+
+    // Order routes
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        Route::get('/{id}/check-payment', [OrderController::class, 'checkPayment'])->name('check-payment');
+        Route::get('/{id}/pay', [OrderController::class, 'pay'])->name('pay');
+        Route::post('/{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');
+        Route::post('/{id}/complete-payment', [OrderController::class, 'completePayment'])->name('complete-payment');
     });
 });
+
+// Midtrans callback (no CSRF)
+Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
+    ->name('midtrans.callback')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
