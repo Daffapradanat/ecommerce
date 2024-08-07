@@ -53,9 +53,13 @@
                                 <option value="upload" {{ old('image_type') == 'upload' ? 'selected' : '' }}>Upload New Image</option>
                                 <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>New Image URL</option>
                             </select>
-                            @error('image_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="mb-3" id="image_url" style="display: none;">
+                                <label for="image_url_input" class="form-label">Image URL</label>
+                                <input type="text" class="form-control @error('image_url') is-invalid @enderror" id="image_url_input" name="image_url" placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}">
+                                @error('image_url')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div class="mb-3" id="image_upload" style="display: none;">
                             <label for="image" class="form-label">Upload New Image</label>
