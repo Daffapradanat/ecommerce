@@ -290,7 +290,7 @@ class ShoppingController extends Controller
                     'product_description' => $product->description,
                     'product_price' => $product->price,
                     'quantity' => $item->quantity,
-                    'product_price' => $product->price * $item->quantity,
+                    'price' => $product->price * $item->quantity,
                 ]);
 
                 $product->decrement('stock', $item->quantity);
