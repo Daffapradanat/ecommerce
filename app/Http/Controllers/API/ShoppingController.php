@@ -142,6 +142,110 @@ class ShoppingController extends Controller
         return $orderId;
     }
 
+//     public function checkout(Request $request)
+// {
+//     $request->validate([
+//         'phone' => 'required|string|max:20',
+//         'city' => 'required|string|max:255',
+//         'address' => 'required|string',
+//         'postal_code' => 'required|string|max:10',
+//     ]);
+
+//     $buyer = auth()->user();
+//     $cartItems = Cart::where('buyer_id', $buyer->id)->with('product')->get();
+
+//     if ($cartItems->isEmpty()) {
+//         return response()->json(['message' => 'Cart is empty'], 400);
+//     }
+
+//     DB::beginTransaction();
+
+//     try {
+//         $totalPrice = $cartItems->sum(function ($item) {
+//             return $item->quantity * $item->product->price;
+//         });
+
+//         $order = Order::create([
+//             'order_id' => $this->generateUniqueOrderId(),
+//             'buyer_id' => $buyer->id,
+//             'total_price' => $totalPrice,
+//             'payment_status' => 'pending',
+//             'email' => $buyer->email,
+//             'phone' => $request->phone,
+//             'city' => $request->city,
+//             'address' => $request->address,
+//             'postal_code' => $request->postal_code,
+//         ]);
+
+//         $orderItems = $cartItems->map(function ($item) use ($order) {
+//             $product = $item->product;
+//             $orderItem = new OrderItem([
+//                 'order_id' => $order->id,
+//                 'product_id' => $product->id,
+//                 'product_name' => $product->name,
+//                 'product_description' => $product->description,
+//                 'product_price' => $product->price,
+//                 'quantity' => $item->quantity,
+//                 'price' => $product->price * $item->quantity,
+//             ]);
+
+//             $product->decrement('stock', $item->quantity);
+
+//             return $orderItem;
+//         });
+
+//         $order->orderItems()->saveMany($orderItems);
+
+//         $params = [
+//             'transaction_details' => [
+//                 'order_id' => $order->order_id,
+//                 'gross_amount' => $totalPrice,
+//             ],
+//             'item_details' => $orderItems->map(function ($item) {
+//                 return [
+//                     'id' => $item->product_id,
+//                     'price' => $item->product_price,
+//                     'quantity' => $item->quantity,
+//                     'name' => $item->product_name,
+//                 ];
+//             })->toArray(),
+//             'customer_details' => [
+//                 'first_name' => $buyer->name,
+//                 'email' => $buyer->email,
+//                 'phone' => $request->phone,
+//                 'billing_address' => [
+//                     'city' => $request->city,
+//                     'postal_code' => $request->postal_code,
+//                     'address' => $request->address,
+//                 ],
+//                 'shipping_address' => [
+//                     'city' => $request->city,
+//                     'postal_code' => $request->postal_code,
+//                     'address' => $request->address,
+//                 ],
+//             ],
+//         ];
+
+//         $snapToken = \Midtrans\Snap::getSnapToken($params);
+//         $order->update(['payment_token' => $snapToken]);
+
+//         Cart::where('buyer_id', $buyer->id)->delete();
+
+//         DB::commit();
+
+//         return response()->json([
+//             'message' => 'Order created successfully',
+//             'order' => $order->load('orderItems'),
+//             'payment_token' => $snapToken,
+//             'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken,
+//         ], 201);
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+
+//         return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
+//     }
+// }
+
     public function checkout(Request $request)
     {
         $request->validate([
@@ -179,7 +283,7 @@ class ShoppingController extends Controller
 
             $orderItems = $cartItems->map(function ($item) use ($order) {
                 $product = $item->product;
-                return new OrderItem([
+                $orderItem = new OrderItem([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'product_name' => $product->name,
@@ -189,7 +293,7 @@ class ShoppingController extends Controller
                     'price' => $product->price * $item->quantity,
                 ]);
 
-                $item->product->decrement('stock', $item->quantity);
+                $product->decrement('stock', $item->quantity);
 
                 return $orderItem;
             });
@@ -201,14 +305,14 @@ class ShoppingController extends Controller
                     'order_id' => $order->order_id,
                     'gross_amount' => $totalPrice,
                 ],
-                'item_details' => $orderItems->map(function ($item) {
+                'item_details' => $cartItems->map(function ($item) {
                     return [
-                        'id' => $item->product_id,
-                        'price' => $item->price,
+                        'id' => $item->product->id,
+                        'price' => $item->product->price,
                         'quantity' => $item->quantity,
                         'name' => $item->product->name,
                     ];
-                }),
+                })->toArray(),
                 'customer_details' => [
                     'first_name' => $buyer->name,
                     'email' => $buyer->email,
@@ -226,7 +330,7 @@ class ShoppingController extends Controller
                 ],
             ];
 
-            $snapToken = Snap::getSnapToken($params);
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
             $order->update(['payment_token' => $snapToken]);
 
             Cart::where('buyer_id', $buyer->id)->delete();
@@ -237,7 +341,7 @@ class ShoppingController extends Controller
                 'message' => 'Order created successfully',
                 'order' => $order->load('orderItems.product'),
                 'payment_token' => $snapToken,
-                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/'.$snapToken,
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
