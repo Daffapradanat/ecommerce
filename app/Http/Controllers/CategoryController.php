@@ -13,21 +13,27 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $categories = Category::withCount('products');
+            $search = $request->input('search.value');
 
-            return DataTables::of($categories)
+            $query = Category::withCount(['products' => function ($query) {
+                // Hanya menghitung produk yang tidak di-soft delete
+                $query->whereNull('deleted_at');
+            }]);
+
+            if ($search) {
+                $query->where(function($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                          ->orWhere('slug', 'like', "%{$search}%");
+                });
+            }
+
+            return DataTables::of($query)
                 ->addColumn('action', function ($category) {
                     $editBtn = '<a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn-sm me-2"><i class="fas fa-edit"></i></a>';
                     $deleteBtn = '<button type="button" class="btn btn-danger btn-sm me-0" data-id="' . $category->id . '"><i class="fas fa-trash"></i></button>';
                     return $editBtn . $deleteBtn;
                 })
                 ->rawColumns(['action'])
-                ->filterColumn('name', function($query, $keyword) {
-                    $query->where('name', 'like', "%{$keyword}%");
-                })
-                ->filterColumn('slug', function($query, $keyword) {
-                    $query->where('slug', 'like', "%{$keyword}%");
-                })
                 ->make(true);
         }
 
