@@ -41,7 +41,7 @@
                             <select class="form-select @error('image_type') is-invalid @enderror" id="image_type" name="image_type">
                                 <option value="">Select image type</option>
                                 <option value="upload" {{ old('image_type') == 'upload' ? 'selected' : '' }}>Upload Image</option>
-                                <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>Image URL</option>
+                                {{-- <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>Image URL</option> --}}
                             </select>
                             @error('image_type')
                                 <div class="invalid-feedback">{{ $message }}</div>

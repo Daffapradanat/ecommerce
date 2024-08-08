@@ -46,7 +46,7 @@
                                 <option value="keep" {{ old('image_type') == 'keep' ? 'selected' : '' }}>Select image type</option>
                                 {{-- <option value="">Select image type</option> --}}
                                 <option value="upload" {{ old('image_type') == 'upload' ? 'selected' : '' }}>Upload New Image</option>
-                                <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>New Image URL</option>
+                                {{-- <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>New Image URL</option> --}}
                                 <option value="keep" {{ old('image_type') == 'keep' ? 'selected' : '' }}>Keep Current Image</option>
                             </select>
                             @error('image_type')
