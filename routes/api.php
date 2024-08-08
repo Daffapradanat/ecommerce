@@ -1,44 +1,43 @@
 <?php
 
-use App\Http\Controllers\API\{
-    AuthController,
-    ProductController,
-    ShoppingController,
-    BuyerController
-};
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\ShoppingController;
+use App\Http\Controllers\API\BuyerController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Buyer routes
+
     Route::put('/buyer', [BuyerController::class, 'update']);
 
-    // Product routes
     Route::get('/products', [ProductController::class, 'index']);
 
-    // Shopping cart routes
-    Route::prefix('cart')->group(function () {
-        Route::post('/add', [ShoppingController::class, 'addToCart']);
-        Route::get('/', [ShoppingController::class, 'showCart']);
-        Route::post('/edit', [ShoppingController::class, 'editCart']);
-        Route::post('/remove', [ShoppingController::class, 'removeFromCart']);
-    });
+    Route::post('/cart/add', [ShoppingController::class, 'addToCart']);
+    Route::get('/cart', [ShoppingController::class, 'showCart']);
+    Route::post('/cart/edit', [ShoppingController::class, 'editCart']);
+    Route::post('/cart/remove', [ShoppingController::class, 'removeFromCart']);
 
-    // Checkout and order routes
     Route::post('/checkout', [ShoppingController::class, 'checkout']);
-    Route::prefix('orders')->group(function () {
-        Route::get('/', [ShoppingController::class, 'listOrders']);
-        Route::get('/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
-        Route::post('/cancel', [ShoppingController::class, 'cancelOrder']);
-    });
 
-    // Logout route
+    Route::get('/orders', [ShoppingController::class, 'listOrders']);
+    Route::get('/orders/{order}/payment-link', [ShoppingController::class, 'getPaymentLink']);
+    Route::post('/orders/cancel', [ShoppingController::class, 'cancelOrder']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-// Payment notification route (public)
 Route::post('payment-notification', [ShoppingController::class, 'handlePaymentNotification']);
