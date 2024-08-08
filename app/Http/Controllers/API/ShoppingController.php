@@ -305,12 +305,12 @@ class ShoppingController extends Controller
                     'order_id' => $order->order_id,
                     'gross_amount' => $totalPrice,
                 ],
-                'item_details' => $cartItems->map(function ($item) {
+                'item_details' => $orderItems->map(function ($item) {
                     return [
-                        'id' => $item->product->id,
-                        'price' => $item->product->price,
+                        'id' => $item->product_id,
+                        'price' => $item->product_price,
                         'quantity' => $item->quantity,
-                        'name' => $item->product->name,
+                        'name' => $item->product_name,
                     ];
                 })->toArray(),
                 'customer_details' => [
@@ -339,13 +339,12 @@ class ShoppingController extends Controller
 
             return response()->json([
                 'message' => 'Order created successfully',
-                'order' => $order->load('orderItems.product'),
+                'order' => $order->load('orderItems'),
                 'payment_token' => $snapToken,
                 'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
         }
     }
