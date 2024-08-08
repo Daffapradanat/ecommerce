@@ -40,7 +40,25 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'image_type' => 'required|in:upload,url',
             'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'required_if:image_type,url|url|active_url',
+            'image_url' => [
+                'required_if:image_type,url',
+                'url',
+                'active_url',
+                function ($attribute, $value, $fail) {
+                    $parsedUrl = parse_url($value);
+                    $path = $parsedUrl['path'] ?? '';
+                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+                    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                        $fail('The image URL must directly link to a jpg, jpeg, png, or gif file.');
+                    }
+
+                    $headers = get_headers($value, 1);
+                    if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') !== 0) {
+                        // $fail('The URL does not point to a valid image file.');
+                    }
+                },
+            ],
         ], [
             'image.required_if' => 'Please upload an image file.',
             'image_url.required_if' => 'Please provide a valid image URL.',
@@ -82,11 +100,29 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'image_type' => 'required|in:keep,upload,url',
             'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'required_if:image_type,url|url|active_url',
+            'image_url' => [
+                'required_if:image_type,url',
+                'url',
+                'active_url',
+                function ($attribute, $value, $fail) {
+                    $parsedUrl = parse_url($value);
+                    $path = $parsedUrl['path'] ?? '';
+                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+                    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                        $fail('The image URL must directly link to a jpg, jpeg, png, or gif file.');
+                    }
+
+                    $headers = get_headers($value, 1);
+                    if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') !== 0) {
+                        // $fail('The URL does not point to a valid image file.');
+                    }
+                },
+            ],
         ], [
-            'image.required_if' => 'Please upload an image file.',
             'image_url.required_if' => 'Please provide a valid image URL.',
-            'image_url.url' => 'The image URL must be a valid URL.',
+            'image_url.url' => 'The image URL format is invalid.',
+            'image_url.active_url' => 'The image URL is not accessible.',
             'image_url.active_url' => 'The image URL must be an active and accessible URL.',
         ]);
 

@@ -63,9 +63,12 @@
                         <div class="mb-3" id="image_url" style="display: none;">
                             <label for="image_url_input" class="form-label">Image URL</label>
                             <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url_input" name="image_url" placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}">
-                            @error('image_url')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @if($errors->has('image_url'))
+                                <div id="server-error-message" class="alert alert-danger mt-2">
+                                    {{ $errors->first('image_url') }}
+                                </div>
+                            @endif
+                            <small class="form-text text-muted">URL harus langsung mengarah ke file gambar (jpg, jpeg, png, atau gif).</small>
                         </div>
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancel</a>
@@ -81,19 +84,51 @@
 
 @push('scripts')
 <script>
-    document.getElementById('image_type').addEventListener('change', function() {
-        var uploadDiv = document.getElementById('image_upload');
-        var urlDiv = document.getElementById('image_url');
-        if (this.value === 'upload') {
-            uploadDiv.style.display = 'block';
-            urlDiv.style.display = 'none';
-        } else if (this.value === 'url') {
-            uploadDiv.style.display = 'none';
-            urlDiv.style.display = 'block';
-        } else {
-            uploadDiv.style.display = 'none';
-            urlDiv.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        var serverErrorMessage = document.getElementById('server-error-message');
+        if (serverErrorMessage) {
+            setTimeout(function() {
+                location.reload();
+            }, 2000);
         }
+
+        document.getElementById('image_type').addEventListener('change', function() {
+            var uploadDiv = document.getElementById('image_upload');
+            var urlDiv = document.getElementById('image_url');
+            if (this.value === 'upload') {
+                uploadDiv.style.display = 'block';
+                urlDiv.style.display = 'none';
+            } else if (this.value === 'url') {
+                uploadDiv.style.display = 'none';
+                urlDiv.style.display = 'block';
+            } else {
+                uploadDiv.style.display = 'none';
+                urlDiv.style.display = 'none';
+            }
+        });
+
+        document.getElementById('image_url_input').addEventListener('blur', function() {
+            var url = this.value;
+            var validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            var extension = url.split('.').pop().toLowerCase();
+
+            if (url && !validExtensions.includes(extension)) {
+                this.classList.add('is-invalid');
+                var feedbackElement = this.nextElementSibling;
+                if (!feedbackElement || !feedbackElement.classList.contains('invalid-feedback')) {
+                    feedbackElement = document.createElement('div');
+                    feedbackElement.classList.add('invalid-feedback');
+                    this.parentNode.insertBefore(feedbackElement, this.nextSibling);
+                }
+                feedbackElement.textContent = 'URL harus langsung mengarah ke file gambar (jpg, jpeg, png, atau gif).';
+            } else {
+                this.classList.remove('is-invalid');
+                var feedbackElement = this.nextElementSibling;
+                if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+                    feedbackElement.remove();
+                }
+            }
+        });
     });
 </script>
 @endpush
