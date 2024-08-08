@@ -182,7 +182,7 @@ class ProductController extends Controller
 
         session()->flash('notification', [
             'type' => 'success',
-            'message' => 'Product deleted successfully',
+            'message' => 'Product soft deleted successfully',
         ]);
 
         return redirect()->route('products.index');
