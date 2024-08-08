@@ -265,9 +265,30 @@ class ShoppingController extends Controller
         DB::beginTransaction();
 
         try {
-            $totalPrice = $cartItems->sum(function ($item) {
-                return $item->quantity * $item->product->price;
-            });
+            $totalPrice = 0;
+            $orderItems = [];
+
+            foreach ($cartItems as $cartItem) {
+                $product = Product::findOrFail($cartItem->product_id);
+
+                if ($product->stock < $cartItem->quantity) {
+                    throw new \Exception("Product '{$product->name}' doesn't have enough stock. Available: {$product->stock}, Requested: {$cartItem->quantity}");
+                }
+
+                $itemPrice = $product->price * $cartItem->quantity;
+                $totalPrice += $itemPrice;
+
+                $orderItems[] = new OrderItem([
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'product_description' => $product->description,
+                    'product_price' => $product->price,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $itemPrice,
+                ]);
+
+                $product->decrement('stock', $cartItem->quantity);
+            }
 
             $order = Order::create([
                 'order_id' => $this->generateUniqueOrderId(),
@@ -281,23 +302,6 @@ class ShoppingController extends Controller
                 'postal_code' => $request->postal_code,
             ]);
 
-            $orderItems = $cartItems->map(function ($item) use ($order) {
-                $product = $item->product;
-                $orderItem = new OrderItem([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'product_description' => $product->description,
-                    'product_price' => $product->price,
-                    'quantity' => $item->quantity,
-                    'price' => $product->price * $item->quantity,
-                ]);
-
-                $product->decrement('stock', $item->quantity);
-
-                return $orderItem;
-            });
-
             $order->orderItems()->saveMany($orderItems);
 
             $params = [
@@ -305,7 +309,7 @@ class ShoppingController extends Controller
                     'order_id' => $order->order_id,
                     'gross_amount' => $totalPrice,
                 ],
-                'item_details' => $orderItems->map(function ($item) {
+                'item_details' => collect($orderItems)->map(function ($item) {
                     return [
                         'id' => $item->product_id,
                         'price' => $item->product_price,

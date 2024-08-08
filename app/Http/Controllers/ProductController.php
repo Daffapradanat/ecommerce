@@ -69,9 +69,9 @@ class ProductController extends Controller
                             <a href="' . route('products.edit', $product->id) . '" class="btn btn-warning btn-sm me-2">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $product->id . '">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                                <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $product->id . '">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                         </div>
                     ';
                 })
@@ -173,11 +173,6 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        foreach ($product->image as $images) {
-            Storage::disk('public')->delete($images->path);
-            $images->delete();
-        }
-
         $product->delete();
 
         session()->flash('notification', [
@@ -187,5 +182,4 @@ class ProductController extends Controller
 
         return redirect()->route('products.index');
     }
-
 }
