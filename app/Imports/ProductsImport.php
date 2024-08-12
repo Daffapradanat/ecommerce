@@ -46,7 +46,6 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
                         ]);
                     }
                 } catch (\Exception $e) {
-                    // Handle the exception as needed
                 }
             }
         }

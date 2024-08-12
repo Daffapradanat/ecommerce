@@ -17,7 +17,7 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
 {
     public function collection()
     {
-        return Product::with('images')->get();
+        return Product::with('image')->get();
     }
 
     public function headings(): array
@@ -28,7 +28,7 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
             'price',
             'stock',
             'category_id',
-            'Image',
+            'image',
         ];
     }
 

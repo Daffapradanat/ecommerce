@@ -3,17 +3,22 @@
 namespace App\Exports;
 
 use App\Models\Buyer;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class BuyersExport implements FromQuery, WithHeadings, ShouldAutoSize
+class BuyersExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
-    public function query()
+    public function collection()
     {
-        return Buyer::query()
-            ->where('status', 'active')
-            ->select('id', 'name', 'email', 'status', 'created_at', 'updated_at', 'image');
+        return Buyer::where('status', 'active')
+            ->select('id', 'name', 'email', 'status', 'image')
+            ->get()
+            ->map(function ($buyer) {
+                $buyer->image = url('storage/buyers/'.basename($buyer->image));
+
+                return $buyer;
+            });
     }
 
     public function headings(): array
@@ -23,20 +28,8 @@ class BuyersExport implements FromQuery, WithHeadings, ShouldAutoSize
             'Name',
             'Email',
             'Status',
-            'Created At',
-            'Updated At',
-            'Image URL',
+            'Image',
         ];
-    }
-
-    public function collection()
-    {
-        return $this->query()
-            ->get()
-            ->map(function ($buyer) {
-                $buyer->image = url('storage/buyers/' . basename($buyer->image));
-                return $buyer;
-            });
     }
 }
 
