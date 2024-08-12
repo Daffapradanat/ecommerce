@@ -9,6 +9,8 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
 
 class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 {
@@ -41,22 +43,28 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 
     private function processImage($imagePath, $productId)
     {
+        $storageFolder = '/var/www/html/ecommerce/public/storage/product_images';
+
+        if (!File::isDirectory($storageFolder)) {
+            File::makeDirectory($storageFolder, 0755, true, true);
+        }
+
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
             $response = Http::get($imagePath);
             if ($response->successful()) {
-                $fileName = basename($imagePath);
-                $newPath = 'product_images/' . $productId . '_' . uniqid() . '_' . $fileName;
-                Storage::disk('public')->put($newPath, $response->body());
-                return $newPath;
+                $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
+                $newPath = $storageFolder . '\\' . $fileName;
+                File::put($newPath, $response->body());
+                return 'product_images/' . $fileName;
             }
         }
         elseif (file_exists($imagePath)) {
-            $fileName = basename($imagePath);
-            $newPath = 'product_images/' . $productId . '_' . uniqid() . '_' . $fileName;
-            Storage::disk('public')->put($newPath, file_get_contents($imagePath));
-            return $newPath;
+            $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
+            $newPath = $storageFolder . '\\' . $fileName;
+            File::copy($imagePath, $newPath);
+            return 'product_images/' . $fileName;
         }
-        elseif (Storage::disk('public')->exists('product_images/' . $imagePath)) {
+        elseif (File::exists($storageFolder . '\\' . $imagePath)) {
             return 'product_images/' . $imagePath;
         }
         return null;
