@@ -34,7 +34,7 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
 
     public function map($product): array
     {
-        $imageUrls = $product->images->pluck('path')->map(function($path) {
+        $imageUrls = $product->image->pluck('path')->map(function($path) {
             return asset('storage/' . $path);
         })->implode(', ');
 
