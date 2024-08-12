@@ -200,12 +200,19 @@ class ProductController extends Controller
         ]);
 
         try {
-            Excel::import(new ProductsImport, $request->file('file'));
+            if ($request->file('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('imports', $fileName, 'public');
 
-            return redirect()->route('products.index')->with('notification', [
-                'type' => 'success',
-                'message' => 'Products imported successfully',
-            ]);
+                Excel::import(new ProductsImport, storage_path('app/public/' . $filePath));
+                Storage::disk('public')->delete($filePath);
+
+                return redirect()->route('products.index')->with('notification', [
+                    'type' => 'success',
+                    'message' => 'Products imported successfully',
+                ]);
+            }
         } catch (\Exception $e) {
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'error',
@@ -221,7 +228,7 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        $templatePath = public_path('template/products_template.xlsx');
+        $templatePath = base_path('app/template/products_template.xlsx');
 
         if (! file_exists($templatePath)) {
             return response()->json(['error' => 'Template not found.'], 404);
@@ -238,12 +245,10 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $path = 'product_images/'.$name;
+            $fileName = time() . '_' . $image->getClientOriginalName();
+            $filePath = $image->storeAs('temp', $fileName, 'public');
 
-            Storage::disk('public')->put($path, file_get_contents($image));
-
-            return response()->json(['path' => $path]);
+            return response()->json(['path' => $filePath]);
         }
 
         return response()->json(['error' => 'No image uploaded'], 400);
