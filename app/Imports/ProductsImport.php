@@ -13,8 +13,6 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
-        Log::info('Importing product: ' . json_encode($row));
-
         $product = Product::create([
             'name' => $row['name'],
             'description' => $row['description'],
@@ -23,13 +21,10 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             'category_id' => $row['category_id'],
         ]);
 
-        Log::info('Product created: ' . $product->id);
-
         if (!empty($row['image'])) {
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-                Log::info('Processing image: ' . $imagePath);
 
                 try {
                     $fileName = basename($imagePath);
@@ -45,17 +40,13 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
                     if ($fileContent) {
                         Storage::disk('public')->put($storagePath, $fileContent);
 
-                        $image = Image::create([
+                        Image::create([
                             'product_id' => $product->id,
                             'path' => $storagePath,
                         ]);
-
-                        Log::info('Image saved: ' . $image->id);
-                    } else {
-                        Log::warning('Unable to get file content: ' . $imagePath);
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error processing image: ' . $e->getMessage());
+                    // Handle the exception as needed
                 }
             }
         }

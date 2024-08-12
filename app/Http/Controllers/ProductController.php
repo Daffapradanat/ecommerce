@@ -9,6 +9,7 @@ use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -126,23 +127,10 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with('images')->findOrFail($id);
-
-        $product->images->transform(function ($image) {
-            $image->url = Storage::url($image->path);
-
-            return $image;
-        });
+        $product = Product::with('image')->findOrFail($id);
 
         return view('products.show', compact('product'));
     }
-
-    // public function show($id)
-    // {
-    //     $product = Product::with('image')->findOrFail($id);
-
-    //     return view('products.show', compact('product'));
-    // }
 
     public function edit(Product $product)
     {
