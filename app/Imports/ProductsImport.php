@@ -4,7 +4,6 @@ namespace App\Imports;
 
 use App\Models\Product;
 use App\Models\Image;
-use App\Models\Cataogry;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -27,27 +26,15 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
+                $fileName = basename($imagePath);
+                $newPath = 'product_images/' . uniqid() . '_' . $fileName;
 
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Image::create([
-                        'product_id' => $product->id,
-                        'path' => $imagePath,
-                    ]);
-                } else {
-                    $imageContent = @file_get_contents($imagePath);
-                    if ($imageContent !== false) {
-                        $fileName = basename($imagePath);
-                        $newPath = 'product_images/' . uniqid() . '_' . $fileName;
-                        if (Storage::disk('public')->put($newPath, $imageContent)) {
-                            Image::create([
-                                'product_id' => $product->id,
-                                'path' => $newPath,
-                            ]);
-                        }
-                    } else {
-                        Log::error("Unable to read image file: " . $imagePath);
-                    }
-                }
+                Image::create([
+                    'product_id' => $product->id,
+                    'path' => $newPath,
+                ]);
+
+                Log::info("Image path saved for product {$product->id}: {$newPath}");
             }
         }
 
