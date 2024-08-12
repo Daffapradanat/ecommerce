@@ -16,7 +16,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
     public function model(array $row)
     {
         $product = Product::create([
-            'name' => $row['nama'],
+            'name' => $row['name'],
             'description' => $row['description'],
             'price' => $row['price'],
             'stock' => $row['stock'],
@@ -28,14 +28,12 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
 
-                // Cek apakah path sudah ada di storage
                 if (Storage::disk('public')->exists($imagePath)) {
                     Image::create([
                         'product_id' => $product->id,
                         'path' => $imagePath,
                     ]);
                 } else {
-                    // Jika tidak ada, coba download atau copy dari sumber
                     $imageContent = @file_get_contents($imagePath);
                     if ($imageContent !== false) {
                         $fileName = basename($imagePath);
@@ -59,7 +57,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'nama' => 'required',
+            'name' => 'required',
             'description' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
