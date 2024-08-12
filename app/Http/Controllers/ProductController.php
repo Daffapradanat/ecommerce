@@ -205,7 +205,22 @@ class ProductController extends Controller
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('imports', $fileName, 'public');
 
-                Excel::import(new ProductsImport, storage_path('app/public/' . $filePath));
+                $import = new ProductsImport;
+                $import->import(storage_path('app/public/' . $filePath));
+
+                $failures = $import->failures();
+
+                if ($failures->isNotEmpty()) {
+                    $errors = [];
+                    foreach ($failures as $failure) {
+                        $errors[] = "Row {$failure->row()}: {$failure->errors()[0]}";
+                    }
+                    return redirect()->route('products.index')->with('notification', [
+                        'type' => 'warning',
+                        'message' => 'Products imported with some issues: ' . implode(', ', $errors),
+                    ]);
+                }
+
                 Storage::disk('public')->delete($filePath);
 
                 return redirect()->route('products.index')->with('notification', [

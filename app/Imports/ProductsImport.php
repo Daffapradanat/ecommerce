@@ -26,10 +26,8 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-
-                $fileName = basename($imagePath);
-                $newPath = 'product_images/' . uniqid() . '_' . $fileName;
-                if (Storage::disk('public')->put($newPath, file_get_contents($imagePath))) {
+                $newPath = $this->processImage($imagePath, $product->id);
+                if ($newPath) {
                     Image::create([
                         'product_id' => $product->id,
                         'path' => $newPath,
@@ -39,6 +37,29 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
         }
 
         return $product;
+    }
+
+    private function processImage($imagePath, $productId)
+    {
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            $response = Http::get($imagePath);
+            if ($response->successful()) {
+                $fileName = basename($imagePath);
+                $newPath = 'product_images/' . $productId . '_' . uniqid() . '_' . $fileName;
+                Storage::disk('public')->put($newPath, $response->body());
+                return $newPath;
+            }
+        }
+        elseif (file_exists($imagePath)) {
+            $fileName = basename($imagePath);
+            $newPath = 'product_images/' . $productId . '_' . uniqid() . '_' . $fileName;
+            Storage::disk('public')->put($newPath, file_get_contents($imagePath));
+            return $newPath;
+        }
+        elseif (Storage::disk('public')->exists('product_images/' . $imagePath)) {
+            return 'product_images/' . $imagePath;
+        }
+        return null;
     }
 
     public function rules(): array
