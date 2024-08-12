@@ -15,7 +15,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
     public function model(array $row)
     {
         $product = Product::create([
-            'name' => $row['nama'],
+            'name' => $row['name'],
             'description' => $row['description'],
             'price' => $row['price'],
             'stock' => $row['stock'],
@@ -44,7 +44,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'nama' => 'required',
+            'name' => 'required',
             'description' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
