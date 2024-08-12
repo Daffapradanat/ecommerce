@@ -268,7 +268,7 @@ class ProductController extends Controller
             return response()->json(['error' => 'Template not found.'], 404);
         }
 
-        return response()->download($templatePath, 'products_template.xlsx');
+        return response()->download($templatePath, 'products_import_template.xlsx');
     }
 
     public function uploadImage(Request $request)
