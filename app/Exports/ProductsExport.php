@@ -21,11 +21,11 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
     public function headings(): array
     {
         return [
-            'Nama',
-            'Description',
-            'Price',
-            'Stock',
-            'Category ID',
+            'name',
+            'description',
+            'price',
+            'stock',
+            'category_id',
             'Image',
         ];
     }
