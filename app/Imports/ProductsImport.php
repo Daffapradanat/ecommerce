@@ -13,6 +13,8 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
+        Log::info('Importing product: ' . json_encode($row));
+
         $product = Product::create([
             'name' => $row['name'],
             'description' => $row['description'],
@@ -21,23 +23,39 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             'category_id' => $row['category_id'],
         ]);
 
+        Log::info('Product created: ' . $product->id);
+
         if (!empty($row['image'])) {
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-                $fileName = basename($imagePath);
+                Log::info('Processing image: ' . $imagePath);
 
-                if (file_exists($imagePath)) {
-                    $fileContent = file_get_contents($imagePath);
+                try {
+                    $fileName = basename($imagePath);
                     $storagePath = 'product_images/' . $fileName;
 
-                    Storage::disk('public')->put($storagePath, $fileContent);
-                    Image::create([
-                        'product_id' => $product->id,
-                        'path' => $storagePath,
-                    ]);
-                } else {
-                    \Log::warning("File not found: $imagePath for product: {$product->id}");
+                    $fileContent = null;
+                    if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+                        $fileContent = file_get_contents($imagePath);
+                    } elseif (file_exists($imagePath)) {
+                        $fileContent = file_get_contents($imagePath);
+                    }
+
+                    if ($fileContent) {
+                        Storage::disk('public')->put($storagePath, $fileContent);
+
+                        $image = Image::create([
+                            'product_id' => $product->id,
+                            'path' => $storagePath,
+                        ]);
+
+                        Log::info('Image saved: ' . $image->id);
+                    } else {
+                        Log::warning('Unable to get file content: ' . $imagePath);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error processing image: ' . $e->getMessage());
                 }
             }
         }
