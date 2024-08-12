@@ -236,21 +236,4 @@ class ProductController extends Controller
 
         return response()->download($templatePath, 'products_import_template.xlsx');
     }
-
-    public function uploadImage(Request $request)
-    {
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $fileName = time() . '_' . $image->getClientOriginalName();
-            $filePath = $image->storeAs('temp', $fileName, 'public');
-
-            return response()->json(['path' => $filePath]);
-        }
-
-        return response()->json(['error' => 'No image uploaded'], 400);
-    }
 }

@@ -65,7 +65,6 @@ Route::middleware('auth')->group(function () {
 
     // Product Routes
     Route::prefix('products')->name('products.')->group(function () {
-        Route::post('/products/upload-image', [ProductController::class, 'uploadImage'])->name('products.upload-image');
         Route::post('/import', [ProductController::class, 'import'])->name('import');
         Route::get('/export', [ProductController::class, 'export'])->name('export');
         Route::get('/download-template', [ProductController::class, 'downloadTemplate'])->name('download.template');
