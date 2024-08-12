@@ -195,45 +195,32 @@ class ProductController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
-        ]);
+        $request->validate(['file' => 'required|mimes:xlsx,xls']);
 
         try {
-            if ($request->file('file')) {
-                $file = $request->file('file');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('imports', $fileName, 'public');
+            $import = new ProductsImport;
+            Excel::import($import, $request->file('file'));
 
-                $import = new ProductsImport;
-                $import->import(storage_path('app/public/' . $filePath));
+            $failureCount = $import->failures()->count();
 
-                $failures = $import->failures();
-
-                if ($failures->isNotEmpty()) {
-                    $errors = [];
-                    foreach ($failures as $failure) {
-                        $errors[] = "Row {$failure->row()}: {$failure->errors()[0]}";
-                    }
-                    return redirect()->route('products.index')->with('notification', [
-                        'type' => 'warning',
-                        'message' => 'Products imported with some issues: ' . implode(', ', $errors),
-                    ]);
-                }
-
-                Storage::disk('public')->delete($filePath);
-
-                return redirect()->route('products.index')->with('notification', [
-                    'type' => 'success',
-                    'message' => 'Products imported successfully',
-                ]);
+            if ($failureCount > 0) {
+                $message = "Imported with $failureCount issues. Check the log for details.";
+                $type = 'warning';
+            } else {
+                $message = 'Products imported successfully';
+                $type = 'success';
             }
+
+            foreach ($import->failures() as $failure) {
+                \Log::warning("Import failure on row {$failure->row()}: " . implode(', ', $failure->errors()));
+            }
+
         } catch (\Exception $e) {
-            return redirect()->route('products.index')->with('notification', [
-                'type' => 'error',
-                'message' => 'Error importing products: '.$e->getMessage(),
-            ]);
+            $message = 'Error importing products: ' . $e->getMessage();
+            $type = 'error';
         }
+
+        return redirect()->route('products.index')->with('notification', compact('type', 'message'));
     }
 
     public function export()
