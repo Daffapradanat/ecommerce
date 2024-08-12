@@ -25,10 +25,10 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
+                $fileName = basename($imagePath);
 
                 if (file_exists($imagePath)) {
                     $fileContent = file_get_contents($imagePath);
-                    $fileName = uniqid() . '_' . basename($imagePath);
                     $storagePath = 'product_images/' . $fileName;
 
                     Storage::disk('public')->put($storagePath, $fileContent);
@@ -36,6 +36,8 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
                         'product_id' => $product->id,
                         'path' => $storagePath,
                     ]);
+                } else {
+                    \Log::warning("File not found: $imagePath for product: {$product->id}");
                 }
             }
         }
