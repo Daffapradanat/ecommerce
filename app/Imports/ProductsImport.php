@@ -26,11 +26,12 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
 
-                $fileName = uniqid() . '_' . basename($imagePath);
-                $storagePath = 'product_images/' . $fileName;
-
                 if (file_exists($imagePath)) {
-                    Storage::disk('public')->put($storagePath, file_get_contents($imagePath));
+                    $fileContent = file_get_contents($imagePath);
+                    $fileName = uniqid() . '_' . basename($imagePath);
+                    $storagePath = 'product_images/' . $fileName;
+
+                    Storage::disk('public')->put($storagePath, $fileContent);
                     Image::create([
                         'product_id' => $product->id,
                         'path' => $storagePath,

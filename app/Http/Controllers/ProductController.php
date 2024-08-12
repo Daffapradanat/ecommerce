@@ -219,47 +219,6 @@ class ProductController extends Controller
         return Excel::download(new ProductsExport, 'products.xlsx');
     }
 
-    // public function downloadTemplate()
-    // {
-    //     $templatePath = public_path('template/products_template.xlsx');
-
-    //     if (!file_exists($templatePath)) {
-    //         return response()->json(['error' => 'Template not found.'], 404);
-    //     }
-
-    //     return response()->download($templatePath);
-    // }
-
-    // public function downloadTemplate()
-    // {
-    //     $headers = [
-    //         'name',
-    //         'description',
-    //         'price',
-    //         'stock',
-    //         'category_id',
-    //         'image_paths'
-    //     ];
-
-    //     $data = [
-    //         $headers,
-    //         [
-    //             'Product A',
-    //             'Description for A',
-    //             10000,
-    //             50,
-    //             1,
-    //             'product_images/productA_1.jpg,product_images/productA_2.jpg'
-    //         ],
-    //     ];
-
-    //     return Excel::download(function($excel) use ($data) {
-    //         $excel->sheet('Products', function($sheet) use ($data) {
-    //             $sheet->fromArray($data, null, 'A1', false, false);
-    //         });
-    //     }, 'template/products_template.xlsx');
-    // }
-
     public function downloadTemplate()
     {
         $templatePath = public_path('template/products_template.xlsx');
