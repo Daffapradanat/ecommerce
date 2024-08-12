@@ -8,7 +8,6 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
 class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 {
@@ -26,27 +25,16 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-                $fileName = basename($imagePath);
-                $newPath = uniqid() . '_' . $fileName;
 
-                // Coba untuk menyalin file jika ada
+                $fileName = uniqid() . '_' . basename($imagePath);
+                $storagePath = 'product_images/' . $fileName;
+
                 if (file_exists($imagePath)) {
-                    if (Storage::disk('public')->put($newPath, file_get_contents($imagePath))) {
-                        Image::create([
-                            'product_id' => $product->id,
-                            'path' => $newPath,
-                        ]);
-                        Log::info("Image successfully copied for product {$product->id}: {$newPath}");
-                    } else {
-                        Log::error("Failed to copy image for product {$product->id}: {$imagePath}");
-                    }
-                } else {
-                    // Jika file tidak ada, simpan path sebagai placeholder
+                    Storage::disk('public')->put($storagePath, file_get_contents($imagePath));
                     Image::create([
                         'product_id' => $product->id,
-                        'path' => $newPath,
+                        'path' => $storagePath,
                     ]);
-                    Log::warning("Image file not found for product {$product->id}. Placeholder path saved: {$newPath}");
                 }
             }
         }
