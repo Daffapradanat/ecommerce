@@ -21,16 +21,12 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
     public function headings(): array
     {
         return [
-            'ID',
-            'Name',
+            'Nama',
             'Description',
             'Price',
             'Stock',
             'Category ID',
-            // 'Created At',
-            // 'Updated At',
-            // 'Deleted At',
-            'Images',
+            'Image',
         ];
     }
 
@@ -41,24 +37,20 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
         })->implode(', ');
 
         return [
-            $product->id,
             $product->name,
             $product->description,
             $product->price,
             $product->stock,
             $product->category_id,
-            // $product->created_at,
-            // $product->updated_at,
-            // $product->deleted_at,
-            $imageUrls ?: 'No Image',
+            $imageUrls ?: '',
         ];
     }
 
     public function bindValue(Cell $cell, $value)
     {
-        if (strpos($cell->getColumn(), 'J') === 0 && $value !== 'No Image') {
+        if (strpos($cell->getColumn(), 'F') === 0 && $value !== '') {
             $urls = explode(', ', $value);
-            $cell->setValueExplicit(implode("\n", $urls), DataType::TYPE_STRING);
+            $cell->setValueExplicit(implode(", ", $urls), DataType::TYPE_STRING);
             return true;
         }
 

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -27,7 +28,7 @@ class OrdersExport implements FromQuery, WithHeadings, WithMapping
     public function map($order): array
     {
         $items = $order->orderItems->map(function ($item) {
-            return "{$item->product->name} ({$item->quantity})";
+            return "{$item->product_name} ({$item->quantity})";
         })->implode(', ');
 
         return [
