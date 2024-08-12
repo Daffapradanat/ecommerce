@@ -29,22 +29,17 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
                 try {
                     $fileName = basename($imagePath);
                     $storagePath = 'product_images/' . $fileName;
-
-                    $fileContent = null;
                     if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
                         $fileContent = file_get_contents($imagePath);
-                    } elseif (file_exists($imagePath)) {
-                        $fileContent = file_get_contents($imagePath);
-                    }
-
-                    if ($fileContent) {
                         Storage::disk('public')->put($storagePath, $fileContent);
-
-                        Image::create([
-                            'product_id' => $product->id,
-                            'path' => $storagePath,
-                        ]);
                     }
+                    else {
+                        continue;
+                    }
+                    Image::create([
+                        'product_id' => $product->id,
+                        'path' => $storagePath,
+                    ]);
                 } catch (\Exception $e) {
                 }
             }

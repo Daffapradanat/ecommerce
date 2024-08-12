@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -22,11 +23,18 @@ class ContentSecurityPolicy
 
         if (!$response instanceof BinaryFileResponse && !$response instanceof StreamedResponse) {
             if (method_exists($response, 'header')) {
-                $response->header('Content-Security-Policy', $cspHeader);
+                $currentHeader = $response->headers->get('Content-Security-Policy');
+                if ($currentHeader !== $cspHeader) {
+                    $response->header('Content-Security-Policy', $cspHeader);
+                    Log::info('CSP Middleware applied: ' . $cspHeader);
+                }
             } elseif (method_exists($response, 'headers')) {
-                $response->headers->set('Content-Security-Policy', $cspHeader);
+                $currentHeader = $response->headers->get('Content-Security-Policy');
+                if ($currentHeader !== $cspHeader) {
+                    $response->headers->set('Content-Security-Policy', $cspHeader);
+                    Log::info('CSP Middleware applied: ' . $cspHeader);
+                }
             }
-            Log::info('CSP Middleware applied: ' . $cspHeader);
         } else {
             Log::info('CSP Middleware skipped for file download or stream');
         }
