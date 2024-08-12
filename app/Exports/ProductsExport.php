@@ -2,7 +2,9 @@
 
 namespace App\Exports;
 
+
 use App\Models\Product;
+use App\Models\Image;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -15,25 +17,25 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
 {
     public function collection()
     {
-        return Product::with('image')->get();
+        return Product::with('images')->get();
     }
 
     public function headings(): array
     {
         return [
-            'name',
-            'description',
-            'price',
-            'stock',
-            'category_id',
+            'Nama',
+            'Description',
+            'Price',
+            'Stock',
+            'Category ID',
             'Image',
         ];
     }
 
     public function map($product): array
     {
-        $imageUrls = $product->image->map(function($image) {
-            return asset('storage/' . $image->path);
+        $imageUrls = $product->images->pluck('path')->map(function($path) {
+            return asset('storage/' . $path);
         })->implode(', ');
 
         return [
@@ -42,15 +44,14 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
             $product->price,
             $product->stock,
             $product->category_id,
-            $imageUrls ?: '',
+            $imageUrls,
         ];
     }
 
     public function bindValue(Cell $cell, $value)
     {
         if (strpos($cell->getColumn(), 'F') === 0 && $value !== '') {
-            $urls = explode(', ', $value);
-            $cell->setValueExplicit(implode(", ", $urls), DataType::TYPE_STRING);
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
             return true;
         }
 
