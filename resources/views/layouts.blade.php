@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> --}}
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -181,20 +182,9 @@
         </div>
 
         <footer class="main-footer">
-            <strong>Copyright &copy; 2023 E-commerce.</strong> All rights reserved.
+            {{-- <strong>Copyright &copy; 2023 E-commerce.</strong> All rights reserved. --}}
         </footer>
     </div>
-
-    {{-- @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show alert-bottom-right" role="alert">
-            @foreach ($errors->all() as $error)
-                {{ $error }}<br>
-            @endforeach
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif --}}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>

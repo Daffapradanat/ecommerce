@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 
 class ClearAllCaches extends Command
 {
@@ -32,6 +33,8 @@ class ClearAllCaches extends Command
         $this->call('config:clear');
         $this->call('event:clear');
         $this->call('optimize:clear');
+        $this->call('clear-compiled');
+        $this->call('view:clear');
 
         $queueDriver = Config::get('queue.default');
         if ($queueDriver !== 'sync') {
@@ -44,7 +47,26 @@ class ClearAllCaches extends Command
         $this->call('route:clear');
         $this->call('route:list');
         $this->call('telescope:clear');
-        $this->call('view:clear');
+
+        $this->info('Clearing application logs...');
+        $logFiles = File::files(storage_path('logs'));
+
+        foreach ($logFiles as $file) {
+            if (File::isFile($file)) {
+                File::delete($file);
+            }
+        }
+
+        $this->info('Application logs cleared.');
+
+        $this->info('Running composer dump-autoload...');
+        exec('composer dump-autoload', $output, $returnVar);
+
+        if ($returnVar === 0) {
+            $this->info('Composer dump-autoload completed successfully.');
+        } else {
+            $this->error('Composer dump-autoload failed.');
+        }
 
         $this->info('All caches and optimizations have been cleared and listed.');
 

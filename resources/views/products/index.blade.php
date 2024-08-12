@@ -4,10 +4,20 @@
 <div class="container-fluid px-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h1 class="mt-4 mb-3 mb-md-0">Product Management</h1>
-        <a href="{{ route('products.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add New Product
-        </a>
+        <div>
+            <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+            <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+            <a href="{{ route('products.export') }}" class="btn btn-info">
+                <i class="fas fa-file-export"></i> Export
+            </a>
+        </div>
     </div>
+</div>
+
 
     @if(session('notification'))
     <div class="alert alert-{{ session('notification')['type'] }} alert-dismissible fade show" role="alert">
@@ -60,6 +70,32 @@
                     <button type="submit" class="btn btn-danger">Delete Product</button>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Products</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Choose Excel File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+                    </div>
+                    <p>Download the <a href="{{ route('products.download.template') }}">import template</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

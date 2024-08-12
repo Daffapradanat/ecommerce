@@ -6,6 +6,9 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\CategoriesImport;
+use App\Exports\CategoriesExport;
 
 class CategoryController extends Controller
 {
@@ -16,7 +19,6 @@ class CategoryController extends Controller
             $search = $request->input('search.value');
 
             $query = Category::withCount(['products' => function ($query) {
-                // Hanya menghitung produk yang tidak di-soft delete
                 $query->whereNull('deleted_at');
             }]);
 
@@ -43,6 +45,11 @@ class CategoryController extends Controller
     public function create()
     {
         return view('categories.create');
+    }
+
+    public function show(Category $category)
+    {
+        return view('categories.show', compact('category'));
     }
 
     public function store(Request $request)
@@ -105,4 +112,30 @@ class CategoryController extends Controller
 
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            Excel::import(new CategoriesImport, $request->file('file'));
+            return redirect()->route('categories.index')->with('success', 'Categories imported successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('categories.index')->with('error', 'Error importing categories: ' . $e->getMessage());
+        }
+    }
+
+    public function export()
+    {
+        return Excel::download(new CategoriesExport, 'categories.xlsx');
+    }
+
+    public function downloadTemplate()
+    {
+        $templatePath = base_path('app/template/categories_template.xlsx');
+        return response()->download($templatePath);
+    }
+
 }

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use App\Exports\BuyersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BuyerController extends Controller
 {
@@ -59,9 +61,7 @@ class BuyerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers',
             'password' => 'required|string|min:8|confirmed',
-            'image_type' => 'required|in:upload,url',
-            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'required_if:image_type,url|url',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $buyer = new Buyer();
@@ -69,11 +69,9 @@ class BuyerController extends Controller
         $buyer->email = $request->email;
         $buyer->password = Hash::make($request->password);
 
-        if ($request->image_type === 'upload' && $request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
-        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
-            $buyer->image = $request->image_url;
         }
 
         $buyer->save();
@@ -103,16 +101,11 @@ class BuyerController extends Controller
         $buyer->email = $request->email;
 
         if ($request->hasFile('image')) {
-            if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
+            if ($buyer->image) {
                 Storage::disk('public')->delete('buyers/'.$buyer->image);
             }
             $imagePath = $request->file('image')->store('buyers', 'public');
             $buyer->image = basename($imagePath);
-        } elseif ($request->filled('image_url')) {
-            if ($buyer->image && !filter_var($buyer->image, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete('buyers/'.$buyer->image);
-            }
-            $buyer->image = $request->image_url;
         }
 
         $buyer->save();
@@ -143,5 +136,10 @@ class BuyerController extends Controller
         } else {
             return redirect()->route('buyer.index')->with('error', 'Buyer is already deleted.');
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(new BuyersExport, 'buyers.xlsx');
     }
 }

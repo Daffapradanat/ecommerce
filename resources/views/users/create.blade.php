@@ -43,34 +43,21 @@
                             <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                         </div>
                         <div class="mb-3">
-                            <label for="image_type" class="form-label">Profile Image Type</label>
-                            <select class="form-select @error('image_type') is-invalid @enderror" id="image_type" name="image_type">
-                                <option value="">Select image type</option>
-                                <option value="upload" {{ old('image_type') == 'upload' ? 'selected' : '' }}>Upload Image</option>
-                                <option value="url" {{ old('image_type') == 'url' ? 'selected' : '' }}>Image URL</option>
-                            </select>
-                            @error('image_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="mb-3" id="image_upload" style="display: none;">
-                            <label for="image" class="form-label">Upload Image</label>
-                            <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
+                            <label class="form-label">Profile Image</label>
+                            <div id="drop-area" class="border rounded p-4 text-center position-relative"
+                                style="background-color: #f8f9fa; border: 2px dashed #ced4da; transition: all 0.3s ease;">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #6c757d;"></i>
+                                <p class="mb-2">Drag and drop an image here, or click to select a file</p>
+                                <small class="text-muted">Supports: JPG, JPEG, PNG, GIF up to 2MB</small>
+                                <input type="file" id="fileElem" name="image" accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
+                                <div id="preview-container" class="mt-3 d-flex justify-content-center align-items-center"></div>
+                            </div>
                             @error('image')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="mb-3" id="image_url" style="display: none;">
-                            <label for="image_url_input" class="form-label">Image URL</label>
-                            <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url_input" name="image_url" placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}">
-                            @if($errors->has('image_url'))
-                                <div id="server-error-message" class="alert alert-danger mt-2">
-                                    {{ $errors->first('image_url') }}
-                                </div>
-                            @endif
-                            <small class="form-text text-muted">URL harus langsung mengarah ke file gambar (jpg, jpeg, png, atau gif).</small>
-                        </div>
-                        <div class="d-flex justify-content-between">
+
+                        <div class="d-flex justify-content-between mt-3">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancel</a>
                             <button type="submit" class="btn btn-success">Create User</button>
                         </div>
@@ -84,51 +71,91 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var serverErrorMessage = document.getElementById('server-error-message');
-        if (serverErrorMessage) {
-            setTimeout(function() {
-                location.reload();
-            }, 2000);
-        }
+    let dropArea = document.getElementById('drop-area');
+    let fileElem = document.getElementById('fileElem');
+    let previewContainer = document.getElementById('preview-container');
 
-        document.getElementById('image_type').addEventListener('change', function() {
-            var uploadDiv = document.getElementById('image_upload');
-            var urlDiv = document.getElementById('image_url');
-            if (this.value === 'upload') {
-                uploadDiv.style.display = 'block';
-                urlDiv.style.display = 'none';
-            } else if (this.value === 'url') {
-                uploadDiv.style.display = 'none';
-                urlDiv.style.display = 'block';
-            } else {
-                uploadDiv.style.display = 'none';
-                urlDiv.style.display = 'none';
-            }
-        });
-
-        document.getElementById('image_url_input').addEventListener('blur', function() {
-            var url = this.value;
-            var validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-            var extension = url.split('.').pop().toLowerCase();
-
-            if (url && !validExtensions.includes(extension)) {
-                this.classList.add('is-invalid');
-                var feedbackElement = this.nextElementSibling;
-                if (!feedbackElement || !feedbackElement.classList.contains('invalid-feedback')) {
-                    feedbackElement = document.createElement('div');
-                    feedbackElement.classList.add('invalid-feedback');
-                    this.parentNode.insertBefore(feedbackElement, this.nextSibling);
-                }
-                feedbackElement.textContent = 'URL harus langsung mengarah ke file gambar (jpg, jpeg, png, atau gif).';
-            } else {
-                this.classList.remove('is-invalid');
-                var feedbackElement = this.nextElementSibling;
-                if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
-                    feedbackElement.remove();
-                }
-            }
-        });
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
     });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.style.backgroundColor = '#e9ecef';
+        dropArea.style.borderColor = '#6c757d';
+    }
+
+    function unhighlight(e) {
+        dropArea.style.backgroundColor = '#f8f9fa';
+        dropArea.style.borderColor = '#ced4da';
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFiles(files);
+    }
+
+    dropArea.addEventListener('click', () => fileElem.click());
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            let file = files[0];
+            if (file.type.startsWith('image/')) {
+                if (file.size <= 2 * 1024 * 1024) { // 2MB limit
+                    previewFile(file);
+                    fileElem.files = files; // Update the file input
+                } else {
+                    alert('File size exceeds 2MB limit');
+                }
+            } else {
+                alert('Please upload an image file');
+            }
+        }
+    }
+
+    function previewFile(file) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function() {
+            let img = document.createElement('img');
+            img.src = reader.result;
+            img.className = 'img-thumbnail mt-2';
+            img.style.maxWidth = '200px';
+            img.style.maxHeight = '200px';
+            previewContainer.innerHTML = '';
+            previewContainer.appendChild(img);
+
+            // Add file name
+            let fileName = document.createElement('p');
+            fileName.textContent = file.name;
+            fileName.className = 'mt-2 mb-0';
+            previewContainer.appendChild(fileName);
+
+            // Add remove button
+            let removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.className = 'btn btn-sm btn-danger mt-2';
+            removeBtn.onclick = function() {
+                previewContainer.innerHTML = '';
+                fileElem.value = ''; // Clear the file input
+            };
+            previewContainer.appendChild(removeBtn);
+        }
+    }
 </script>
 @endpush

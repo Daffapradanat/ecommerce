@@ -2,12 +2,20 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Administrator Management</h1>
-        <a href="{{ route('users.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-user-plus fa-sm text-white-50"></i> Add New Administrator
-        </a>
+    <div class="container-fluid px-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+            <h1 class="mt-4 mb-3 mb-md-0">Administrator Management</h1>
+            <div>
+                <a href="{{ route('users.create') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-user-plus"></i> Add New Administrator
+                </a>
+                <a href="{{ route('users.export') }}" class="btn btn-info">
+                    <i class="fas fa-file-export"></i> Export Users
+                </a>
+            </div>
+        </div>
     </div>
+
 
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">

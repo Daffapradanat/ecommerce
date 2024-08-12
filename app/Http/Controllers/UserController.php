@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
+use App\Imports\UsersImport;
 
 class UserController extends Controller
 {
@@ -38,32 +41,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'image_type' => 'required|in:upload,url',
-            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => [
-                'required_if:image_type,url',
-                'url',
-                'active_url',
-                function ($attribute, $value, $fail) {
-                    $parsedUrl = parse_url($value);
-                    $path = $parsedUrl['path'] ?? '';
-                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-
-                    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        $fail('The image URL must directly link to a jpg, jpeg, png, or gif file.');
-                    }
-
-                    $headers = get_headers($value, 1);
-                    if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') !== 0) {
-                        // $fail('The URL does not point to a valid image file.');
-                    }
-                },
-            ],
-        ], [
-            'image.required_if' => 'Please upload an image file.',
-            'image_url.required_if' => 'Please provide a valid image URL.',
-            'image_url.url' => 'The image URL must be a valid URL.',
-            'image_url.active_url' => 'The image URL must be an active and accessible URL.',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = new User();
@@ -71,11 +49,9 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
 
-        if ($request->image_type === 'upload' && $request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
-        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
-            $user->image = $request->image_url;
         }
 
         $user->save();
@@ -98,48 +74,19 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'image_type' => 'required|in:keep,upload,url',
-            'image' => 'required_if:image_type,upload|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => [
-                'required_if:image_type,url',
-                'url',
-                'active_url',
-                function ($attribute, $value, $fail) {
-                    $parsedUrl = parse_url($value);
-                    $path = $parsedUrl['path'] ?? '';
-                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-
-                    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        $fail('The image URL must directly link to a jpg, jpeg, png, or gif file.');
-                    }
-
-                    $headers = get_headers($value, 1);
-                    if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') !== 0) {
-                        // $fail('The URL does not point to a valid image file.');
-                    }
-                },
-            ],
-        ], [
-            'image_url.required_if' => 'Please provide a valid image URL.',
-            'image_url.url' => 'The image URL format is invalid.',
-            'image_url.active_url' => 'The image URL is not accessible.',
-            'image_url.active_url' => 'The image URL must be an active and accessible URL.',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
 
-        if ($request->image_type === 'upload' && $request->hasFile('image')) {
-            if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
+        if ($request->hasFile('image')) {
+            if ($user->image) {
                 Storage::disk('public')->delete('users/'.$user->image);
             }
+
             $imagePath = $request->file('image')->store('users', 'public');
             $user->image = basename($imagePath);
-        } elseif ($request->image_type === 'url' && $request->filled('image_url')) {
-            if ($user->image && !filter_var($user->image, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete('users/'.$user->image);
-            }
-            $user->image = $request->image_url;
         }
 
         $user->save();
@@ -156,5 +103,15 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new UsersExport, 'users.xlsx');
+    }
+
+    public function exportTemplate()
+    {
+        return Excel::download(new UsersExport(true), 'users_template.xlsx');
     }
 }

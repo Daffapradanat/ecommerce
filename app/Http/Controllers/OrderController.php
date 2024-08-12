@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\OrderService;
 use App\Services\MidtransService;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\OrdersExport;
 
 class OrderController extends Controller
 {
@@ -221,5 +223,27 @@ class OrderController extends Controller
 
         return response('OK', 200);
     }
+
+    public function export()
+    {
+        return Excel::download(new OrdersExport, 'orders.xlsx');
+    }
+
+    // public function import(Request $request)
+    // {
+    //     $request->validate([
+    //         'file' => 'required|mimes:xlsx,xls',
+    //     ]);
+
+    //     Excel::import(new OrdersImport, $request->file('file'));
+
+    //     return redirect()->route('orders.index')->with('success', 'Orders imported successfully.');
+    // }
+
+    // public function downloadTemplate()
+    // {
+    //     $filePath = public_path('templates/orders_import_template.xlsx');
+    //     return response()->download($filePath, 'orders_import_template.xlsx');
+    // }
 
 }

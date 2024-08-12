@@ -2,7 +2,15 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4 mb-4">Order Management</h1>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <h1 class="mt-4 mb-3 mb-md-0">Order Management</h1>
+        <div>
+            <a href="{{ route('orders.export') }}" class="btn btn-info">
+                <i class="fas fa-file-export"></i> Export Orders
+            </a>
+        </div>
+    </div>
+</div>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -42,7 +50,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('styles')

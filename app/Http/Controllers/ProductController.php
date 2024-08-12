@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\UpdateProductRequest;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
@@ -38,21 +41,21 @@ class ProductController extends Controller
             return DataTables::of($query)
                 ->addColumn('image', function ($product) {
                     if ($product->image->isNotEmpty()) {
-                        return '<img src="' . asset('storage/' . $product->image->first()->path) . '" alt="' . $product->name . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
+                        return '<img src="'.asset('storage/'.$product->image->first()->path).'" alt="'.$product->name.'" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
                     } else {
                         return '<div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;"><i class="fas fa-image"></i></div>';
                     }
                 })
                 ->addColumn('price', function ($product) {
-                    return 'Rp ' . number_format($product->price, 0, ',', '.');
+                    return 'Rp '.number_format($product->price, 0, ',', '.');
                 })
                 ->addColumn('stock', function ($product) {
                     if ($product->stock > 50) {
-                        return '<span class="badge bg-success">' . $product->stock . '</span>';
+                        return '<span class="badge bg-success">'.$product->stock.'</span>';
                     } elseif ($product->stock > 10) {
-                        return '<span class="badge bg-warning">' . $product->stock . '</span>';
+                        return '<span class="badge bg-warning">'.$product->stock.'</span>';
                     } elseif ($product->stock > 0) {
-                        return '<span class="badge bg-danger">' . $product->stock . '</span>';
+                        return '<span class="badge bg-danger">'.$product->stock.'</span>';
                     } else {
                         return '<span class="badge bg-secondary">Out of Stock</span>';
                     }
@@ -63,13 +66,13 @@ class ProductController extends Controller
                 ->addColumn('action', function ($product) {
                     return '
                         <div class="btn-group" role="group">
-                            <a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-2">
+                            <a href="'.route('products.show', $product->id).'" class="btn btn-info btn-sm me-2">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="' . route('products.edit', $product->id) . '" class="btn btn-warning btn-sm me-2">
+                            <a href="'.route('products.edit', $product->id).'" class="btn btn-warning btn-sm me-2">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $product->id . '">
+                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$product->id.'">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -85,12 +88,14 @@ class ProductController extends Controller
         }
 
         $categories = Category::all();
+
         return view('products.index', compact('categories'));
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return view('products.create', compact('categories'));
     }
 
@@ -123,13 +128,14 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with('image')->findOrFail($id);
+
         return view('products.show', compact('product'));
     }
-
 
     public function edit(Product $product)
     {
         $categories = Category::all();
+
         return view('products.edit', compact('product', 'categories'));
     }
 
@@ -143,7 +149,7 @@ class ProductController extends Controller
             'category_id' => 'sometimes|required|exists:categories,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_images' => 'array',
-            'remove_images.*' => 'exists:images,id'
+            'remove_images.*' => 'exists:images,id',
         ]);
 
         $product->update($validatedData);
@@ -171,18 +177,6 @@ class ProductController extends Controller
         ]);
     }
 
-    // public function destroy(Product $product)
-    // {
-    //     $product->delete();
-
-    //     session()->flash('notification', [
-    //         'type' => 'success',
-    //         'message' => 'Product soft deleted successfully',
-    //     ]);
-
-    //     return redirect()->route('products.index');
-    // }
-
     public function destroy(Product $product)
     {
         foreach ($product->image as $image) {
@@ -197,5 +191,102 @@ class ProductController extends Controller
         ]);
 
         return redirect()->route('products.index');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('file'));
+
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'success',
+                'message' => 'Products imported successfully',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'error',
+                'message' => 'Error importing products: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductsExport, 'products.xlsx');
+    }
+
+    // public function downloadTemplate()
+    // {
+    //     $templatePath = public_path('template/products_template.xlsx');
+
+    //     if (!file_exists($templatePath)) {
+    //         return response()->json(['error' => 'Template not found.'], 404);
+    //     }
+
+    //     return response()->download($templatePath);
+    // }
+
+    // public function downloadTemplate()
+    // {
+    //     $headers = [
+    //         'name',
+    //         'description',
+    //         'price',
+    //         'stock',
+    //         'category_id',
+    //         'image_paths'
+    //     ];
+
+    //     $data = [
+    //         $headers,
+    //         [
+    //             'Product A',
+    //             'Description for A',
+    //             10000,
+    //             50,
+    //             1,
+    //             'product_images/productA_1.jpg,product_images/productA_2.jpg'
+    //         ],
+    //     ];
+
+    //     return Excel::download(function($excel) use ($data) {
+    //         $excel->sheet('Products', function($sheet) use ($data) {
+    //             $sheet->fromArray($data, null, 'A1', false, false);
+    //         });
+    //     }, 'template/products_template.xlsx');
+    // }
+
+    public function downloadTemplate()
+    {
+        $templatePath = public_path('template/products_template.xlsx');
+
+        if (! file_exists($templatePath)) {
+            return response()->json(['error' => 'Template not found.'], 404);
+        }
+
+        return response()->download($templatePath, 'products_template.xlsx');
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $path = 'product_images/'.$name;
+
+            Storage::disk('public')->put($path, file_get_contents($image));
+
+            return response()->json(['path' => $path]);
+        }
+
+        return response()->json(['error' => 'No image uploaded'], 400);
     }
 }

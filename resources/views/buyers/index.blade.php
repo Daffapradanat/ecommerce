@@ -8,16 +8,22 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <h1 class="display-4">Buyer List</h1>
-        </div>
-        <div class="col-md-6 text-md-end">
-            <a href="{{ route('buyer.create') }}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Add New Buyer
-            </a>
+    <div class="container-fluid py-4">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4">Buyer List</h1>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="{{ route('buyer.create') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-user-plus"></i> Add New Buyer
+                </a>
+                <a href="{{ route('buyer.export') }}" class="btn btn-info">
+                    <i class="fas fa-file-export"></i> Export Buyers
+                </a>
+            </div>
         </div>
     </div>
+
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
