@@ -27,14 +27,27 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
                 $fileName = basename($imagePath);
-                $newPath = 'product_images/' . uniqid() . '_' . $fileName;
+                $newPath = uniqid() . '_' . $fileName;
 
-                Image::create([
-                    'product_id' => $product->id,
-                    'path' => $newPath,
-                ]);
-
-                Log::info("Image path saved for product {$product->id}: {$newPath}");
+                // Coba untuk menyalin file jika ada
+                if (file_exists($imagePath)) {
+                    if (Storage::disk('public')->put($newPath, file_get_contents($imagePath))) {
+                        Image::create([
+                            'product_id' => $product->id,
+                            'path' => $newPath,
+                        ]);
+                        Log::info("Image successfully copied for product {$product->id}: {$newPath}");
+                    } else {
+                        Log::error("Failed to copy image for product {$product->id}: {$imagePath}");
+                    }
+                } else {
+                    // Jika file tidak ada, simpan path sebagai placeholder
+                    Image::create([
+                        'product_id' => $product->id,
+                        'path' => $newPath,
+                    ]);
+                    Log::warning("Image file not found for product {$product->id}. Placeholder path saved: {$newPath}");
+                }
             }
         }
 
