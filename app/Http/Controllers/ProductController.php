@@ -195,32 +195,16 @@ class ProductController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:xlsx,xls']);
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
 
         try {
-            $import = new ProductsImport;
-            Excel::import($import, $request->file('file'));
-
-            $failureCount = $import->failures()->count();
-
-            if ($failureCount > 0) {
-                $message = "Imported with $failureCount issues. Check the log for details.";
-                $type = 'warning';
-            } else {
-                $message = 'Products imported successfully';
-                $type = 'success';
-            }
-
-            foreach ($import->failures() as $failure) {
-                \Log::warning("Import failure on row {$failure->row()}: " . implode(', ', $failure->errors()));
-            }
-
+            Excel::import(new ProductsImport, $request->file('file'));
+            return redirect()->route('products.index')->with('success', 'Products imported successfully.');
         } catch (\Exception $e) {
-            $message = 'Error importing products: ' . $e->getMessage();
-            $type = 'error';
+            return redirect()->back()->with('error', 'Error importing products: ' . $e->getMessage());
         }
-
-        return redirect()->route('products.index')->with('notification', compact('type', 'message'));
     }
 
     public function export()
