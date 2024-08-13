@@ -103,9 +103,11 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             Storage::disk('public')->put($newPath, $contents);
             return $newPath;
         } else {
-            $fullPath = realpath($imagePath);
-            if (!$fullPath || !file_exists($fullPath)) {
-                Log::error("Local file not found: $imagePath");
+            $importFolder = storage_path('app/imports');
+            $fullPath = $importFolder . '/' . basename($imagePath);
+
+            if (!file_exists($fullPath)) {
+                Log::error("Local file not found: $fullPath");
                 return null;
             }
 
