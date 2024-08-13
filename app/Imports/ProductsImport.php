@@ -85,27 +85,27 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     private function processImage($imagePath, $productId)
     {
-        $storageFolder = storage_path('app/public/product_images');
-
-        if (!File::isDirectory($storageFolder)) {
-            File::makeDirectory($storageFolder, 0755, true, true);
-        }
-
+        $storageFolder = 'product_images';
         $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
-        $newPath = 'product_images/' . $fileName;
+        $newPath = $storageFolder . '/' . $fileName;
 
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            // It's a URL
-            $content = file_get_contents($imagePath);
-            Storage::disk('public')->put($newPath, $content);
-            return $newPath;
+            $tempImage = tempnam(sys_get_temp_dir(), 'img');
+            copy($imagePath, $tempImage);
+            $file = new \Illuminate\Http\UploadedFile($tempImage, $fileName);
         } elseif (File::exists($imagePath)) {
-            // It's a local file
-            Storage::disk('public')->put($newPath, File::get($imagePath));
-            return $newPath;
+            $file = new \Illuminate\Http\UploadedFile($imagePath, basename($imagePath));
+        } else {
+            return null;
         }
 
-        return null;
+        $path = $file->store($storageFolder, 'public');
+
+        if (isset($tempImage) && file_exists($tempImage)) {
+            unlink($tempImage);
+        }
+
+        return $path;
     }
 
     public function rules(): array
