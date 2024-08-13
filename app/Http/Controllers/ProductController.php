@@ -7,10 +7,12 @@ use App\Imports\ProductsImport;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
@@ -196,38 +198,46 @@ class ProductController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv',
+            'file' => 'required|mimes:xlsx,xls',
         ]);
 
+        DB::beginTransaction();
+
         try {
-            $import = new ProductsImport();
-            $import->import($request->file('file'));
+            $import = new ProductsImport;
+            Excel::import($import, $request->file('file'));
+            DB::commit();
 
-            $failures = $import->failures();
-
-            if ($failures->isNotEmpty()) {
-                $errorMessages = $failures->map(function ($failure) {
-                    return "Row {$failure->row()}: " . implode(', ', $failure->errors());
-                })->join('');
-
-                return redirect()->route('products.index')->with('notification', [
-                    'type' => 'warning',
-                    'message' => "Products imported with some issues:<br>{$errorMessages}",
-                ]);
+            $message = 'Products imported successfully.';
+            $duplicateNames = $import->getDuplicateNames();
+            if (!empty($duplicateNames)) {
+                $message .= ' The following products were skipped due to duplicate names: ' . implode(', ', $duplicateNames);
             }
 
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'success',
-                'message' => 'Products imported successfully. Existing products were updated, and soft-deleted products were restored.',
+                'message' => $message,
+            ]);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function ($failure) {
+                return "Row {$failure->row()}: {$failure->errors()[0]}";
+            })->implode('<br>');
+
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'error',
+                'message' => 'Error importing products:<br>' . $errors,
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->route('products.index')->with('notification', [
-                'type' => 'danger',
-                'message' => "There was an issue during import: {$e->getMessage()}",
+                'type' => 'error',
+                'message' => 'Error importing products: ' . $e->getMessage(),
             ]);
         }
     }
-
+    
     public function export()
     {
         return Excel::download(new ProductsExport, 'products.xlsx');
@@ -270,15 +280,4 @@ class ProductController extends Controller
             }
         }, 'products_import_template.xlsx');
     }
-
-    // public function downloadTemplate()
-    // {
-    //     $templatePath = base_path('app/template/products_template.xlsx');
-
-    //     if (! file_exists($templatePath)) {
-    //         return response()->json(['error' => 'Template not found.'], 404);
-    //     }
-
-    //     return response()->download($templatePath, 'products_import_template.xlsx');
-    // }
 }
