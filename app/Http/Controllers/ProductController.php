@@ -207,12 +207,12 @@ class ProductController extends Controller
 
             if ($failures->isNotEmpty()) {
                 $errorMessages = $failures->map(function ($failure) {
-                    return $failure->errors()[0];
-                })->join(', ');
+                    return "Row {$failure->row()}: " . implode(', ', $failure->errors());
+                })->join('');
 
                 return redirect()->route('products.index')->with('notification', [
                     'type' => 'warning',
-                    'message' => "Products imported with some issues: {$errorMessages}",
+                    'message' => "Products imported with some issues:<br>{$errorMessages}",
                 ]);
             }
 
