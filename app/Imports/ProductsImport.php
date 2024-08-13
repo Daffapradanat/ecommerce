@@ -78,6 +78,31 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         }
     }
 
+    private function processUrlImage($url, $product)
+    {
+        try {
+            $response = Http::get($url);
+            if ($response->successful()) {
+                $imageData = $response->body();
+                $fileName = $product->id . '_' . uniqid() . '.jpg';
+                $path = 'product_images/' . $fileName;
+
+                Storage::disk('public')->put($path, $imageData);
+
+                Image::create([
+                    'product_id' => $product->id,
+                    'path' => $path,
+                ]);
+
+                Log::info("URL image processed successfully for product: " . $product->id);
+            } else {
+                Log::error("Failed to fetch image from URL for product: " . $product->id . ". URL: " . $url);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to process URL image for product: " . $product->id . ". Error: " . $e->getMessage());
+        }
+    }
+
     private function processLocalImage($filePath, $product)
     {
         try {
