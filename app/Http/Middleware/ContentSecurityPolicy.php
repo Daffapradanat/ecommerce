@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ContentSecurityPolicy
 {
+    private $hasLogged = false;
+    
     public function handle($request, Closure $next)
     {
         $response = $next($request);
@@ -22,21 +24,23 @@ class ContentSecurityPolicy
                      "style-src 'self' https: 'unsafe-inline';";
 
         if (!$response instanceof BinaryFileResponse && !$response instanceof StreamedResponse) {
-            if (method_exists($response, 'header')) {
-                $currentHeader = $response->headers->get('Content-Security-Policy');
-                if ($currentHeader !== $cspHeader) {
+            $currentHeader = $response->headers->get('Content-Security-Policy');
+
+            if ($currentHeader !== $cspHeader) {
+                if (method_exists($response, 'header')) {
                     $response->header('Content-Security-Policy', $cspHeader);
-                    Log::info('CSP Middleware applied: ' . $cspHeader);
-                }
-            } elseif (method_exists($response, 'headers')) {
-                $currentHeader = $response->headers->get('Content-Security-Policy');
-                if ($currentHeader !== $cspHeader) {
+                } elseif (method_exists($response, 'headers')) {
                     $response->headers->set('Content-Security-Policy', $cspHeader);
-                    Log::info('CSP Middleware applied: ' . $cspHeader);
+                }
+
+                if (!$this->hasLogged) {
+                    Log::info('CSP Middleware applied');
+                    $this->hasLogged = true;
                 }
             }
-        } else {
+        } elseif (!$this->hasLogged) {
             Log::info('CSP Middleware skipped for file download or stream');
+            $this->hasLogged = true;
         }
 
         return $response;
