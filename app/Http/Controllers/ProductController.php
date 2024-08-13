@@ -209,9 +209,14 @@ class ProductController extends Controller
             DB::commit();
 
             $message = 'Products imported successfully.';
-            $duplicateNames = $import->getDuplicateNames();
-            if (!empty($duplicateNames)) {
-                $message .= ' The following products were skipped due to duplicate names: ' . implode(', ', $duplicateNames);
+            $restoredNames = $import->getRestoredNames();
+            $updatedNames = $import->getUpdatedNames();
+
+            if (!empty($restoredNames)) {
+                $message .= ' The following products were restored: ' . implode(', ', $restoredNames);
+            }
+            if (!empty($updatedNames)) {
+                $message .= ' The following products were updated: ' . implode(', ', $updatedNames);
             }
 
             return redirect()->route('products.index')->with('notification', [

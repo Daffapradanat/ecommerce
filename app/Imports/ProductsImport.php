@@ -2,46 +2,57 @@
 
 namespace App\Imports;
 
-use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
+use App\Models\Category;
+use App\Models\Image;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
+use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Http;
 
-class ProductsImport implements SkipsOnError, ToModel, WithHeadingRow, WithValidation
+class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError
 {
     use SkipsErrors;
 
-    private $duplicateNames = [];
+    private $restoredNames = [];
+    private $updatedNames = [];
 
     public function model(array $row)
     {
         $category = Category::findOrFail($row['category_id']);
+        $product = Product::withTrashed()->where('name', $row['name'])->first();
 
-        $existingProduct = Product::where('name', $row['name'])->first();
-        if ($existingProduct) {
-            $this->duplicateNames[] = $row['name'];
+        if ($product) {
+            if ($product->trashed()) {
+                $product->restore();
+                $this->restoredNames[] = $row['name'];
+            } else {
+                $this->updatedNames[] = $row['name'];
+            }
 
-            return null;
+            $product->update([
+                'description' => $row['description'],
+                'price' => $row['price'],
+                'stock' => $row['stock'],
+                'category_id' => $category->id,
+            ]);
+        } else {
+            $product = new Product([
+                'name' => $row['name'],
+                'description' => $row['description'],
+                'price' => $row['price'],
+                'stock' => $row['stock'],
+                'category_id' => $category->id,
+            ]);
+            $product->save();
         }
 
-        $product = new Product([
-            'name' => $row['name'],
-            'description' => $row['description'],
-            'price' => $row['price'],
-            'stock' => $row['stock'],
-            'category_id' => $category->id,
-        ]);
-
-        $product->save();
-
-        if (! empty($row['image'])) {
+        if (!empty($row['image'])) {
             $this->handleImageImport($product, $row['image']);
         }
 
@@ -51,12 +62,7 @@ class ProductsImport implements SkipsOnError, ToModel, WithHeadingRow, WithValid
     public function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('products', 'name'),
-            ],
+            'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -82,16 +88,24 @@ class ProductsImport implements SkipsOnError, ToModel, WithHeadingRow, WithValid
             return;
         }
 
-        $imageName = 'product_'.$product->id.'_'.time().'.'.$extension;
-        $path = 'product_images/'.$imageName;
+        $imageName = 'product_' . $product->id . '_' . time() . '.' . $extension;
+        $path = 'product_images/' . $imageName;
 
         Storage::disk('public')->put($path, $imageContent);
 
-        $product->image()->create(['path' => $path]);
+        Image::create([
+            'product_id' => $product->id,
+            'path' => $path
+        ]);
     }
 
-    public function getDuplicateNames()
+    public function getRestoredNames()
     {
-        return $this->duplicateNames;
+        return $this->restoredNames;
+    }
+
+    public function getUpdatedNames()
+    {
+        return $this->updatedNames;
     }
 }
