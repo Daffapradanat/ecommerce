@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
