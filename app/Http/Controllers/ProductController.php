@@ -208,7 +208,7 @@ class ProductController extends Controller
             if ($failures->isNotEmpty()) {
                 $errorMessages = $failures->map(function ($failure) {
                     return "Row {$failure->row()}: " . implode(', ', $failure->errors());
-                })->join('<br>');
+                })->join('');
 
                 return redirect()->route('products.index')->with('notification', [
                     'type' => 'warning',
@@ -218,7 +218,7 @@ class ProductController extends Controller
 
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'success',
-                'message' => 'Products imported successfully.',
+                'message' => 'Products imported successfully. Existing products were updated, and soft-deleted products were restored.',
             ]);
         } catch (\Exception $e) {
             return redirect()->route('products.index')->with('notification', [

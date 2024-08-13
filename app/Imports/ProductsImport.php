@@ -3,17 +3,21 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\File;
-use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use App\Models\Image;
+use App\Models\Category;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Validators\Failure;
 
-class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading
+class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
     use Importable, SkipsFailures;
 
@@ -22,25 +26,57 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
 
     public function __construct()
     {
-        $this->existingProducts = Product::pluck('name')->toArray();
+        $this->existingProducts = Product::withTrashed()->pluck('name', 'id')->toArray();
     }
 
     public function model(array $row)
     {
         $this->rowCount++;
 
-        $product = new Product([
-            'name' => $row['name'],
-            'description' => $row['description'],
-            'price' => $row['price'],
-            'stock' => $row['stock'],
-            'category_id' => $row['category_id'],
-        ]);
+        $existingProduct = Product::withTrashed()->where('name', $row['name'])->first();
+
+        if ($existingProduct) {
+            if ($existingProduct->trashed()) {
+                $existingProduct->restore();
+                $existingProduct->update([
+                    'description' => $row['description'],
+                    'price' => $row['price'],
+                    'stock' => $row['stock'],
+                    'category_id' => $row['category_id'],
+                ]);
+                $product = $existingProduct;
+            } else {
+                $failureMessage = "The product \"{$row['name']}\" already exists and is not deleted.";
+                $failure = new Failure(
+                    $this->rowCount,
+                    'name',
+                    [$failureMessage],
+                    $row
+                );
+                $this->onFailure($failure);
+                return null;
+            }
+        } else {
+            $product = Product::create([
+                'name' => $row['name'],
+                'description' => $row['description'],
+                'price' => $row['price'],
+                'stock' => $row['stock'],
+                'category_id' => $row['category_id'],
+            ]);
+        }
 
         if (!empty($row['image'])) {
-            $imagePath = $this->processImage($row['image'], $this->rowCount);
-            if ($imagePath) {
-                $product->image()->create(['path' => $imagePath]);
+            $imagePaths = explode(',', $row['image']);
+            foreach ($imagePaths as $imagePath) {
+                $imagePath = trim($imagePath);
+                $newPath = $this->processImage($imagePath, $product->id);
+                if ($newPath) {
+                    Image::create([
+                        'product_id' => $product->id,
+                        'path' => $newPath,
+                    ]);
+                }
             }
         }
 
@@ -55,20 +91,18 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             File::makeDirectory($storageFolder, 0755, true, true);
         }
 
-        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
-            $newPath = $storageFolder . '/' . $fileName;
+        $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
+        $newPath = 'product_images/' . $fileName;
 
-            $imageContent = file_get_contents($imagePath);
-            if ($imageContent !== false) {
-                File::put($newPath, $imageContent);
-                return 'product_images/' . $fileName;
-            }
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            // It's a URL
+            $content = file_get_contents($imagePath);
+            Storage::disk('public')->put($newPath, $content);
+            return $newPath;
         } elseif (File::exists($imagePath)) {
-            $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
-            $newPath = $storageFolder . '/' . $fileName;
-            File::copy($imagePath, $newPath);
-            return 'product_images/' . $fileName;
+            // It's a local file
+            Storage::disk('public')->put($newPath, File::get($imagePath));
+            return $newPath;
         }
 
         return null;
@@ -77,10 +111,10 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
     public function rules(): array
     {
         return [
-            'name' => ['required', 'unique:products,name'],
+            'name' => 'required',
             'description' => 'required',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable',
         ];
@@ -91,15 +125,5 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         return [
             'name.unique' => 'The product ":input" already exists.',
         ];
-    }
-
-    public function batchSize(): int
-    {
-        return 1000;
-    }
-
-    public function chunkSize(): int
-    {
-        return 1000;
     }
 }
