@@ -241,7 +241,7 @@ class ProductController extends Controller
             'Price',
             'Stock',
             'Category ID',
-            'Image (Base64)'
+            'Image'
         ];
 
         $data = [

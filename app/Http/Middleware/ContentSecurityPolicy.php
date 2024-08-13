@@ -9,14 +9,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ContentSecurityPolicy
 {
     private $hasLogged = false;
-    
+
     public function handle($request, Closure $next)
     {
         $response = $next($request);
 
         $cspHeader = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " .
-                     "img-src 'self' https: data: blob: http: https:; " .
-                     "connect-src 'self' https: http: ws: wss:; " .
+                     "img-src 'self' https: data: blob: http: https: *; " .
+                     "connect-src 'self' https: http: ws: wss: *; " .
                      "font-src 'self' https: data:; " .
                      "media-src 'self' https: data:; " .
                      "object-src 'none'; " .

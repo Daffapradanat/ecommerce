@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Validators\Failure;
+use Illuminate\Support\Facades\Http;
 
 class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
@@ -58,29 +59,72 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         }
 
         if (!empty($row['image'])) {
-            $this->processBase64Image($row['image'], $product);
+            $this->processImages($row['image'], $product);
         }
 
         return $product;
     }
 
-    private function processBase64Image($base64String, $product)
+    private function processImages($imageString, $product)
+    {
+        $images = explode(',', $imageString);
+        foreach ($images as $image) {
+            $image = trim($image);
+            if (filter_var($image, FILTER_VALIDATE_URL)) {
+                $this->processUrlImage($image, $product);
+            } elseif (file_exists($image)) {
+                $this->processLocalImage($image, $product);
+            } else {
+                Log::warning("Invalid image source for product: " . $product->id . ". Source: " . $image);
+            }
+        }
+    }
+
+    private function processUrlImage($url, $product)
     {
         try {
-            $imageData = base64_decode($base64String);
-            $fileName = $product->id . '_' . uniqid() . '.png';
-            $path = 'product_images/' . $fileName;
+            $response = Http::get($url);
+            if ($response->successful()) {
+                $imageData = $response->body();
+                $fileName = $product->id . '_' . uniqid() . '.jpg';
+                $path = 'product_images/' . $fileName;
 
-            Storage::disk('public')->put($path, $imageData);
+                Storage::disk('public')->put($path, $imageData);
 
-            Image::create([
-                'product_id' => $product->id,
-                'path' => $path,
-            ]);
+                Image::create([
+                    'product_id' => $product->id,
+                    'path' => $path,
+                ]);
 
-            Log::info("Image processed successfully for product: " . $product->id);
+                Log::info("URL image processed successfully for product: " . $product->id);
+            } else {
+                Log::error("Failed to fetch image from URL for product: " . $product->id . ". URL: " . $url);
+            }
         } catch (\Exception $e) {
-            Log::error("Failed to process image for product: " . $product->id . ". Error: " . $e->getMessage());
+            Log::error("Failed to process URL image for product: " . $product->id . ". Error: " . $e->getMessage());
+        }
+    }
+
+    private function processLocalImage($filePath, $product)
+    {
+        try {
+            if (file_exists($filePath)) {
+                $fileName = $product->id . '_' . uniqid() . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
+                $path = 'product_images/' . $fileName;
+
+                Storage::disk('public')->put($path, file_get_contents($filePath));
+
+                Image::create([
+                    'product_id' => $product->id,
+                    'path' => $path,
+                ]);
+
+                Log::info("Local image processed successfully for product: " . $product->id);
+            } else {
+                Log::error("Local image file not found for product: " . $product->id . ". Path: " . $filePath);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to process local image for product: " . $product->id . ". Error: " . $e->getMessage());
         }
     }
 
