@@ -208,7 +208,7 @@ class ProductController extends Controller
             if ($failures->isNotEmpty()) {
                 $errorMessages = $failures->map(function ($failure) {
                     return "Row {$failure->row()}: " . implode(', ', $failure->errors());
-                })->join('');
+                })->join('<br>');
 
                 return redirect()->route('products.index')->with('notification', [
                     'type' => 'warning',
