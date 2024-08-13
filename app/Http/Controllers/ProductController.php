@@ -235,12 +235,50 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        $templatePath = base_path('app/template/products_template.xlsx');
+        $headers = [
+            'Name',
+            'Description',
+            'Price',
+            'Stock',
+            'Category ID',
+            'Image (Base64)'
+        ];
 
-        if (! file_exists($templatePath)) {
-            return response()->json(['error' => 'Template not found.'], 404);
-        }
+        $data = [
+            $headers,
+            [
+                'Example Product',
+                'This is a sample product description',
+                '10000',
+                '50',
+                '1',
+                ''
+            ]
+        ];
 
-        return response()->download($templatePath, 'products_import_template.xlsx');
+        return Excel::download(new class($data) implements FromArray {
+            private $data;
+
+            public function __construct($data)
+            {
+                $this->data = $data;
+            }
+
+            public function array(): array
+            {
+                return $this->data;
+            }
+        }, 'products_import_template.xlsx');
     }
+
+    // public function downloadTemplate()
+    // {
+    //     $templatePath = base_path('app/template/products_template.xlsx');
+
+    //     if (! file_exists($templatePath)) {
+    //         return response()->json(['error' => 'Template not found.'], 404);
+    //     }
+
+    //     return response()->download($templatePath, 'products_import_template.xlsx');
+    // }
 }

@@ -4,31 +4,21 @@ namespace App\Imports;
 
 use App\Models\Product;
 use App\Models\Image;
-use App\Models\Category;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Validators\Failure;
 
 class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
     use Importable, SkipsFailures;
 
-    private $existingProducts = [];
     private $rowCount = 0;
-
-    public function __construct()
-    {
-        $this->existingProducts = Product::withTrashed()->pluck('name', 'id')->toArray();
-    }
 
     public function model(array $row)
     {
@@ -68,57 +58,29 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         }
 
         if (!empty($row['image'])) {
-            $imagePaths = explode(',', $row['image']);
-            foreach ($imagePaths as $imagePath) {
-                $imagePath = trim($imagePath);
-                Log::info("Processing image: $imagePath");
-                $newPath = $this->processImage($imagePath, $product->id);
-                if ($newPath) {
-                    Log::info("Image processed successfully: $newPath");
-                    Image::create([
-                        'product_id' => $product->id,
-                        'path' => $newPath,
-                    ]);
-                } else {
-                    Log::error("Failed to process image: $imagePath");
-                }
-            }
+            $this->processBase64Image($row['image'], $product);
         }
 
         return $product;
     }
 
-    private function processImage($imagePath, $productId)
+    private function processBase64Image($base64String, $product)
     {
-        $storageFolder = 'product_images';
-        $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
-        $newPath = $storageFolder . '/' . $fileName;
+        try {
+            $imageData = base64_decode($base64String);
+            $fileName = $product->id . '_' . uniqid() . '.png';
+            $path = 'product_images/' . $fileName;
 
-        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            $contents = @file_get_contents($imagePath);
-            if ($contents === false) {
-                Log::error("Failed to download image from URL: $imagePath");
-                return null;
-            }
-            Storage::disk('public')->put($newPath, $contents);
-            return $newPath;
-        } else {
-            $importFolder = storage_path('app/imports');
-            $fullPath = $importFolder . '/' . basename($imagePath);
+            Storage::disk('public')->put($path, $imageData);
 
-            if (!file_exists($fullPath)) {
-                Log::error("Local file not found: $fullPath");
-                return null;
-            }
+            Image::create([
+                'product_id' => $product->id,
+                'path' => $path,
+            ]);
 
-            $contents = @file_get_contents($fullPath);
-            if ($contents === false) {
-                Log::error("Failed to read local file: $fullPath");
-                return null;
-            }
-
-            Storage::disk('public')->put($newPath, $contents);
-            return $newPath;
+            Log::info("Image processed successfully for product: " . $product->id);
+        } catch (\Exception $e) {
+            Log::error("Failed to process image for product: " . $product->id . ". Error: " . $e->getMessage());
         }
     }
 
@@ -131,13 +93,6 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             'stock' => 'required|integer',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable',
-        ];
-    }
-
-    public function customValidationMessages()
-    {
-        return [
-            'name.unique' => 'The product ":input" already exists.',
         ];
     }
 }
