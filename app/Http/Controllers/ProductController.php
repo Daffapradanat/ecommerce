@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
 {
@@ -199,19 +198,20 @@ class ProductController extends Controller
         ]);
 
         try {
-            $file = $request->file('file');
-            $filePath = $file->getRealPath();
-
             $import = new ProductsImport();
-            $import->import($filePath);
+            Excel::import($import, $request->file('file'));
 
+            $failures = $import->failures();
             $errors = $import->errors;
 
-            if (!empty($errors)) {
-                $errorMessages = implode('<br>', $errors);
+            if ($failures->isNotEmpty() || !empty($errors)) {
+                $errorMessages = collect($failures)->map(function ($failure) {
+                    return "Row {$failure->row()}: ".$failure->errors()[0];
+                })->merge($errors)->join('');
+
                 return redirect()->route('products.index')->with('notification', [
                     'type' => 'warning',
-                    'message' => "Products imported with some issues:<br>" . $errorMessages,
+                    'message' => 'Products imported with some issues:'.$errorMessages,
                 ]);
             }
 
@@ -222,7 +222,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'danger',
-                'message' => "There was an issue during import: " . $e->getMessage(),
+                'message' => 'There was an issue during import: '.$e->getMessage(),
             ]);
         }
     }
