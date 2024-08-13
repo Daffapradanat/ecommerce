@@ -70,12 +70,16 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
+                Log::info("Processing image: $imagePath");
                 $newPath = $this->processImage($imagePath, $product->id);
                 if ($newPath) {
+                    Log::info("Image processed successfully: $newPath");
                     Image::create([
                         'product_id' => $product->id,
                         'path' => $newPath,
                     ]);
+                } else {
+                    Log::error("Failed to process image: $imagePath");
                 }
             }
         }
@@ -90,22 +94,29 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $newPath = $storageFolder . '/' . $fileName;
 
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            $tempImage = tempnam(sys_get_temp_dir(), 'img');
-            copy($imagePath, $tempImage);
-            $file = new \Illuminate\Http\UploadedFile($tempImage, $fileName);
-        } elseif (File::exists($imagePath)) {
-            $file = new \Illuminate\Http\UploadedFile($imagePath, basename($imagePath));
+            $contents = @file_get_contents($imagePath);
+            if ($contents === false) {
+                Log::error("Failed to download image from URL: $imagePath");
+                return null;
+            }
+            Storage::disk('public')->put($newPath, $contents);
+            return $newPath;
         } else {
-            return null;
+            $fullPath = realpath($imagePath);
+            if (!$fullPath || !file_exists($fullPath)) {
+                Log::error("Local file not found: $imagePath");
+                return null;
+            }
+
+            $contents = @file_get_contents($fullPath);
+            if ($contents === false) {
+                Log::error("Failed to read local file: $fullPath");
+                return null;
+            }
+
+            Storage::disk('public')->put($newPath, $contents);
+            return $newPath;
         }
-
-        $path = $file->store($storageFolder, 'public');
-
-        if (isset($tempImage) && file_exists($tempImage)) {
-            unlink($tempImage);
-        }
-
-        return $path;
     }
 
     public function rules(): array
