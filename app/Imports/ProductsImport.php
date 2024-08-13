@@ -3,12 +3,13 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
+use App\Models\Image;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ProductsImport implements ToModel, WithHeadingRow, WithValidation
 {
@@ -22,7 +23,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             'category_id' => $row['category_id'],
         ]);
 
-        if (! empty($row['image'])) {
+        if (!empty($row['image'])) {
             $imagePath = $this->processImage($row['image']);
             if ($imagePath) {
                 $product->image()->create(['path' => $imagePath]);
@@ -41,7 +42,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
                 'max:255',
                 Rule::unique('products', 'name'),
             ],
-            'description' => 'required',
+            'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
@@ -55,16 +56,14 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation
             $response = Http::get($imagePath);
             if ($response->successful()) {
                 $filename = basename($imagePath);
-                $path = 'product_images/'.uniqid().'_'.$filename;
+                $path = 'product_images/' . uniqid() . '_' . $filename;
                 Storage::disk('public')->put($path, $response->body());
-
                 return $path;
             }
         } elseif (file_exists($imagePath)) {
             $filename = basename($imagePath);
-            $path = 'product_images/'.uniqid().'_'.$filename;
+            $path = 'product_images/' . uniqid() . '_' . $filename;
             Storage::disk('public')->put($path, file_get_contents($imagePath));
-
             return $path;
         }
 
