@@ -4,8 +4,8 @@ namespace App\Imports;
 
 use App\Models\Image;
 use App\Models\Product;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -25,6 +25,7 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $this->rowCount++;
 
         if (empty(array_filter($row))) {
+            // Skip empty rows
             return null;
         }
 
@@ -44,10 +45,6 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
                 } else {
                     throw new \Exception("The product \"{$row['name']}\" already exists and is not deleted.");
                 }
-
-                if (empty($row['name']) && empty($row['description']) && empty($row['price']) && empty($row['stock']) && empty($row['category_id'])) {
-                    return null;
-                }
             } else {
                 $product = Product::create([
                     'name' => $row['name'],
@@ -63,6 +60,7 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             return $product;
         } catch (\Exception $e) {
             $this->errors[] = "Row {$this->rowCount}: {$e->getMessage()}";
+            Log::error("Import Error - Row {$this->rowCount}: {$e->getMessage()}");
             return null;
         }
     }
@@ -89,8 +87,9 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $storageFolder = 'product_images';
         $fileName = $productId.'_'.uniqid().'_'.basename($imagePath);
         $newPath = $storageFolder.'/'.$fileName;
-    
+
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            // Handle image URL
             $imageContents = @file_get_contents($imagePath);
             if ($imageContents !== false) {
                 Storage::disk('public')->put($newPath, $imageContents);
@@ -99,17 +98,18 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
                 Log::error("Failed to get image from URL: {$imagePath}");
             }
         } elseif (file_exists($imagePath)) {
+            // Handle local image path
             $fileContents = file_get_contents($imagePath);
             Storage::disk('public')->put($newPath, $fileContents);
             return $newPath;
         } else {
             Log::error("File does not exist: {$imagePath}");
         }
-    
+
         $this->errors[] = "Failed to process image: {$imagePath}";
         return null;
     }
-    
+
     public function rules(): array
     {
         return [

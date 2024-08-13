@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\ProductsExport;
-use App\Imports\ProductsImport;
 use App\Models\Category;
 use App\Models\Product;
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
+use App\Http\Requests\StoreProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
