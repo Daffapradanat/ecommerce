@@ -10,6 +10,8 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
@@ -201,44 +203,21 @@ class ProductController extends Controller
             'file' => 'required|mimes:xlsx,xls',
         ]);
 
-        DB::beginTransaction();
+        $file = $request->file('file');
 
         try {
-            $import = new ProductsImport;
-            Excel::import($import, $request->file('file'));
-            DB::commit();
-
-            $message = 'Products imported successfully.';
-            $restoredNames = $import->getRestoredNames();
-            $updatedNames = $import->getUpdatedNames();
-
-            if (!empty($restoredNames)) {
-                $message .= ' The following products were restored: ' . implode(', ', $restoredNames);
-            }
-            if (!empty($updatedNames)) {
-                $message .= ' The following products were updated: ' . implode(', ', $updatedNames);
-            }
+            Excel::import(new ProductsImport, $file);
 
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'success',
-                'message' => $message,
+                'message' => 'Products imported successfully',
             ]);
-        } catch (ValidationException $e) {
-            DB::rollBack();
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
-            $errors = collect($failures)->map(function ($failure) {
-                return "Row {$failure->row()}: {$failure->errors()[0]}";
-            })->implode('<br>');
 
-            return redirect()->route('products.index')->with('notification', [
+            return redirect()->back()->withErrors($failures)->with('notification', [
                 'type' => 'error',
-                'message' => 'Error importing products:<br>' . $errors,
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->route('products.index')->with('notification', [
-                'type' => 'error',
-                'message' => 'Error importing products: ' . $e->getMessage(),
+                'message' => 'There were errors during the import',
             ]);
         }
     }
