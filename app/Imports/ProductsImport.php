@@ -23,6 +23,10 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
     {
         $this->rowCount++;
 
+        if (empty(array_filter($row))) {
+            return null;
+        }
+
         try {
             $existingProduct = Product::withTrashed()->where('name', $row['name'])->first();
 
@@ -84,23 +88,27 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $storageFolder = 'product_images';
         $fileName = $productId.'_'.uniqid().'_'.basename($imagePath);
         $newPath = $storageFolder.'/'.$fileName;
-
+    
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
             $imageContents = @file_get_contents($imagePath);
             if ($imageContents !== false) {
                 Storage::disk('public')->put($newPath, $imageContents);
                 return $newPath;
+            } else {
+                Log::error("Failed to get image from URL: {$imagePath}");
             }
         } elseif (file_exists($imagePath)) {
             $fileContents = file_get_contents($imagePath);
             Storage::disk('public')->put($newPath, $fileContents);
             return $newPath;
+        } else {
+            Log::error("File does not exist: {$imagePath}");
         }
-
+    
         $this->errors[] = "Failed to process image: {$imagePath}";
         return null;
     }
-
+    
     public function rules(): array
     {
         return [
