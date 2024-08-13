@@ -106,11 +106,15 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     private function processLocalImage($filePath, $product)
     {
         try {
-            if (file_exists($filePath)) {
-                $fileName = $product->id . '_' . uniqid() . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
+            $importFolder = storage_path('app/imports');
+            $fullPath = str_replace('\\', '/', $filePath);
+            $fullPath = $importFolder . '/' . basename($fullPath);
+
+            if (file_exists($fullPath)) {
+                $fileName = $product->id . '_' . uniqid() . '.' . pathinfo($fullPath, PATHINFO_EXTENSION);
                 $path = 'product_images/' . $fileName;
 
-                Storage::disk('public')->put($path, file_get_contents($filePath));
+                Storage::disk('public')->put($path, file_get_contents($fullPath));
 
                 Image::create([
                     'product_id' => $product->id,
