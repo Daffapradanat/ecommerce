@@ -229,8 +229,7 @@
                 @endforeach
             @endif
         });
-    </script>
-    <script>
+
         document.addEventListener("DOMContentLoaded", function() {
             const imgElements = document.querySelectorAll('.nav-link img');
 

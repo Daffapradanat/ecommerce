@@ -200,10 +200,31 @@ class ProductController extends Controller
         ]);
 
         try {
-            Excel::import(new ProductsImport, $request->file('file'));
-            return redirect()->route('products.index')->with('success', 'Products imported successfully.');
+            $import = new ProductsImport();
+            $import->import($request->file('file'));
+
+            $failures = $import->failures();
+
+            if ($failures->isNotEmpty()) {
+                $errorMessages = $failures->map(function ($failure) {
+                    return $failure->errors()[0];
+                })->join(', ');
+
+                return redirect()->route('products.index')->with('notification', [
+                    'type' => 'warning',
+                    'message' => "Products imported with some issues: {$errorMessages}",
+                ]);
+            }
+
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'success',
+                'message' => 'Products imported successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error importing products: ' . $e->getMessage());
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'danger',
+                'message' => "There was an issue during import: {$e->getMessage()}",
+            ]);
         }
     }
 
