@@ -63,7 +63,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     {
         return [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
@@ -73,22 +73,48 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     private function handleImageImport(Product $product, string $imageData)
     {
-        if (filter_var($imageData, FILTER_VALIDATE_URL)) {
-            $response = Http::get($imageData);
-            if ($response->successful()) {
-                $imageContent = $response->body();
-                $extension = pathinfo(parse_url($imageData, PHP_URL_PATH), PATHINFO_EXTENSION);
-            } else {
-                return;
+        $imageUrls = explode(',', $imageData);
+        foreach ($imageUrls as $imageUrl) {
+            $imageUrl = trim($imageUrl);
+            if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                $this->importFromUrl($product, $imageUrl);
+            } elseif (Str::startsWith($imageUrl, 'data:image')) {
+                $this->importFromBase64($product, $imageUrl);
+            } elseif (file_exists($imageUrl)) {
+                $this->importFromLocalPath($product, $imageUrl);
             }
-        } elseif (Str::startsWith($imageData, 'data:image')) {
-            $imageContent = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData));
-            $extension = explode('/', mime_content_type($imageData))[1];
-        } else {
-            return;
         }
+    }
 
-        $imageName = 'product_' . $product->id . '_' . time() . '.' . $extension;
+    private function importFromUrl(Product $product, string $url)
+    {
+        $response = Http::get($url);
+        if ($response->successful()) {
+            $imageContent = $response->body();
+            $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+            $this->saveImage($product, $imageContent, $extension);
+        }
+    }
+
+    private function importFromBase64(Product $product, string $base64String)
+    {
+        $imageContent = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
+        $extension = explode('/', mime_content_type($base64String))[1];
+        $this->saveImage($product, $imageContent, $extension);
+    }
+
+    private function importFromLocalPath(Product $product, string $path)
+    {
+        if (file_exists($path)) {
+            $imageContent = file_get_contents($path);
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $this->saveImage($product, $imageContent, $extension);
+        }
+    }
+
+    private function saveImage(Product $product, $imageContent, $extension)
+    {
+        $imageName = 'product_' . $product->id . '_' . time() . '_' . Str::random(5) . '.' . $extension;
         $path = 'product_images/' . $imageName;
 
         Storage::disk('public')->put($path, $imageContent);
