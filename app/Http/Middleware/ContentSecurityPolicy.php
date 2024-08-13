@@ -15,7 +15,7 @@ class ContentSecurityPolicy
         $response = $next($request);
 
         $cspHeader = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " .
-                     "img-src 'self' https: data: blob: http: https: *; " .
+                     "img-src 'self' https: data: blob: http: https: file:; " .
                      "connect-src 'self' https: http: ws: wss: *; " .
                      "font-src 'self' https: data:; " .
                      "media-src 'self' https: data:; " .
