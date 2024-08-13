@@ -72,36 +72,9 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             $image = trim($image);
             if (filter_var($image, FILTER_VALIDATE_URL)) {
                 $this->processUrlImage($image, $product);
-            } elseif (file_exists($image)) {
+            } else {
                 $this->processLocalImage($image, $product);
-            } else {
-                Log::warning("Invalid image source for product: " . $product->id . ". Source: " . $image);
             }
-        }
-    }
-
-    private function processUrlImage($url, $product)
-    {
-        try {
-            $response = Http::get($url);
-            if ($response->successful()) {
-                $imageData = $response->body();
-                $fileName = $product->id . '_' . uniqid() . '.jpg';
-                $path = 'product_images/' . $fileName;
-
-                Storage::disk('public')->put($path, $imageData);
-
-                Image::create([
-                    'product_id' => $product->id,
-                    'path' => $path,
-                ]);
-
-                Log::info("URL image processed successfully for product: " . $product->id);
-            } else {
-                Log::error("Failed to fetch image from URL for product: " . $product->id . ". URL: " . $url);
-            }
-        } catch (\Exception $e) {
-            Log::error("Failed to process URL image for product: " . $product->id . ". Error: " . $e->getMessage());
         }
     }
 
@@ -127,6 +100,7 @@ class ProductsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             Log::error("Failed to process local image for product: " . $product->id . ". Error: " . $e->getMessage());
         }
     }
+
 
     public function rules(): array
     {
