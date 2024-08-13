@@ -103,13 +103,13 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->products()->count() > 0) {
+        if ($category->products()->whereNull('deleted_at')->count() > 0) {
             return redirect()->route('categories.index')
                 ->with('error', 'Cannot delete this category. It is still being used by one or more products.');
         }
-
+    
         $category->delete();
-
+    
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
     }
 
