@@ -71,12 +71,20 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-                $newPath = $this->processImage($imagePath, $product->id);
-                if ($newPath) {
+                $existingPath = $this->getExistingImagePath($imagePath);
+                if ($existingPath) {
                     Image::create([
                         'product_id' => $product->id,
-                        'path' => $newPath,
+                        'path' => $existingPath,
                     ]);
+                } else {
+                    $newPath = $this->processImage($imagePath, $product->id);
+                    if ($newPath) {
+                        Image::create([
+                            'product_id' => $product->id,
+                            'path' => $newPath,
+                        ]);
+                    }
                 }
             }
         }
@@ -89,7 +97,6 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $newPath = $storageFolder.'/'.$fileName;
 
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            // Handle image URL
             $imageContents = @file_get_contents($imagePath);
             if ($imageContents !== false) {
                 Storage::disk('public')->put($newPath, $imageContents);
@@ -98,7 +105,6 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
                 Log::error("Failed to get image from URL: {$imagePath}");
             }
         } elseif (file_exists($imagePath)) {
-            // Handle local image path
             $fileContents = file_get_contents($imagePath);
             Storage::disk('public')->put($newPath, $fileContents);
             return $newPath;
