@@ -5,14 +5,10 @@ namespace App\Http\Controllers;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use App\Models\Category;
-use App\Models\Image;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Validators\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
@@ -198,24 +194,35 @@ class ProductController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
-        $file = $request->file('file');
-
         try {
-            Excel::import(new ProductsImport, $file);
+            $import = new ProductsImport;
+            Excel::import($import, $request->file('file'));
+
+            $failures = $import->failures();
+            $errors = $import->errors;
+
+            if ($failures->isNotEmpty() || ! empty($errors)) {
+                $errorMessages = collect($failures)->map(function ($failure) {
+                    return "Row {$failure->row()}: ".$failure->errors()[0];
+                })->merge($errors)->join('');
+
+                return redirect()->route('products.index')->with('notification', [
+                    'type' => 'warning',
+                    'message' => 'Products imported with some issues:'.$errorMessages,
+                ]);
+            }
 
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'success',
-                'message' => 'Products imported successfully',
+                'message' => 'Products imported successfully.',
             ]);
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $failures = $e->failures();
-
-            return redirect()->back()->withErrors($failures)->with('notification', [
-                'type' => 'error',
-                'message' => 'There were errors during the import',
+        } catch (\Exception $e) {
+            return redirect()->route('products.index')->with('notification', [
+                'type' => 'danger',
+                'message' => 'There was an issue during import: '.$e->getMessage(),
             ]);
         }
     }
@@ -227,39 +234,12 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        $headers = [
-            'Name',
-            'Description',
-            'Price',
-            'Stock',
-            'Category ID',
-            'Image'
-        ];
+        $filePath = base_path('app/template/products_template.xlsx');
 
-        $data = [
-            $headers,
-            [
-                'Example Product',
-                'This is a sample product description',
-                '10000',
-                '50',
-                '1',
-                ''
-            ]
-        ];
+        if (! file_exists($filePath)) {
+            abort(404, 'Template file not found.');
+        }
 
-        return Excel::download(new class($data) implements FromArray {
-            private $data;
-
-            public function __construct($data)
-            {
-                $this->data = $data;
-            }
-
-            public function array(): array
-            {
-                return $this->data;
-            }
-        }, 'products_import_template.xlsx');
+        return response()->download($filePath, 'products_template.xlsx');
     }
 }
