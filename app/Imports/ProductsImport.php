@@ -25,7 +25,6 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $this->rowCount++;
 
         if (empty(array_filter($row))) {
-            // Skip empty rows
             return null;
         }
 
@@ -71,20 +70,12 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             $imagePaths = explode(',', $row['image']);
             foreach ($imagePaths as $imagePath) {
                 $imagePath = trim($imagePath);
-                $existingPath = $this->getExistingImagePath($imagePath);
-                if ($existingPath) {
+                $newPath = $this->processImage($imagePath, $product->id);
+                if ($newPath) {
                     Image::create([
                         'product_id' => $product->id,
-                        'path' => $existingPath,
+                        'path' => $newPath,
                     ]);
-                } else {
-                    $newPath = $this->processImage($imagePath, $product->id);
-                    if ($newPath) {
-                        Image::create([
-                            'product_id' => $product->id,
-                            'path' => $newPath,
-                        ]);
-                    }
                 }
             }
         }
@@ -93,23 +84,17 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
     private function processImage($imagePath, $productId)
     {
         $storageFolder = 'product_images';
-        $fileName = $productId.'_'.uniqid().'_'.basename($imagePath);
-        $newPath = $storageFolder.'/'.$fileName;
+        $fileName = $productId . '_' . uniqid() . '_' . basename($imagePath);
+        $newPath = $storageFolder . '/' . $fileName;
 
-        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            $imageContents = @file_get_contents($imagePath);
+        try {
+            $imageContents = file_get_contents($imagePath);
             if ($imageContents !== false) {
                 Storage::disk('public')->put($newPath, $imageContents);
                 return $newPath;
-            } else {
-                Log::error("Failed to get image from URL: {$imagePath}");
             }
-        } elseif (file_exists($imagePath)) {
-            $fileContents = file_get_contents($imagePath);
-            Storage::disk('public')->put($newPath, $fileContents);
-            return $newPath;
-        } else {
-            Log::error("File does not exist: {$imagePath}");
+        } catch (\Exception $e) {
+            Log::error("Failed to process image: {$imagePath}. Error: {$e->getMessage()}");
         }
 
         $this->errors[] = "Failed to process image: {$imagePath}";
