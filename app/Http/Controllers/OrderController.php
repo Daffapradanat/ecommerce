@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Log;
 use App\Services\OrderService;
 use App\Services\MidtransService;
 use Yajra\DataTables\Facades\DataTables;
+<<<<<<< HEAD
+=======
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\OrdersExport;
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 
 class OrderController extends Controller
 {
@@ -37,7 +42,11 @@ class OrderController extends Controller
                         $viewBtn = '<a href="' . route('orders.show', $order->id) . '" class="btn btn-info btn-sm me-2"><i class="fas fa-eye"></i></a>';
                         $cancelBtn = '';
                         if ($order->payment_status === 'awaiting_payment' || $order->payment_status === 'pending') {
+<<<<<<< HEAD
                             $cancelBtn = '<button type="button" class="btn btn-danger btn-sm delete-order" onclick="confirmCancellation(' . $order->id . ')"><i class="fas fa-trash"></i></button>';
+=======
+                            $cancelBtn = '<button type="button" class="btn btn-danger btn-sm delete-order" data-id="' . $order->id . '"><i class="fas fa-trash"></i></button>';
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                         }
                         return $viewBtn . $cancelBtn;
                     })
@@ -83,8 +92,21 @@ class OrderController extends Controller
 
     public function cancel($id)
     {
+<<<<<<< HEAD
         $result = $this->orderService->cancelOrder($id);
         return redirect()->route('orders.index')->with($result['status'], $result['message']);
+=======
+        $order = Order::findOrFail($id);
+
+        if (!in_array($order->payment_status, ['awaiting_payment', 'pending'])) {
+            return response()->json(['message' => 'This order cannot be cancelled.'], 400);
+        }
+
+        $order->payment_status = 'cancelled';
+        $order->save();
+
+        return response()->json(['message' => 'Order cancelled successfully.']);
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     }
 
     public function pay($id)
@@ -214,4 +236,29 @@ class OrderController extends Controller
         return response('OK', 200);
     }
 
+<<<<<<< HEAD
+=======
+    public function export()
+    {
+        return Excel::download(new OrdersExport, 'orders.xlsx');
+    }
+
+    // public function import(Request $request)
+    // {
+    //     $request->validate([
+    //         'file' => 'required|mimes:xlsx,xls',
+    //     ]);
+
+    //     Excel::import(new OrdersImport, $request->file('file'));
+
+    //     return redirect()->route('orders.index')->with('success', 'Orders imported successfully.');
+    // }
+
+    // public function downloadTemplate()
+    // {
+    //     $filePath = public_path('templates/orders_import_template.xlsx');
+    //     return response()->download($filePath, 'orders_import_template.xlsx');
+    // }
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 }

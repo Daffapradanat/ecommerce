@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-4">
+<<<<<<< HEAD
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Administrator Management</h1>
         <a href="{{ route('users.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
@@ -9,6 +10,23 @@
         </a>
     </div>
 
+=======
+    <div class="container-fluid px-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+            <h1 class="mt-4 mb-3 mb-md-0">Administrator Management</h1>
+            <div>
+                <a href="{{ route('users.create') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-user-plus"></i> Add New Administrator
+                </a>
+                <a href="{{ route('users.export') }}" class="btn btn-info">
+                    <i class="fas fa-file-export"></i> Export Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
@@ -37,12 +55,25 @@
                         @foreach($users as $user)
                         <tr>
                             <td class="align-middle text-center">
+<<<<<<< HEAD
                                 @if ($user->image)
                                     <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
                                 @else
                                     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white mx-auto" style="width: 50px; height: 50px;">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
+=======
+                                @if (filter_var($user->image, FILTER_VALIDATE_URL))
+                                    <img src="{{ $user->image }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                @else
+                                    @if ($user->image)
+                                        <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <span class="text-white" style="font-size: 24px;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                        </div>
+                                    @endif
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                                 @endif
                             </td>
                             <td class="align-middle">{{ $user->name }}</td>
@@ -98,12 +129,20 @@
 @endsection
 
 @push('styles')
+<<<<<<< HEAD
 <link href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 @endpush
 
 @push('scripts')
 {{-- <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script> --}}
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+=======
+
+@endpush
+
+@push('scripts')
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 <script>
     $(document).ready(function() {
         $('#dataTable').DataTable({
@@ -116,5 +155,15 @@
             }
         });
     });
+<<<<<<< HEAD
+=======
+
+        // Alert auto-close
+        window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+            $(this).remove();
+        });
+    }, 5000);
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 </script>
 @endpush

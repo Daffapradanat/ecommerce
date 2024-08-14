@@ -75,10 +75,17 @@
                             <tbody>
                                 @foreach($order->orderItems as $item)
                                 <tr>
+<<<<<<< HEAD
                                     <td>{{ $item->product->name }}</td>
                                     <td class="text-end">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                                     <td class="text-center">{{ $item->quantity }}</td>
                                     <td class="text-end">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
+=======
+                                    <td>{{ $item->product_name }}</td>
+                                    <td class="text-end">Rp {{ number_format($item->product_price, 0, ',', '.') }}</td>
+                                    <td class="text-center">{{ $item->quantity }}</td>
+                                    <td class="text-end">Rp {{ number_format($item->product_price * $item->quantity, 0, ',', '.') }}</td>
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                                 </tr>
                                 @endforeach
                             </tbody>

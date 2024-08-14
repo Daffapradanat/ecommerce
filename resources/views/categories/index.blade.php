@@ -7,9 +7,23 @@
             <h1 class="display-4">Category List</h1>
         </div>
         <div class="col-md-6 text-md-end">
+<<<<<<< HEAD
             <a href="{{ route('categories.create') }}" class="btn btn-primary">
                 <i class="fas fa-user-plus"></i> Create New Category
+=======
+            <a href="{{ route('categories.create') }}" class="btn btn-primary me-2">
+                <i class="fas fa-plus"></i> Create New Category
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
             </a>
+            <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+            <a href="{{ route('categories.export') }}" class="btn btn-info">
+                <i class="fas fa-file-export"></i> Export
+            </a>
+            {{-- <a href="{{ route('categories.export') }}" class="btn btn-info" id="exportBtn">
+                <i class="fas fa-file-export"></i> Export
+            </a> --}}
         </div>
     </div>
 
@@ -72,10 +86,44 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 @endsection
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+=======
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Categories</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('categories.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Choose Excel File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+                    </div>
+                    <p>Download the <a href="{{ route('categories.template') }}">Excel template</a> for import.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@push('styles')
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 <style>
     .table th, .table td {
         vertical-align: middle;
@@ -84,9 +132,26 @@
 @endpush
 
 @push('scripts')
+<<<<<<< HEAD
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
 <script>
+=======
+<script>
+
+// document.getElementById('exportBtn').addEventListener('click', function(event) {
+//         event.preventDefault();
+//         var iframe = document.createElement('iframe');
+//         iframe.style.display = 'none';
+//         iframe.src = '{{ route('categories.export') }}';
+//         document.body.appendChild(iframe);
+
+//         setTimeout(function() {
+//             window.location.href = "{{ route('categories.index') }}";
+//         }, 1000);
+//     });
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 $(document).ready(function() {
     $('#categoriesTable').DataTable({
         processing: true,

@@ -13,7 +13,13 @@
         "laravel/telescope": "^5.1",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.5",
+<<<<<<< HEAD
         "midtrans/midtrans-php": "^2.5",
+=======
+        "maatwebsite/excel": "^3.1",
+        "midtrans/midtrans-php": "^2.5",
+        "phpoffice/phpspreadsheet": "^1.29",
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
         "yajra/laravel-datatables": "^10.0",
         "yajra/laravel-datatables-oracle": "^10.11"
     },

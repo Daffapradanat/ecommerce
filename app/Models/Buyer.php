@@ -16,6 +16,10 @@ class Buyer extends Authenticatable
         'email',
         'password',
         'image',
+<<<<<<< HEAD
+=======
+        'status',
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     ];
 
     protected $hidden = [

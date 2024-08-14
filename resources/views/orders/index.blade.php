@@ -2,7 +2,19 @@
 
 @section('content')
 <div class="container-fluid px-4">
+<<<<<<< HEAD
     <h1 class="mt-4 mb-4">Order Management</h1>
+=======
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <h1 class="mt-4 mb-3 mb-md-0">Order Management</h1>
+        <div>
+            <a href="{{ route('orders.export') }}" class="btn btn-info">
+                <i class="fas fa-file-export"></i> Export Orders
+            </a>
+        </div>
+    </div>
+</div>
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 
     <div class="card mb-4">
         <div class="card-body">
@@ -22,6 +34,28 @@
             </div>
         </div>
     </div>
+<<<<<<< HEAD
+=======
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Order Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel this order?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelButton">Cancel Order</button>
+            </div>
+        </div>
+    </div>
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 </div>
 
 <!-- Delete Modal -->
@@ -46,12 +80,19 @@
 @endsection
 
 @push('styles')
+<<<<<<< HEAD
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 @endpush
 
 @push('scripts')
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+=======
+
+@endpush
+
+@push('scripts')
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
@@ -69,6 +110,7 @@ $(document).ready(function() {
         ]
     });
 
+<<<<<<< HEAD
     $('#ordersTable').on('click', '.delete-order', function() {
         var orderId = $(this).data('id');
         $('#deleteModal').modal('show');
@@ -79,11 +121,40 @@ $(document).ready(function() {
         var orderId = $(this).data('id');
         $.ajax({
             url: "{{ url('orders') }}/" + orderId + "/cancel",
+=======
+    // $('#ordersTable').on('click', '.delete-order', function() {
+    //     var orderId = $(this).data('id');
+    //     $('#deleteModal').modal('show');
+    //     $('#confirmCancelButton').data('id', orderId);
+    // });
+
+    $('#ordersTable').on('click', '.delete-order', function() {
+        var orderId = $(this).data('id');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cancelOrder(orderId);
+            }
+        });
+    });
+
+    function cancelOrder(orderId) {
+        $.ajax({
+            url: "{{ route('orders.cancel', ':id') }}".replace(':id', orderId),
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
             method: 'POST',
             data: {
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
+<<<<<<< HEAD
                 $('#deleteModal').modal('hide');
                 table.ajax.reload();
                 Swal.fire('Cancelled!', 'The order has been cancelled.', 'success');
@@ -94,6 +165,23 @@ $(document).ready(function() {
             }
         });
     });
+=======
+                table.ajax.reload();
+                Swal.fire('Cancelled!', response.message, 'success');
+            },
+            error: function(xhr) {
+                Swal.fire('Error!', xhr.responseJSON.message || 'There was an error cancelling the order.', 'error');
+            }
+        });
+    }
+
+    // Alert auto-close
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+            $(this).remove();
+        });
+    }, 5000);
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 });
 </script>
 @endpush

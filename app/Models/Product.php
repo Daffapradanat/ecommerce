@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -17,6 +18,11 @@ class Product extends Model
         'category_id',
     ];
 
+<<<<<<< HEAD
+=======
+    protected $dates = ['deleted_at'];
+
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     public function category()
     {
         return $this->belongsTo(Category::class);

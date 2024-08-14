@@ -170,6 +170,10 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\TelescopeServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
+<<<<<<< HEAD
+=======
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     ])->toArray(),
 
     /*
@@ -186,6 +190,10 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+<<<<<<< HEAD
+=======
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     ])->toArray(),
 
 ];

@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+<<<<<<< HEAD
+=======
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
+use App\Imports\UsersImport;
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
 
 class UserController extends Controller
 {
@@ -78,7 +84,6 @@ class UserController extends Controller
         $user->email = $request->email;
 
         if ($request->hasFile('image')) {
-            // Delete old image
             if ($user->image) {
                 Storage::disk('public')->delete('users/'.$user->image);
             }
@@ -101,5 +106,15 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new UsersExport, 'users.xlsx');
+    }
+
+    public function exportTemplate()
+    {
+        return Excel::download(new UsersExport(true), 'users_template.xlsx');
     }
 }

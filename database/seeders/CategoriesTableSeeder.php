@@ -11,6 +11,10 @@ class CategoriesTableSeeder extends Seeder
     public function run()
     {
         $categories = [
+<<<<<<< HEAD
+=======
+            'Automotive',
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
             'Electronics',
             'Clothing',
             'Books',

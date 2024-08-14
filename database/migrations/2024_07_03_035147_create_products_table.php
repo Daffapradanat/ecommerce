@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('price');
             $table->integer('stock');
             $table->unsignedBigInteger('category_id');
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories');

@@ -2,18 +2,28 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob: http: https:; connect-src 'self' https: http: ws: wss:; font-src 'self' https: data:; media-src 'self' https: data:; object-src 'none'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; style-src 'self' https: 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>E-commerce Dashboard</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('Asset/Logo.ico') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<<<<<<< HEAD
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+=======
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> --}}
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -70,13 +80,29 @@
                     @auth
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+<<<<<<< HEAD
                             <img src="{{ Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png') }}" class="rounded-circle me-2" alt="User Image" style="width: 32px; height: 32px; object-fit: cover;">
+=======
+                            @php
+                                $imageUrl = Auth::user()->image;
+                                $isUrl = filter_var($imageUrl, FILTER_VALIDATE_URL);
+                                $image = $isUrl && preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $imageUrl) ? $imageUrl : (Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png'));
+                            @endphp
+                            <img src="{{ $image }}" class="rounded-circle me-2" alt="User Image" style="width: 32px; height: 32px; object-fit: cover;">
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                             <span>{{ Auth::user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="width: 220px;">
                             <li class="px-3 py-2">
                                 <div class="d-flex align-items-center">
+<<<<<<< HEAD
                                     <img src="{{ Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png') }}" class="rounded-circle me-2" alt="User Image" style="width: 48px; height: 48px; object-fit: cover;">
+=======
+                                    @php
+                                        $imageLarge = $isUrl && preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $imageUrl) ? $imageUrl : (Auth::user()->image ? asset('storage/users/' . Auth::user()->image) : asset('default-avatar.png'));
+                                    @endphp
+                                    <img src="{{ $imageLarge }}" class="rounded-circle me-2" alt="User Image" style="width: 48px; height: 48px; object-fit: cover;">
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                                     <div>
                                         <h6 class="mb-0">{{ Auth::user()->name }}</h6>
                                         <small class="text-muted">Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
@@ -173,6 +199,7 @@
         </div>
 
         <footer class="main-footer">
+<<<<<<< HEAD
             <strong>Copyright &copy; 2023 E-commerce.</strong> All rights reserved.
         </footer>
     </div>
@@ -195,6 +222,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+=======
+            {{-- <strong>Copyright &copy; 2023 E-commerce.</strong> All rights reserved. --}}
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
@@ -209,6 +247,47 @@
             $('.nav-sidebar .nav-link').each(function() {
                 if ($(this).attr('href') === window.location.href) {
                     $(this).addClass('active');
+<<<<<<< HEAD
+=======
+                }
+            });
+
+            // Toastr configuration
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error('{{ $error }}');
+                @endforeach
+            @endif
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const imgElements = document.querySelectorAll('.nav-link img');
+
+            imgElements.forEach(img => {
+                const imgUrl = img.src;
+
+                function isImageUrl(url) {
+                    return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+                }
+
+                if (!isImageUrl(imgUrl)) {
+                    img.src = '{{ asset('default-avatar.png') }}';
+                    alert('The provided URL is not a valid image.');
+>>>>>>> 9e59e9efe56e52d879af0fb2232e489f79c8d300
                 }
             });
 
