@@ -5,6 +5,7 @@ namespace App\Exports;
 
 use App\Models\Product;
 use App\Models\Image;
+use App\Models\Catagory;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -23,11 +24,13 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
     public function headings(): array
     {
         return [
+            'id',
             'name',
             'description',
             'price',
             'stock',
             'category_id',
+            'category_name',
             'image',
         ];
     }
@@ -39,11 +42,13 @@ class ProductsExport extends DefaultValueBinder implements FromCollection, WithH
         })->implode(', ');
 
         return [
+            $product->id,
             $product->name,
             $product->description,
             $product->price,
             $product->stock,
             $product->category_id,
+            $product->category->name,
             $imageUrls,
         ];
     }
