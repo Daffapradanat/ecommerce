@@ -1,7 +1,7 @@
 # Ecommerce BackOffice
 
 <p align="center">
-  <img src="https://laravel.com/img/logomark.min.svg" alt="Laravel Logo" width="1000"/>
+  <img src="https://laravel.com/img/logomark.min.svg" alt="Laravel Logo" width="250"/>
 <!--   <img src="https://www.php.net/images/logos/php-logo.svg" alt="PHP Logo" width="100"/>
   <img src="https://getcomposer.org/img/logo-composer-transparent.png" alt="Composer Logo" width="100"/> -->
 </p>
