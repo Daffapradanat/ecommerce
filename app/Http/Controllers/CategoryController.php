@@ -128,12 +128,12 @@ class CategoryController extends Controller
 
             if ($failures->isNotEmpty() || !empty($errors)) {
                 $errorMessages = collect($failures)->map(function ($failure) {
-                    return "Row {$failure->row()}: ".$failure->errors()[0];
-                })->merge($errors)->join('');
+                    return "Row {$failure->row()}: " . implode(', ', $failure->errors());
+                })->merge($errors)->join('<br>');
 
                 return redirect()->route('categories.index')->with('notification', [
                     'type' => 'warning',
-                    'message' => 'Categories imported with some issues: '.$errorMessages,
+                    'message' => 'Categories imported with some issues:<br>' . $errorMessages,
                 ]);
             }
 
@@ -141,10 +141,20 @@ class CategoryController extends Controller
                 'type' => 'success',
                 'message' => 'Categories imported successfully.',
             ]);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = collect($failures)->map(function ($failure) {
+                return "Row {$failure->row()}: " . implode(', ', $failure->errors());
+            })->join('<br>');
+
+            return redirect()->route('categories.index')->with('notification', [
+                'type' => 'warning',
+                'message' => 'Categories import failed:<br>' . $errorMessages,
+            ]);
         } catch (\Exception $e) {
             return redirect()->route('categories.index')->with('notification', [
                 'type' => 'danger',
-                'message' => 'There was an issue during import: '.$e->getMessage(),
+                'message' => 'There was an issue during import: ' . $e->getMessage(),
             ]);
         }
     }
