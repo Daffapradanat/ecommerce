@@ -40,5 +40,3 @@ Ecommerce BackOffice is a robust application built with Laravel 10+ for managing
 git clone https://github.com/Daffapradanat/ecommerce.git
 cd ecommerce
 
-
-This should properly display the Laravel, PHP, and Composer logos. If you still encounter issues, consider hosting the images locally or using different image URLs.
