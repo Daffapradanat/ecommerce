@@ -1,6 +1,10 @@
 # Ecommerce BackOffice
 
-![Laravel Logo](https://laravel.com/img/logomark.min.svg) ![PHP Logo](https://www.php.net/images/logos/php-logo.svg) ![Composer Logo](https://getcomposer.org/img/logo-composer-transparent.png)
+<p align="center">
+  <img src="https://laravel.com/img/logomark.min.svg" alt="Laravel Logo" width="100"/>
+  <img src="https://www.php.net/images/logos/php-logo.svg" alt="PHP Logo" width="100"/>
+  <img src="https://getcomposer.org/img/logo-composer-transparent.png" alt="Composer Logo" width="100"/>
+</p>
 
 ## Overview
 
