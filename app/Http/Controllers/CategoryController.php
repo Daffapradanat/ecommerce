@@ -107,23 +107,45 @@ class CategoryController extends Controller
             return redirect()->route('categories.index')
                 ->with('error', 'Cannot delete this category. It is still being used by one or more products.');
         }
-    
+
         $category->delete();
-    
+
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
     }
 
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         try {
-            Excel::import(new CategoriesImport, $request->file('file'));
-            return redirect()->route('categories.index')->with('success', 'Categories imported successfully.');
+            $import = new CategoriesImport();
+            Excel::import($import, $request->file('file'));
+
+            $failures = $import->failures();
+            $errors = $import->errors;
+
+            if ($failures->isNotEmpty() || !empty($errors)) {
+                $errorMessages = collect($failures)->map(function ($failure) {
+                    return "Row {$failure->row()}: ".$failure->errors()[0];
+                })->merge($errors)->join('');
+
+                return redirect()->route('categories.index')->with('notification', [
+                    'type' => 'warning',
+                    'message' => 'Categories imported with some issues: '.$errorMessages,
+                ]);
+            }
+
+            return redirect()->route('categories.index')->with('notification', [
+                'type' => 'success',
+                'message' => 'Categories imported successfully.',
+            ]);
         } catch (\Exception $e) {
-            return redirect()->route('categories.index')->with('error', 'Error importing categories: ' . $e->getMessage());
+            return redirect()->route('categories.index')->with('notification', [
+                'type' => 'danger',
+                'message' => 'There was an issue during import: '.$e->getMessage(),
+            ]);
         }
     }
 
