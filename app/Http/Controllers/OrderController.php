@@ -273,11 +273,13 @@ class OrderController extends Controller
                 break;
         }
 
-        $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
-        $admins = User::where('role', 'admin')->get();
-        Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
-
         $order->save();
+
+        if ($order->payment_status !== $oldStatus) {
+            $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+            $admins = User::where('role', 'admin')->get();
+            Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+        }
 
         return response('OK', 200);
     }

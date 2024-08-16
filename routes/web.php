@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
         Route::post('mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
         Route::post('batch-action', [NotificationController::class, 'batchAction'])->name('batchAction');
         Route::post('delete-selected', [NotificationController::class, 'deleteSelected'])->name('deleteSelected');
+        Route::get('/get', [NotificationController::class, 'getNotifications'])->name('getNotifications');
     });
 
     // Order Routes

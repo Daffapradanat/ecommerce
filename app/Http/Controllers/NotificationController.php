@@ -4,14 +4,37 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class NotificationController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $notifications = $user->notifications()->orderBy('created_at', 'desc')->paginate(10);
-        return view('notifications.index', compact('notifications'));
+        return view('notifications.index');
+    }
+
+    public function getNotifications()
+    {
+        $notifications = Auth::user()->notifications();
+
+        return DataTables::of($notifications)
+            ->addColumn('checkbox', function ($notification) {
+                return '<input type="checkbox" name="selected_notifications[]" value="' . $notification->id . '" class="notification-checkbox">';
+            })
+            ->addColumn('message', function ($notification) {
+                $class = $notification->read_at ? 'text-muted' : 'fw-bold';
+                return '<span class="' . $class . '">' . $notification->data['message'] . '</span>';
+            })
+            ->addColumn('actions', function ($notification) {
+                $actions = '';
+                if (!$notification->read_at) {
+                    $actions .= '<a href="' . route('notifications.markAsRead', $notification->id) . '" class="btn btn-sm btn-primary me-2"><i class="fas fa-eye"></i></a>';
+                }
+                $actions .= '<button type="button" class="btn btn-sm btn-danger delete-notification" data-notification-id="' . $notification->id . '"><i class="fas fa-trash"></i></button>';
+                return $actions;
+            })
+            ->rawColumns(['checkbox', 'message', 'actions'])
+            ->make(true);
     }
 
     public function markAsRead($id)
