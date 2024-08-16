@@ -334,7 +334,6 @@ class ShoppingController extends Controller
         $order->payment_status = 'cancelled';
         $order->save();
 
-        $order->user->notify(new OrderStatusChangedNotification($order, $oldStatus));
         $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
 
         $admins = User::where('role', 'admin')->get();
