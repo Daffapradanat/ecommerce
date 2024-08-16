@@ -67,6 +67,12 @@
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
 <script>
 $(document).ready(function() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     let table = $('#notificationsTable').DataTable({
         processing: true,
         serverSide: true,
@@ -94,11 +100,11 @@ $(document).ready(function() {
         $.ajax({
             url: '{{ route('notifications.markAllAsRead') }}',
             type: 'POST',
-            data: {
-                "_token": "{{ csrf_token() }}",
-            },
             success: function(result) {
                 table.ajax.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Failed to mark all as read: ' + error);
             }
         });
     });
@@ -112,14 +118,14 @@ $(document).ready(function() {
 
     $('#confirmDeleteButton').click(function() {
         $.ajax({
-            url: 'notifications/' + notificationIdToDelete,
+            url: '{{ route("notifications.destroy", "") }}/' + notificationIdToDelete,
             type: 'DELETE',
-            data: {
-                "_token": "{{ csrf_token() }}",
-            },
             success: function(result) {
                 $('#deleteModal').modal('hide');
                 table.ajax.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Failed to delete notification: ' + error);
             }
         });
     });
@@ -129,22 +135,23 @@ $(document).ready(function() {
     });
 
     $('#deleteSelectedButton').click(function() {
-        let selectedIds = [];
-        $('.notification-checkbox:checked').each(function() {
-            selectedIds.push($(this).val());
-        });
+        let selectedIds = $('.notification-checkbox:checked').map(function() {
+            return $(this).val();
+        }).get();
 
         if (selectedIds.length > 0) {
             if (confirm('Are you sure you want to delete these notifications?')) {
                 $.ajax({
-                    url: '{{ route('notifications.deleteSelected') }}',
+                    url: '{{ route("notifications.deleteSelected") }}',
                     type: 'POST',
                     data: {
-                        "_token": "{{ csrf_token() }}",
                         "selected_notifications": selectedIds
                     },
                     success: function(result) {
                         table.ajax.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Failed to delete selected notifications: ' + error);
                     }
                 });
             }

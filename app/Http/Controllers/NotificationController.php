@@ -46,15 +46,28 @@ class NotificationController extends Controller
 
     public function destroy($id)
     {
-        Auth::user()->notifications()->findOrFail($id)->delete();
-        return back()->with('success', 'Notification deleted successfully');
+        try {
+            $notification = Auth::user()->notifications()->findOrFail($id);
+            $notification->delete();
+            return response()->json(['success' => 'Notification deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete the notification'], 500);
+        }
     }
 
     public function deleteSelected(Request $request)
     {
-        $selectedNotifications = $request->input('selected_notifications', []);
-        Auth::user()->notifications()->whereIn('id', $selectedNotifications)->delete();
-        return response()->json(['success' => 'Selected notifications deleted successfully.']);
+        $validated = $request->validate([
+            'selected_notifications' => 'required|array|min:1',
+            'selected_notifications.*' => 'exists:notifications,id',
+        ]);
+
+        try {
+            Auth::user()->notifications()->whereIn('id', $validated['selected_notifications'])->delete();
+            return response()->json(['success' => 'Selected notifications deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete selected notifications.'], 500);
+        }
     }
 
     public function markAllAsRead()
