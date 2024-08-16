@@ -54,7 +54,7 @@ class NotificationController extends Controller
     {
         $selectedNotifications = $request->input('selected_notifications', []);
         Auth::user()->notifications()->whereIn('id', $selectedNotifications)->delete();
-        return back()->with('success', 'Selected notifications deleted successfully.');
+        return response()->json(['success' => 'Selected notifications deleted successfully.']);
     }
 
     public function markAllAsRead()

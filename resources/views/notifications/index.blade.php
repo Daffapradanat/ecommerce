@@ -63,61 +63,95 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            let table = $('#notificationsTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('notifications.getNotifications') }}",
-                columns: [
-                    { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
-                    { data: 'message', name: 'message' },
-                    { data: 'actions', name: 'actions', orderable: false, searchable: false }
-                ]
-            });
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+<script>
+$(document).ready(function() {
+    let table = $('#notificationsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('notifications.getNotifications') }}",
+        columns: [
+            {
+                data: 'checkbox',
+                name: 'checkbox',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    return '<input type="checkbox" class="notification-checkbox" value="' + row.id + '">';
+                }
+            },
+            { data: 'message', name: 'message' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false }
+        ]
+    });
 
-            $('#refreshButton').click(function() {
+    $('#refreshButton').click(function() {
+        table.ajax.reload();
+    });
+
+    $('#markAllReadButton').click(function() {
+        $.ajax({
+            url: '{{ route('notifications.markAllAsRead') }}',
+            type: 'POST',
+            data: {
+                "_token": "{{ csrf_token() }}",
+            },
+            success: function(result) {
                 table.ajax.reload();
-            });
+            }
+        });
+    });
 
-            $('#markAllReadButton').click(function() {
-                $('#notificationForm').attr('action', '{{ route('notifications.markAllAsRead') }}').submit();
-            });
+    let notificationIdToDelete;
 
-            let notificationIdToDelete;
+    $(document).on('click', '.delete-notification', function() {
+        notificationIdToDelete = $(this).data('notification-id');
+        $('#deleteModal').modal('show');
+    });
 
-            $(document).on('click', '.delete-notification', function() {
-                notificationIdToDelete = $(this).data('notification-id');
-                $('#deleteModal').modal('show');
-            });
+    $('#confirmDeleteButton').click(function() {
+        $.ajax({
+            url: 'notifications/' + notificationIdToDelete,
+            type: 'DELETE',
+            data: {
+                "_token": "{{ csrf_token() }}",
+            },
+            success: function(result) {
+                $('#deleteModal').modal('hide');
+                table.ajax.reload();
+            }
+        });
+    });
 
-            $('#confirmDeleteButton').click(function() {
+    $('#selectAll').change(function() {
+        $('.notification-checkbox').prop('checked', $(this).prop('checked'));
+    });
+
+    $('#deleteSelectedButton').click(function() {
+        let selectedIds = [];
+        $('.notification-checkbox:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+
+        if (selectedIds.length > 0) {
+            if (confirm('Are you sure you want to delete these notifications?')) {
                 $.ajax({
-                    url: 'notifications/' + notificationIdToDelete,
-                    type: 'DELETE',
+                    url: '{{ route('notifications.deleteSelected') }}',
+                    type: 'POST',
                     data: {
                         "_token": "{{ csrf_token() }}",
+                        "selected_notifications": selectedIds
                     },
                     success: function(result) {
-                        $('#deleteModal').modal('hide');
                         table.ajax.reload();
                     }
                 });
-            });
-
-            $('#selectAll').change(function() {
-                $('.notification-checkbox').prop('checked', $(this).prop('checked'));
-            });
-
-            $('#deleteSelectedButton').click(function() {
-                if ($('.notification-checkbox:checked').length > 0) {
-                    $('#deleteModal').modal('show');
-                } else {
-                    alert('Please select at least one notification to delete.');
-                }
-            });
-        });
-    </script>
+            }
+        } else {
+            alert('Please select at least one notification to delete.');
+        }
+    });
+});
+</script>
 @endpush
