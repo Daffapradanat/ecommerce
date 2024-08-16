@@ -33,7 +33,6 @@ class AuthController extends Controller
             'password' => bcrypt($validatedData['password']),
         ]);
 
-        // Automatically log in the user after registration
         Auth::login($user);
 
         return redirect()->route('home')->with('success', 'You have successfully registered and logged in!');

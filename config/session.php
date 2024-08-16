@@ -18,7 +18,11 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'file'),
+        'driver' => env('SESSION_DRIVER', 'file'), // This can be overridden by .env
+        // ...
+        'driver' => 'database',
+        'table' => 'sessions',
+        // ...
 
     /*
     |--------------------------------------------------------------------------
