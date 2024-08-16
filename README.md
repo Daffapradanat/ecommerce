@@ -33,6 +33,7 @@ Ecommerce BackOffice is a robust application built with Laravel 10+ for managing
 - PHP 8.3 or higher
 - Composer
 - Laravel 10+
+- extension=php_zip.dll
 
 ### 1. Clone the Repository
 
