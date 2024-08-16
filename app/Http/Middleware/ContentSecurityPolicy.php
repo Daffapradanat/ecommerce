@@ -22,6 +22,7 @@ class ContentSecurityPolicy
                      "object-src 'none'; " .
                      "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; " .
                      "style-src 'self' https: 'unsafe-inline';";
+                    //  "form-action 'self';";
 
         if (!$response instanceof BinaryFileResponse && !$response instanceof StreamedResponse) {
             $currentHeader = $response->headers->get('Content-Security-Policy');

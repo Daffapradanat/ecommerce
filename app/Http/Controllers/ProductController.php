@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Buyer;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use App\Http\Requests\StoreProductRequest;
+use App\Notifications\NewProductNotification;
+use App\Notifications\ImportedProductsNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -118,6 +121,11 @@ class ProductController extends Controller
             }
         }
 
+            $buyers = Buyer::all();
+            foreach ($buyers as $buyer) {
+                $buyer->notify(new NewProductNotification($product));
+            }
+
         return redirect()->route('products.index')->with('notification', [
             'type' => 'success',
             'message' => 'Product created successfully',
@@ -216,9 +224,21 @@ class ProductController extends Controller
                 ]);
             }
 
+            $importCount = $import->getRowCount();
+
+            $buyers = Buyer::all();
+            foreach ($buyers as $buyer) {
+                $buyer->notify(new ImportedProductsNotification($importCount));
+            }
+
+            $users = User::all();
+            foreach ($users as $user) {
+                $user->notify(new ImportedProductsNotification($importCount));
+            }
+
             return redirect()->route('products.index')->with('notification', [
                 'type' => 'success',
-                'message' => 'Products imported successfully.',
+                'message' => 'Products imported successfully. ' . $importCount . ' new products added.',
             ]);
         } catch (\Exception $e) {
             return redirect()->route('products.index')->with('notification', [

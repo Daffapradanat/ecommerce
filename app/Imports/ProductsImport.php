@@ -126,4 +126,9 @@ class ProductsImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             'category_id.exists' => 'The selected category_id is invalid.',
         ];
     }
+
+    public function getRowCount()
+    {
+        return $this->rowCount;
+    }
 }

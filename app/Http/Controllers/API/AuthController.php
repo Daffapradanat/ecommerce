@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\NewBuyer;
+use App\Models\User;
 use App\Models\Buyer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +28,11 @@ class AuthController extends Controller
         ]);
 
         $token = $buyer->createToken('auth_token')->plainTextToken;
+
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->notify(new NewBuyer($buyer));
+        }
 
         return response()->json([
             'buyer' => $buyer,

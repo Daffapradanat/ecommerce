@@ -124,34 +124,62 @@
 
 @push('scripts')
 @if(isset($snapToken))
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Fungsi untuk memperbarui tampilan status
-    function updateStatusDisplay(newStatus) {
-        const statusBadge = document.querySelector('.badge');
-        const statusClasses = {
-            'pending': 'bg-warning',
-            'awaiting_payment': 'bg-info',
-            'paid': 'bg-success',
-            'failed': 'bg-danger'
-        };
-        statusBadge.className = `badge ${statusClasses[newStatus] || 'bg-secondary'} fs-6`;
-        statusBadge.textContent = `Payment Status: ${newStatus.replace('_', ' ').charAt(0).toUpperCase() + newStatus.slice(1)}`;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-    // Cek status pembayaran saat halaman dimuat
-    fetch("{{ route('orders.check-payment', $order->id) }}")
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== '{{ $order->payment_status }}') {
-                updateStatusDisplay(data.status);
-            }
-        });
-});
-</script>
-@endpush
+        function updateStatusDisplay(newStatus) {
+            const statusBadge = document.querySelector('.badge');
+            const statusClasses = {
+                'pending': 'bg-warning',
+                'awaiting_payment': 'bg-info',
+                'paid': 'bg-success',
+                'failed': 'bg-danger'
+            };
+            statusBadge.className = `badge ${statusClasses[newStatus] || 'bg-secondary'} fs-6`;
+            statusBadge.textContent = `Payment Status: ${newStatus.replace('_', ' ').charAt(0).toUpperCase() + newStatus.slice(1)}`;
+        }
+
+        fetch("{{ route('orders.check-payment', $order->id) }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== '{{ $order->payment_status }}') {
+                    updateStatusDisplay(data.status);
+                }
+            });
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+            });
+        @endif
+
+        @if(session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Warning!',
+                text: "{{ session('warning') }}",
+            });
+        @endif
+    });
+    </script>
 @endif
+@endpush
 
 @push('styles')
 <style>

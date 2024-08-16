@@ -3,17 +3,22 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Notifications\NewBuyerOrderNotification;
+use App\Notifications\NewOrderNotification;
+use App\Notifications\OrderStatusChangedNotification;
+use App\Notifications\OrderCancelledNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction;
-
 
 class ShoppingController extends Controller
 {
@@ -142,110 +147,6 @@ class ShoppingController extends Controller
         return $orderId;
     }
 
-//     public function checkout(Request $request)
-// {
-//     $request->validate([
-//         'phone' => 'required|string|max:20',
-//         'city' => 'required|string|max:255',
-//         'address' => 'required|string',
-//         'postal_code' => 'required|string|max:10',
-//     ]);
-
-//     $buyer = auth()->user();
-//     $cartItems = Cart::where('buyer_id', $buyer->id)->with('product')->get();
-
-//     if ($cartItems->isEmpty()) {
-//         return response()->json(['message' => 'Cart is empty'], 400);
-//     }
-
-//     DB::beginTransaction();
-
-//     try {
-//         $totalPrice = $cartItems->sum(function ($item) {
-//             return $item->quantity * $item->product->price;
-//         });
-
-//         $order = Order::create([
-//             'order_id' => $this->generateUniqueOrderId(),
-//             'buyer_id' => $buyer->id,
-//             'total_price' => $totalPrice,
-//             'payment_status' => 'pending',
-//             'email' => $buyer->email,
-//             'phone' => $request->phone,
-//             'city' => $request->city,
-//             'address' => $request->address,
-//             'postal_code' => $request->postal_code,
-//         ]);
-
-//         $orderItems = $cartItems->map(function ($item) use ($order) {
-//             $product = $item->product;
-//             $orderItem = new OrderItem([
-//                 'order_id' => $order->id,
-//                 'product_id' => $product->id,
-//                 'product_name' => $product->name,
-//                 'product_description' => $product->description,
-//                 'product_price' => $product->price,
-//                 'quantity' => $item->quantity,
-//                 'price' => $product->price * $item->quantity,
-//             ]);
-
-//             $product->decrement('stock', $item->quantity);
-
-//             return $orderItem;
-//         });
-
-//         $order->orderItems()->saveMany($orderItems);
-
-//         $params = [
-//             'transaction_details' => [
-//                 'order_id' => $order->order_id,
-//                 'gross_amount' => $totalPrice,
-//             ],
-//             'item_details' => $orderItems->map(function ($item) {
-//                 return [
-//                     'id' => $item->product_id,
-//                     'price' => $item->product_price,
-//                     'quantity' => $item->quantity,
-//                     'name' => $item->product_name,
-//                 ];
-//             })->toArray(),
-//             'customer_details' => [
-//                 'first_name' => $buyer->name,
-//                 'email' => $buyer->email,
-//                 'phone' => $request->phone,
-//                 'billing_address' => [
-//                     'city' => $request->city,
-//                     'postal_code' => $request->postal_code,
-//                     'address' => $request->address,
-//                 ],
-//                 'shipping_address' => [
-//                     'city' => $request->city,
-//                     'postal_code' => $request->postal_code,
-//                     'address' => $request->address,
-//                 ],
-//             ],
-//         ];
-
-//         $snapToken = \Midtrans\Snap::getSnapToken($params);
-//         $order->update(['payment_token' => $snapToken]);
-
-//         Cart::where('buyer_id', $buyer->id)->delete();
-
-//         DB::commit();
-
-//         return response()->json([
-//             'message' => 'Order created successfully',
-//             'order' => $order->load('orderItems'),
-//             'payment_token' => $snapToken,
-//             'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken,
-//         ], 201);
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-
-//         return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
-//     }
-// }
-
     public function checkout(Request $request)
     {
         $request->validate([
@@ -337,6 +238,13 @@ class ShoppingController extends Controller
 
             DB::commit();
 
+            $buyer->notify(new NewBuyerOrderNotification($order));
+
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewOrderNotification($order));
+            }
+
             return response()->json([
                 'message' => 'Order created successfully',
                 'order' => $order->load('orderItems'),
@@ -401,8 +309,9 @@ class ShoppingController extends Controller
 
     public function cancelOrder(Request $request)
     {
+
         $request->validate([
-            'order_id' => 'required|exists:orders,order_id'
+            'order_id' => 'required|exists:orders,order_id',
         ]);
 
         $order = Order::where('order_id', $request->order_id)
@@ -417,12 +326,19 @@ class ShoppingController extends Controller
             return response()->json(['message' => 'Paid orders cannot be cancelled'], 400);
         }
 
-        if ($order->payment_status === 'failed') {
-            return response()->json(['message' => 'This order is already cancelled or failed'], 400);
+        if ($order->payment_status === 'cancelled') {
+            return response()->json(['message' => 'This order is already cancelled'], 400);
         }
 
-        $order->payment_status = 'failed';
+        $oldStatus = $order->payment_status;
+        $order->payment_status = 'cancelled';
         $order->save();
+
+        $order->user->notify(new OrderStatusChangedNotification($order, $oldStatus));
+        $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new OrderCancelledNotification($order));
 
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order]);
     }
@@ -435,14 +351,12 @@ class ShoppingController extends Controller
             return response()->json(['error' => 'This order is not pending payment'], 400);
         }
 
-        // Ambil payment token dari order
         $paymentToken = $order->payment_token;
 
         if (! $paymentToken) {
             return response()->json(['error' => 'Payment token not found'], 404);
         }
 
-        // Gunakan Midtrans SDK untuk mendapatkan redirect URL
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production');
 

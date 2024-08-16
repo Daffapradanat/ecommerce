@@ -55,29 +55,64 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-let itemCount = 1;
-document.getElementById('add-item').addEventListener('click', function() {
-    const itemsDiv = document.getElementById('items');
-    const newItem = document.createElement('div');
-    newItem.className = 'item';
-    newItem.innerHTML = `
-        <h3>Item ${itemCount + 1}</h3>
-        <div class="form-group">
-            <label>Product</label>
-            <select name="items[${itemCount}][product_id]" class="form-control" required>
-                @foreach($products as $product)
-                    <option value="{{ $product->id }}">{{ $product->name }} - Rp{{ number_format($product->price, 0, ',', '.') }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" name="items[${itemCount}][quantity]" class="form-control" min="1" value="1" required>
-        </div>
-    `;
-    itemsDiv.appendChild(newItem);
-    itemCount++;
-});
-</script>
-@endsection
+    document.addEventListener('DOMContentLoaded', function () {
+        let itemCount = 1;
+
+        document.getElementById('add-item').addEventListener('click', function() {
+            const itemsDiv = document.getElementById('items');
+            const newItem = document.createElement('div');
+            newItem.className = 'item';
+            newItem.innerHTML = `
+                <h3>Item ${itemCount + 1}</h3>
+                <div class="form-group">
+                    <label>Product</label>
+                    <select name="items[${itemCount}][product_id]" class="form-control" required>
+                        @foreach($products as $product)
+                            <option value="{{ $product->id }}">{{ $product->name }} - Rp{{ number_format($product->price, 0, ',', '.') }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" name="items[${itemCount}][quantity]" class="form-control" min="1" value="1" required>
+                </div>
+            `;
+            itemsDiv.appendChild(newItem);
+            itemCount++;
+        });
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Creating Order',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+            form.submit();
+        });
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+            });
+        @endif
+    });
+    </script>
+    @endsection

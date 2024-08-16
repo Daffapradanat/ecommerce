@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Buyer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use App\Notifications\NewBuyer;
 use App\Exports\BuyersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -57,6 +59,7 @@ class BuyerController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers',
@@ -76,8 +79,14 @@ class BuyerController extends Controller
 
         $buyer->save();
 
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->notify(new NewBuyer($buyer));
+        }
+
         return redirect()->route('buyer.index')->with('success', 'Buyer created successfully.');
     }
+
 
     public function show(buyer $buyer)
     {

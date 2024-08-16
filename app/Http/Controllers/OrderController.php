@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Notifications\Notification;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Illuminate\Support\Facades\Log;
 use App\Services\OrderService;
+use App\Notifications\OrderStatusChangedNotification;
+use App\Notifications\OrderCancelledNotification;
 use App\Services\MidtransService;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
@@ -86,6 +90,7 @@ class OrderController extends Controller
     public function cancel($id)
     {
         $order = Order::findOrFail($id);
+        $oldStatus = $order->payment_status;
 
         if (!in_array($order->payment_status, ['awaiting_payment', 'pending'])) {
             return response()->json(['message' => 'This order cannot be cancelled.'], 400);
@@ -94,12 +99,20 @@ class OrderController extends Controller
         $order->payment_status = 'cancelled';
         $order->save();
 
+        if ($oldStatus !== 'cancelled') {
+            $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+            $admins = User::where('role', 'admin')->get();
+            Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+        }
+
         return response()->json(['message' => 'Order cancelled successfully.']);
     }
 
     public function pay($id)
     {
         $order = Order::findOrFail($id);
+        $oldStatus = $order->payment_status;
 
         if (!in_array($order->payment_status, ['pending', 'awaiting_payment'])) {
             return redirect()->route('orders.show', $order->id)
@@ -113,6 +126,13 @@ class OrderController extends Controller
                 'payment_token' => $snapToken,
                 'payment_status' => 'awaiting_payment',
             ]);
+
+            if ($oldStatus !== 'awaiting_payment') {
+                $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+                $admins = User::where('role', 'admin')->get();
+                \Illuminate\Support\Facades\Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+            }
 
             $expirationTime = now()->addMinutes(5);
             session(['payment_expires_at_' . $order->id => $expirationTime->timestamp]);
@@ -135,9 +155,16 @@ class OrderController extends Controller
     public function completePayment(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+        $oldStatus = $order->payment_status;
 
         $order->payment_status = 'paid';
         $order->save();
+
+        if ($oldStatus !== 'paid') {
+            $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+            $admins = User::where('role', 'admin')->get();
+            Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+        }
 
         return response()->json([
             'success' => true,
@@ -148,22 +175,28 @@ class OrderController extends Controller
     public function cancelPayment($id)
     {
         $result = $this->orderService->cancelPayment($id);
+        $order = Order::findOrFail($id);
+        $oldStatus = $order->payment_status;
 
         if ($result['status'] === 'success') {
+            if ($oldStatus !== 'cancelled') {
+                $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+                $admins = User::where('role', 'admin')->get();
+                Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+            }
+
             if (request()->ajax()) {
                 return response()->json(['message' => $result['message']], 200);
             }
-            return redirect()->route('orders.show', $id)
-                ->with('success', $result['message']);
+            return redirect()->route('orders.show', $id)->with('success', $result['message']);
         } else {
             if (request()->ajax()) {
                 return response()->json(['message' => $result['message']], 400);
             }
-            return redirect()->route('orders.show', $id)
-                ->with('error', $result['message']);
+            return redirect()->route('orders.show', $id)->with('error', $result['message']);
         }
     }
-
 
     public function handlePaymentCallback(Request $request)
     {
@@ -176,6 +209,26 @@ class OrderController extends Controller
                 $order->save();
             }
         }
+
+        $oldStatus = $order->payment_status;
+
+        if ($transactionStatus == 'capture') {
+            if ($fraudStatus == 'challenge') {
+                $order->setStatusPending();
+            } elseif ($fraudStatus == 'accept') {
+                $order->setStatusSuccess();
+            }
+        } elseif ($transactionStatus == 'settlement') {
+            $order->setStatusSuccess();
+        } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
+            $order->setStatusFailed();
+        } elseif ($transactionStatus == 'pending') {
+            $order->setStatusPending();
+        }
+
+        $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
 
         return response('OK', 200);
     }
@@ -200,24 +253,26 @@ class OrderController extends Controller
         }
 
         Log::info('Processing order: ' . $order->id);
+        $oldStatus = $order->payment_status;
 
         switch ($request->transaction_status) {
             case 'capture':
             case 'settlement':
                 $order->payment_status = 'paid';
-                Log::info('Payment for order ' . $order->id . ' marked as paid');
                 break;
             case 'pending':
                 $order->payment_status = 'pending';
-                Log::info('Payment for order ' . $order->id . ' marked as pending');
                 break;
             case 'deny':
             case 'expire':
             case 'cancel':
                 $order->payment_status = 'failed';
-                Log::info('Payment for order ' . $order->id . ' marked as failed');
                 break;
         }
+
+        $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
 
         $order->save();
 
@@ -228,22 +283,5 @@ class OrderController extends Controller
     {
         return Excel::download(new OrdersExport, 'orders.xlsx');
     }
-
-    // public function import(Request $request)
-    // {
-    //     $request->validate([
-    //         'file' => 'required|mimes:xlsx,xls',
-    //     ]);
-
-    //     Excel::import(new OrdersImport, $request->file('file'));
-
-    //     return redirect()->route('orders.index')->with('success', 'Orders imported successfully.');
-    // }
-
-    // public function downloadTemplate()
-    // {
-    //     $filePath = public_path('templates/orders_import_template.xlsx');
-    //     return response()->download($filePath, 'orders_import_template.xlsx');
-    // }
 
 }

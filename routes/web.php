@@ -8,18 +8,8 @@ use App\Http\Controllers\LobbyController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 Route::view('/', 'layouts');
 
@@ -37,12 +27,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/lobby', [LobbyController::class, 'index'])->name('lobby.index');
     Route::get('/home', [AuthController::class, 'layouts'])->name('home');
 
+    // Notification Routes
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
+        Route::delete('{id}', [NotificationController::class, 'destroy'])->name('destroy');
+        Route::post('mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
+        Route::post('batch-action', [NotificationController::class, 'batchAction'])->name('batchAction');
+        Route::post('delete-selected', [NotificationController::class, 'deleteSelected'])->name('deleteSelected');
+    });
+
     // Order Routes
     Route::prefix('orders')->name('orders.')->group(function () {
-        // Buyer Route
-        Route::patch('/buyer/{buyer}/restore', [BuyerController::class, 'restore'])->name('buyer.restore');
-
-        // Order Routes
         Route::post('{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');
         Route::post('{id}/complete-payment', [OrderController::class, 'completePayment'])->name('complete-payment');
@@ -51,8 +47,6 @@ Route::middleware('auth')->group(function () {
         Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
             ->name('midtrans.callback')
             ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-
-        // Export
         Route::get('/export', [OrderController::class, 'export'])->name('export');
     });
 
@@ -78,6 +72,7 @@ Route::middleware('auth')->group(function () {
     // Buyer Routes
     Route::prefix('buyer')->name('buyer.')->group(function () {
         Route::get('/export', [BuyerController::class, 'export'])->name('export');
+        Route::patch('{buyer}/restore', [BuyerController::class, 'restore'])->name('restore');
     });
 
     // Resource Routes
