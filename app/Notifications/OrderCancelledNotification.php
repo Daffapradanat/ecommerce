@@ -39,7 +39,7 @@ class OrderCancelledNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'message' => 'Your order with ID ' . $this->order->order_id . ' has been cancelled.',
+            'message' => $this->order->buyer->name . ' order with ID ' . $this->order->order_id . ' has been cancelled.',
             'order_id' => $this->order->order_id,
             'total_price' => $this->order->total_price,
             'url' => '/orders/' . $this->order->order_id
@@ -49,7 +49,7 @@ class OrderCancelledNotification extends Notification
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
-            'message' => 'Your order with ID ' . $this->order->order_id . ' has been cancelled.',
+            'message' => $this->order->buyer->name . ' order with ID ' . $this->order->order_id . ' has been cancelled.',
             'order_id' => $this->order->order_id,
             'total_price' => $this->order->total_price,
             'url' => '/orders/' . $this->order->order_id

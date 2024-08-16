@@ -100,10 +100,11 @@ class OrderController extends Controller
         $order->save();
 
         if ($oldStatus !== 'cancelled') {
-            $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+            $order->buyer->notify(new OrderCancelledNotification($order));
 
             $admins = User::where('role', 'admin')->get();
-            Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+            Notification::send($admins, new OrderCancelledNotification($order));
         }
 
         return response()->json(['message' => 'Order cancelled successfully.']);
@@ -157,11 +158,13 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $oldStatus = $order->payment_status;
 
-        $order->payment_status = 'paid';
-        $order->save();
-
         if ($oldStatus !== 'paid') {
+            $order->payment_status = 'paid';
+            $order->save();
+
             $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+
+
             $admins = User::where('role', 'admin')->get();
             Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
         }
@@ -180,10 +183,10 @@ class OrderController extends Controller
 
         if ($result['status'] === 'success') {
             if ($oldStatus !== 'cancelled') {
-                $order->buyer->notify(new OrderStatusChangedNotification($order, $oldStatus));
+                $order->buyer->notify(new OrderCancelledNotification($order));
 
                 $admins = User::where('role', 'admin')->get();
-                Notification::send($admins, new OrderStatusChangedNotification($order, $oldStatus));
+                Notification::send($admins, new OrderCancelledNotification($order));
             }
 
             if (request()->ajax()) {
