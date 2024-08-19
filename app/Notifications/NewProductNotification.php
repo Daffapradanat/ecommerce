@@ -6,8 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Product;
 use App\Mail\NotificationEmail;
+use App\Models\Product;
 
 class NewProductNotification extends Notification
 {
