@@ -27,8 +27,7 @@ class NotificationEmail extends Mailable
                     ->subject($subject)
                     ->with([
                         'subject' => $subject,
-                        'notification' => $this->notification,
-                        'data' => $this->notification->toArray($this->notification->notifiable)
+                        'notification' => $this->notification
                     ]);
     }
 
