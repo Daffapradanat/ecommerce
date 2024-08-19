@@ -48,21 +48,31 @@ class OrderStatusChangedNotification extends Notification
         ];
     }
 
+    // protected function getMessage()
+    // {
+    //     return "Order {$this->order->order_id} has changed status.";
+    // }
+
     protected function getMessage()
     {
-        switch($this->order->payment_status) {
-            case 'cancelled':
-                return "Order {$this->order->order_id} has been cancelled.";
-            case 'awaiting_payment':
-                return "Order {$this->order->order_id} is now awaiting payment.";
-            case 'pending':
-                return "Order {$this->order->order_id} is pending.";
-            case 'failed':
-                return "Payment for Order {$this->order->order_id} has failed.";
-            case 'paid':
-                return "Payment for Order {$this->order->order_id} has been successful.";
-            default:
-                return "Order {$this->order->order_id} status has changed to {$this->order->payment_status}.";
-        }
+        return "Order {$this->order->order_id} has changed status. View details at: " . route('orders.show', $this->order->id);
     }
+
+    // protected function getMessage()
+    // {
+    //     switch($this->order->payment_status) {
+    //         case 'cancelled':
+    //             return "Order {$this->order->order_id} has been cancelled.";
+    //         case 'awaiting_payment':
+    //             return "Order {$this->order->order_id} is now awaiting payment.";
+    //         case 'pending':
+    //             return "Order {$this->order->order_id} is pending.";
+    //         case 'failed':
+    //             return "Payment for Order {$this->order->order_id} has failed.";
+    //         case 'paid':
+    //             return "Payment for Order {$this->order->order_id} has been successful.";
+    //         default:
+    //             return "Order {$this->order->order_id} status has changed to {$this->order->payment_status}.";
+    //     }
+    // }
 }
