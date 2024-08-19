@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificationEmail;
 
 class NotificationController extends Controller
 {
@@ -90,5 +92,21 @@ class NotificationController extends Controller
         }
 
         return back()->with('error', 'Invalid action');
+    }
+
+    public function createNotification(Request $request)
+    {
+        $user = Auth::user();
+        $notification = $user->notifications()->create([
+            'type' => 'App\Notifications\CustomNotification',
+            'data' => [
+                'message' => $request->message,
+                'url' => $request->url ?? route('lobby.index'),
+            ],
+        ]);
+
+        Mail::to($user->email)->send(new NotificationEmail($notification));
+
+        return response()->json(['message' => 'Notification created and email sent successfully'], 201);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Mail\NotificationEmail;
 
 class ImportedProductsNotification extends Notification
 {
@@ -20,7 +21,13 @@ class ImportedProductsNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new NotificationEmail($this))
+                ->to($notifiable->email);
     }
 
     public function toArray($notifiable)

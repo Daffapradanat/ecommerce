@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Mail\NotificationEmail;
 
 class NewBuyer extends Notification
 {
@@ -20,7 +21,7 @@ class NewBuyer extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database','mail'];
     }
 
     public function toArray($notifiable)

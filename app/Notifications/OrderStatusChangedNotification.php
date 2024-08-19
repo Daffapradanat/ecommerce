@@ -5,7 +5,9 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\Order;
+use App\Mail\NotificationEmail;
 
 class OrderStatusChangedNotification extends Notification
 {
@@ -22,7 +24,13 @@ class OrderStatusChangedNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database','mail'];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new NotificationEmail($this))
+                ->to($notifiable->email);
     }
 
     public function toArray($notifiable)

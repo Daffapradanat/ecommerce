@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Product;
+use App\Mail\NotificationEmail;
 
 class NewProductNotification extends Notification
 {
@@ -21,7 +22,13 @@ class NewProductNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database','mail'];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new NotificationEmail($this))
+                ->to($notifiable->email);
     }
 
     /**

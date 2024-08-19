@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
+use App\Mail\NotificationEmail;
 use App\Models\Order;
 use App\Models\Buyer;
 
@@ -20,7 +22,7 @@ class NewBuyerOrderNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database','mail'];
     }
 
     public function toArray($notifiable)

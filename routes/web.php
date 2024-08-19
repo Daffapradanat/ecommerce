@@ -30,25 +30,26 @@ Route::middleware('auth')->group(function () {
     // Notification Routes
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::get('{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
-        Route::delete('{id}', [NotificationController::class, 'destroy'])->name('destroy');
         Route::post('mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
         Route::post('batch-action', [NotificationController::class, 'batchAction'])->name('batchAction');
         Route::post('delete-selected', [NotificationController::class, 'deleteSelected'])->name('deleteSelected');
         Route::get('/get', [NotificationController::class, 'getNotifications'])->name('getNotifications');
+        Route::get('/create', [NotificationController::class, 'createNotification'])->name('notifications.create');
+        Route::get('{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
+        Route::delete('{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
 
     // Order Routes
     Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/export', [OrderController::class, 'export'])->name('export');
+        Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
+            ->name('midtrans.callback')
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
         Route::post('{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');
         Route::post('{id}/complete-payment', [OrderController::class, 'completePayment'])->name('complete-payment');
         Route::get('{id}/check-payment', [OrderController::class, 'checkPayment'])->name('check-payment');
         Route::get('{id}/pay', [OrderController::class, 'pay'])->name('pay');
-        Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
-            ->name('midtrans.callback')
-            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-        Route::get('/export', [OrderController::class, 'export'])->name('export');
     });
 
     // Category Routes

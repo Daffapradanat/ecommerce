@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Mail\NotificationEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,20 +22,24 @@ class OrderCancelledNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database', 'broadcast','mail'];
     }
-
 
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Order Cancelled')
-            ->line('We regret to inform you that your order has been cancelled.')
-            ->line('Order ID: ' . $this->order->order_id)
-            ->line('Total Price: $' . number_format($this->order->total_price, 2))
-            ->action('View Order', url('/orders/' . $this->order->id))
-            ->line('Thank you for using our application!');
+        return (new NotificationEmail($this))
+                ->to($notifiable->email);
     }
+    // public function toMail($notifiable)
+    // {
+    //     return (new MailMessage)
+    //         ->subject('Order Cancelled')
+    //         ->line('We regret to inform you that your order has been cancelled.')
+    //         ->line('Order ID: ' . $this->order->order_id)
+    //         ->line('Total Price: $' . number_format($this->order->total_price, 2))
+    //         ->action('View Order', url('/orders/' . $this->order->id))
+    //         ->line('Thank you for using our application!');
+    // }
 
     public function toArray($notifiable)
     {

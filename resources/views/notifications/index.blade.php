@@ -1,6 +1,21 @@
 @extends('layouts')
 
 @section('content')
+{{-- <div class="mt-4">
+    <h2>Create New Notification</h2>
+    <form id="createNotificationForm">
+        @csrf
+        <div class="mb-3">
+            <label for="message" class="form-label">Message</label>
+            <input type="text" class="form-control" id="message" name="message" required>
+        </div>
+        <div class="mb-3">
+            <label for="url" class="form-label">URL (optional)</label>
+            <input type="text" class="form-control" id="url" name="url">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Notification</button>
+    </form>
+</div> --}}
     <div class="container mt-4">
         <div class="card">
             <div class="card-header">
