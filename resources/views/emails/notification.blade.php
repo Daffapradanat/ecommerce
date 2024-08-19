@@ -65,32 +65,32 @@
         <h1>{{ $subject ?? 'Notification' }}</h1>
 
         <div class="content">
-            @if (isset($notification->data['message']))
-                <p>{{ $notification->data['message'] }}</p>
+            @if (isset($data['message']))
+                <p>{{ $data['message'] }}</p>
             @endif
 
-            @if (isset($notification->data['order_id']))
-                <p><strong>Order ID:</strong> {{ $notification->data['order_id'] }}</p>
+            @if (isset($data['order_id']))
+                <p><strong>Order ID:</strong> {{ $data['order_id'] }}</p>
             @endif
 
-            @if (isset($notification->data['product_name']))
-                <p><strong>Product:</strong> {{ $notification->data['product_name'] }}</p>
+            @if (isset($data['product_name']))
+                <p><strong>Product:</strong> {{ $data['product_name'] }}</p>
             @endif
 
-            @if (isset($notification->data['total_price']))
-                <p><strong>Total Price:</strong> ${{ number_format($notification->data['total_price'], 2) }}</p>
+            @if (isset($data['total_price']))
+                <p><strong>Total Price:</strong> ${{ number_format($data['total_price'], 2) }}</p>
             @endif
 
-            @if (isset($notification->data['buyer_name']))
-                <p><strong>Buyer Name:</strong> {{ $notification->data['buyer_name'] }}</p>
+            @if (isset($data['buyer_name']))
+                <p><strong>Buyer Name:</strong> {{ $data['buyer_name'] }}</p>
             @endif
 
-            @if (isset($notification->data['buyer_email']))
-                <p><strong>Buyer Email:</strong> {{ $notification->data['buyer_email'] }}</p>
+            @if (isset($data['buyer_email']))
+                <p><strong>Buyer Email:</strong> {{ $data['buyer_email'] }}</p>
             @endif
 
-            @if (isset($notification->data['url']))
-                <p><a href="{{ url($notification->data['url']) }}" class="btn">View Details</a></p>
+            @if (isset($data['url']))
+                <p><a href="{{ url($data['url']) }}" class="btn">View Details</a></p>
             @endif
         </div>
 

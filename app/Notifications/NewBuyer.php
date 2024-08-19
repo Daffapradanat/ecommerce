@@ -24,6 +24,16 @@ class NewBuyer extends Notification
         return ['database','mail'];
     }
 
+    public function toMail($notifiable)
+    {
+        return (new NotificationEmail($this))
+                ->to($notifiable->email)
+                ->with([
+                    'notification' => $this,
+                    'data' => $this->toArray($notifiable)
+                ]);
+    }
+
     public function toArray($notifiable)
     {
         return [
