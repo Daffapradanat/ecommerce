@@ -10,6 +10,7 @@ use App\Imports\ProductsImport;
 use App\Http\Requests\StoreProductRequest;
 use App\Notifications\NewProductNotification;
 use App\Notifications\ImportedProductsNotification;
+use App\Mail\NotificationEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
