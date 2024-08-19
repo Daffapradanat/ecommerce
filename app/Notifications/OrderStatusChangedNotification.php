@@ -48,14 +48,9 @@ class OrderStatusChangedNotification extends Notification
         ];
     }
 
-    // protected function getMessage()
-    // {
-    //     return "Order {$this->order->order_id} has changed status.";
-    // }
-
     protected function getMessage()
     {
-        return "Order {$this->order->order_id} has changed status. View details at: " . route('orders.show', $this->order->id);
+        return "Order {$this->order->order_id} has changed status.";
     }
 
     // protected function getMessage()
