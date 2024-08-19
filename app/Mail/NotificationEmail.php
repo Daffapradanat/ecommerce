@@ -24,7 +24,8 @@ class NotificationEmail extends Mailable
     {
         $subject = $this->getSubject();
         return $this->view('emails.notification')
-                    ->subject('Notification from E-commerce');
+                    ->subject($subject)
+                    ->with(['subject' => $subject]);
     }
 
     private function getSubject()

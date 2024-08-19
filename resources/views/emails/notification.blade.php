@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>{{ $subject }}</title>
+    <title>{{ $subject ?? 'Notification' }}</title>
 </head>
 
 <body>
