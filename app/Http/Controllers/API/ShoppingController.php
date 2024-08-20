@@ -373,19 +373,17 @@ class ShoppingController extends Controller
     public function downloadInvoice(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|string'
+            'order_id' => 'required|string|exists:orders,order_id'
         ]);
 
-        $order = Order::where('order_id', $request->order_id)->firstOrFail();
+        $order = Order::where('order_id', $request->order_id)
+                      ->with(['buyer', 'orderItems.product'])
+                      ->firstOrFail();
+
         $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-        $filename = 'invoice-' . $order->order_id . '.pdf';
-        $path = storage_path('app/public/' . $filename);
-        $pdf->save($path);
-        $url = url('storage/' . $filename);
 
-        return response()->json([
-            'message' => 'Invoice generated successfully',
-            'invoice_url' => $url,
-        ]);
+        $filename = 'invoice-' . $order->order_id . '.pdf';
+
+        return $pdf->download($filename);
     }
 }
