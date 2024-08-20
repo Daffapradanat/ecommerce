@@ -19,6 +19,7 @@ class Order extends Model implements ShouldBroadcast
     protected $fillable = [
         'buyer_id', 'order_id', 'email', 'phone', 'city', 'address', 'postal_code', 'total_price', 'payment_token', 'payment_method', 'payment_status'
     ];
+
     public function buyer()
     {
         return $this->belongsTo(Buyer::class);
