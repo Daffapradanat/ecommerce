@@ -61,18 +61,20 @@
             <thead>
                 <tr>
                     <th>Product Name</th>
+                    <th>Description</th>
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($order->items as $item)
+                @foreach ($order->orderItems as $item)
                     <tr>
-                        <td>{{ $item->product->name }}</td>
+                        <td>{{ $item->product_name }}</td>
+                        <td>{{ $item->product_description }}</td>
                         <td>{{ $item->quantity }}</td>
+                        <td>Rp {{ number_format($item->product_price, 0, ',', '.') }}</td>
                         <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                        <td>Rp {{ number_format($item->quantity * $item->price, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -80,8 +82,7 @@
     </div>
 
     <div class="total">
-        <p>Sub Total: Rp
-            {{ number_format($order->items->sum(fn($item) => $item->quantity * $item->price), 0, ',', '.') }}</p>
+        <p>Sub Total: Rp {{ number_format($order->orderItems->sum('price'), 0, ',', '.') }}</p>
         <p>Credit: Rp 0,00</p>
         <p>Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
     </div>
