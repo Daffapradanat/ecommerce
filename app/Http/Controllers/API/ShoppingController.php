@@ -369,6 +369,50 @@ class ShoppingController extends Controller
         }
     }
 
+    // public function downloadInvoice(Request $request)
+    // {
+    //     $request->validate([
+    //         'order_id' => 'required|string'
+    //     ]);
+
+    //     $order = Order::where('order_id', $request->order_id)->firstOrFail();
+    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+    //     $filename = 'invoice-' . $order->order_id . '.pdf';
+    //     $path = storage_path('app/public/' . $filename);
+    //     $pdf->save($path);
+    //     $url = url('storage/' . $filename);
+
+    //     return response()->json([
+    //         'message' => 'Invoice generated successfully',
+    //         'invoice_url' => $url,
+    //     ]);
+    // }
+
+    // public function downloadInvoice($id)
+    // {
+    //     $order = Order::findOrFail($id);
+    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+    //     return $pdf->stream('invoice-'.$order->order_id.'.pdf');
+    // }
+
+    // public function showPublicInvoice($orderId, $token)
+    // {
+    //     $order = Order::findOrFail($orderId);
+
+    //     if ($token !== $this->generateInvoiceToken($order)) {
+    //         abort(403, 'Invalid token');
+    //     }
+
+    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+    //     return $pdf->stream('invoice-'.$order->order_id.'.pdf');
+    // }
+
+    // private function generateInvoiceToken($order)
+    // {
+    //     return hash('sha256', $order->id . $order->order_id . $order->created_at);
+    // }
+
+    // penyimpanan file PDF agar hanya dihasilkan secara publik tanpa menyimpannya di dalam storage,
     public function downloadInvoice(Request $request)
     {
         $request->validate([
@@ -376,17 +420,14 @@ class ShoppingController extends Controller
         ]);
 
         $order = Order::where('order_id', $request->order_id)->firstOrFail();
-        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-        $filename = 'invoice-' . $order->order_id . '.pdf';
-        $path = storage_path('app/public/' . $filename);
-        $pdf->save($path);
-        $url = url('storage/' . $filename);
 
-        return response()->json([
-            'message' => 'Invoice generated successfully',
-            'invoice_url' => $url,
-        ]);
+        // Generate the PDF from the view
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+
+        // Stream the PDF to the browser without saving it
+        return $pdf->stream('invoice-' . $order->order_id . '.pdf');
     }
+
 
     // public function downloadInvoice(Request $request)
     // {
