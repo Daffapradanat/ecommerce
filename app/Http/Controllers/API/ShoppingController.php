@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ShoppingController extends Controller
 {
@@ -366,5 +367,25 @@ class ShoppingController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to get payment URL: '.$e->getMessage()], 500);
         }
+    }
+
+
+    public function downloadInvoice(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|string'
+        ]);
+
+        $order = Order::where('order_id', $request->order_id)->firstOrFail();
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+        $filename = 'invoice-' . $order->order_id . '.pdf';
+        $path = storage_path('app/public/' . $filename);
+        $pdf->save($path);
+        $url = url('storage/' . $filename);
+
+        return response()->json([
+            'message' => 'Invoice generated successfully',
+            'invoice_url' => $url,
+        ]);
     }
 }
