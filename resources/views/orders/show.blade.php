@@ -114,6 +114,7 @@
                                 </a>
                             @endif
                         </div>
+                        <a href="{{ route('orders.download-invoice', $order->id) }}" class="btn btn-primary">Download Invoice</a>
                     </div>
                 </div>
             </div>
