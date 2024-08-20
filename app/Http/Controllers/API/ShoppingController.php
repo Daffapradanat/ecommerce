@@ -369,24 +369,24 @@ class ShoppingController extends Controller
         }
     }
 
-    // public function downloadInvoice(Request $request)
-    // {
-    //     $request->validate([
-    //         'order_id' => 'required|string'
-    //     ]);
+    public function downloadInvoice(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|string'
+        ]);
 
-    //     $order = Order::where('order_id', $request->order_id)->firstOrFail();
-    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-    //     $filename = 'invoice-' . $order->order_id . '.pdf';
-    //     $path = storage_path('app/public/' . $filename);
-    //     $pdf->save($path);
-    //     $url = url('storage/' . $filename);
+        $order = Order::where('order_id', $request->order_id)->firstOrFail();
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+        $filename = 'invoice-' . $order->order_id . '.pdf';
+        $path = storage_path('app/public/' . $filename);
+        $pdf->save($path);
+        $url = url('storage/' . $filename);
 
-    //     return response()->json([
-    //         'message' => 'Invoice generated successfully',
-    //         'invoice_url' => $url,
-    //     ]);
-    // }
+        return response()->json([
+            'message' => 'Invoice generated successfully',
+            'invoice_url' => $url,
+        ]);
+    }
 
     // public function downloadInvoice($id)
     // {
@@ -413,20 +413,16 @@ class ShoppingController extends Controller
     // }
 
     // penyimpanan file PDF agar hanya dihasilkan secara publik tanpa menyimpannya di dalam storage,
-    public function downloadInvoice(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|string'
-        ]);
+    // public function downloadInvoice(Request $request)
+    // {
+    //     $request->validate([
+    //         'order_id' => 'required|string'
+    //     ]);
 
-        $order = Order::where('order_id', $request->order_id)->firstOrFail();
-
-        // Generate the PDF from the view
-        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-
-        // Stream the PDF to the browser without saving it
-        return $pdf->stream('invoice-' . $order->order_id . '.pdf');
-    }
+    //     $order = Order::where('order_id', $request->order_id)->firstOrFail();
+    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+    //     return $pdf->stream('invoice-' . $order->order_id . '.pdf');
+    // }
 
 
     // public function downloadInvoice(Request $request)

@@ -5,6 +5,7 @@ use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ShoppingController;
 use App\Http\Controllers\API\BuyerController;
 use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/edit', [ShoppingController::class, 'editCart']);
         Route::post('/remove', [ShoppingController::class, 'removeFromCart']);
     });
+
+    Route::get('invoices/{orderId}', [InvoiceController::class, 'downloadInvoice']);
+    Route::get('generate-invoice-link/{orderId}', [InvoiceController::class, 'getInvoiceLink']);
 
     // Checkout and order
     Route::post('/checkout', [ShoppingController::class, 'checkout']);
