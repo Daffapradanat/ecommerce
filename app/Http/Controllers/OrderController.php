@@ -293,9 +293,7 @@ class OrderController extends Controller
     public function downloadInvoice($id)
     {
         $order = Order::with(['buyer', 'orderItems.product'])->findOrFail($id);
-
         $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-
         return $pdf->download('invoice-'.$order->order_id.'.pdf');
     }
 
