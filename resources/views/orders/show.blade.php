@@ -100,7 +100,8 @@
                 <div class="card-footer bg-white p-4">
                     <div class="row align-items-center">
                         <div class="col-lg-6 mb-3 mb-lg-0">
-                            <p class="mb-0 fw-bold"><i class="fas fa-credit-card me-2"></i>Payment Method:
+                            <p class="mb-0 fw-bold">
+                                <i class="fas fa-credit-card me-2"></i>Payment Method:
                                 <span class="fw-normal">{{ ucfirst(str_replace('_', ' ', $order->payment_method ?? 'Not available')) }}</span>
                             </p>
                         </div>
@@ -113,6 +114,9 @@
                                     <i class="fas fa-credit-card me-2"></i>Pay Now
                                 </a>
                             @endif
+                            <a href="{{ route('orders.invoice.download', $order->id) }}" class="btn btn-primary">
+                                <i class="fas fa-download me-2"></i>Download Invoice
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -45,12 +45,15 @@ Route::middleware('auth')->group(function () {
         Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
             ->name('midtrans.callback')
             ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+        Route::get('/{id}/invoice', [OrderController::class, 'downloadInvoice'])
+            ->name('invoice');
         Route::post('{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');
         Route::post('{id}/complete-payment', [OrderController::class, 'completePayment'])->name('complete-payment');
         Route::get('{id}/check-payment', [OrderController::class, 'checkPayment'])->name('check-payment');
         Route::get('{id}/pay', [OrderController::class, 'pay'])->name('pay');
     });
+
 
     // Category Routes
     Route::prefix('categories')->name('categories.')->group(function () {

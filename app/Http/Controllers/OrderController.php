@@ -16,6 +16,9 @@ use App\Services\MidtransService;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrdersExport;
+use App\Mail\InvoiceMail;
+use Illuminate\Support\Facades\Mail;
+use PDF;
 
 class OrderController extends Controller
 {
@@ -287,6 +290,17 @@ class OrderController extends Controller
     public function export()
     {
         return Excel::download(new OrdersExport, 'orders.xlsx');
+    }
+
+    public function downloadInvoice($id)
+    {
+        $order = Order::with(['buyer', 'orderItems.product'])->findOrFail($id);
+
+        $this->authorize('view', $order);
+
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+
+        return $pdf->download('invoice-' . $order->order_id . '.pdf');
     }
 
 }
