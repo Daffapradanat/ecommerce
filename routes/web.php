@@ -22,6 +22,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', 'logout')->name('logout');
 });
 
+// Invoice for email
+Route::get('/public-invoice/{order}/{token}', [OrderController::class, 'showPublicInvoice'])->name('orders.public-invoice');
+
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     Route::get('/lobby', [LobbyController::class, 'index'])->name('lobby.index');
@@ -45,7 +48,6 @@ Route::middleware('auth')->group(function () {
         Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
             ->name('midtrans.callback')
             ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-        // Route::get('{id}/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice');
         Route::get('{id}/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice');
         Route::post('{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');

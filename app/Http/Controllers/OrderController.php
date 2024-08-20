@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -304,6 +305,23 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
         return $pdf->stream('invoice-'.$order->order_id.'.pdf');
+    }
+
+    public function showPublicInvoice($orderId, $token)
+    {
+        $order = Order::findOrFail($orderId);
+
+        if ($token !== $this->generateInvoiceToken($order)) {
+            abort(403, 'Invalid token');
+        }
+
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+        return $pdf->stream('invoice-'.$order->order_id.'.pdf');
+    }
+
+    private function generateInvoiceToken($order)
+    {
+        return hash('sha256', $order->id . $order->order_id . $order->created_at);
     }
 
 }

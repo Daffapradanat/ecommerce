@@ -30,6 +30,11 @@ class Order extends Model implements ShouldBroadcast
         return $this->hasMany(OrderItem::class);
     }
 
+    public function generateInvoiceToken()
+    {
+        return hash('sha256', $this->id . $this->order_id . $this->created_at);
+    }
+
     public function setStatusSuccess()
     {
         $this->update([
