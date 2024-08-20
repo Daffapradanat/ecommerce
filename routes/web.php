@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('midtrans/callback', [OrderController::class, 'midtransCallback'])
             ->name('midtrans.callback')
             ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+        // Route::get('{id}/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice');
         Route::get('{id}/download-invoice', [OrderController::class, 'downloadInvoice'])->name('download-invoice');
         Route::post('{id}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         Route::post('{id}/cancel-payment', [OrderController::class, 'cancelPayment'])->name('cancel-payment');

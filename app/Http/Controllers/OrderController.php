@@ -290,11 +290,20 @@ class OrderController extends Controller
         return Excel::download(new OrdersExport, 'orders.xlsx');
     }
 
+    //Ini langsung ke downloaded
+    // public function downloadInvoice($id)
+    // {
+    //     $order = Order::findOrFail($id);
+    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+    //     return $pdf->download('invoice-'.$order->order_id.'.pdf');
+    // }
+
+    //ini agar tidak langsung ke download
     public function downloadInvoice($id)
     {
-        $order = Order::with(['buyer', 'orderItems.product'])->findOrFail($id);
+        $order = Order::findOrFail($id);
         $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-        return $pdf->download('invoice-'.$order->order_id.'.pdf');
+        return $pdf->stream('invoice-'.$order->order_id.'.pdf');
     }
 
 }

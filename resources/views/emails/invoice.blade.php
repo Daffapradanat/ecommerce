@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Invoice for Order #{{ $order->order_id }}</title>
     <style>
@@ -11,46 +12,57 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
         }
+
         .logo {
             max-width: 200px;
             height: auto;
         }
+
         h1 {
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
         }
+
         .info-section {
             margin-bottom: 20px;
         }
+
         .info-section h2 {
             color: #2980b9;
             font-size: 1.2em;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
             color: #2c3e50;
         }
+
         .total {
             font-size: 1.2em;
             font-weight: bold;
             text-align: right;
             color: #2c3e50;
         }
+
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -59,9 +71,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <img src="{{ asset('path/to/your/logo.png') }}" alt="Company Logo" class="logo">
+        <img src="{{ asset('Asset/Logo.png') }}" alt="Company Logo" class="logo">
         <h1>Invoice for Order #{{ $order->order_id }}</h1>
     </div>
 
@@ -84,13 +97,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($order->orderItems as $item)
-                <tr>
-                    <td>{{ $item->product->name }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($item->quantity * $item->price, 0, ',', '.') }}</td>
-                </tr>
+                @foreach ($order->orderItems as $item)
+                    <tr>
+                        <td>{{ $item->product->name }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($item->quantity * $item->price, 0, ',', '.') }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -105,4 +118,5 @@
         <p>If you have any questions, please contact our customer support.</p>
     </div>
 </body>
+
 </html>
