@@ -37,12 +37,8 @@ class NewBuyerOrderNotification extends Notification
 
     public function toMail($notifiable)
     {
-        return (new NewOrderMail($this))
-                ->to($notifiable->email)
-                ->with([
-                    'notification' => $this,
-                    'data' => $this->toArray($notifiable)
-                ]);
+        return (new NewOrderMail($this->order))
+                ->to($notifiable->email);
     }
 
     public function toArray($notifiable)
@@ -50,6 +46,7 @@ class NewBuyerOrderNotification extends Notification
         return [
             'message' => $this->order->buyer->name . 'order has been placed successfully. ' . $this->order->order_id,
             'order_id' => $this->order->order_id,
+            'buyer_name' => $this->order->buyer->name,
             'total_price' => $this->order->total_price,
             'url' => '/orders/' . $this->order->order_id
         ];
