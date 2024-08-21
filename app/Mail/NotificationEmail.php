@@ -13,43 +13,63 @@ class NotificationEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $notification;
+    public $order;
+    // public $notification;
 
-    public function __construct($notification)
+    public function __construct(Order $order)
     {
-        $this->notification = $notification;
+        $this->order = $order;
     }
+
+    // public function __construct($notification)
+    // {
+    //     $this->notification = $notification;
+    // }
 
     public function build()
     {
-        $subject = $this->getSubject();
-        return $this->view('emails.notification')
-                    ->subject($subject)
+        $pdf = PDF::loadView('emails.invoice', ['order' => $this->order]);
+
+        return $this->markdown('emails.new_order')
+                    ->subject('Pesanan Baru - ' . $this->order->order_id)
                     ->with([
-                        'subject' => $subject,
-                        'notification' => $this->notification
+                        'order' => $this->order,
+                    ])
+                    ->attachData($pdf->output(), 'invoice-'.$this->order->order_id.'.pdf', [
+                        'mime' => 'application/pdf',
                     ]);
     }
 
-    private function getSubject()
-    {
-        $notificationType = class_basename($this->notification);
-        switch ($notificationType) {
-            case 'NewProductNotification':
-                return 'New Product Arrival';
-            case 'OrderCancelledNotification':
-                return 'Order Cancelled';
-            case 'OrderStatusChangedNotification':
-                return 'Order Status Updated';
-            case 'NewBuyerOrderNotification':
-            case 'NewOrderNotification':
-                return 'New Order Placed';
-            case 'ImportedProductsNotification':
-                return 'Products Imported Successfully';
-            case 'NewBuyer':
-                return 'New Buyer Registration';
-            default:
-                return 'New Notification';
-        }
-    }
+    // public function build()
+    // {
+    //     $subject = $this->getSubject();
+    //     return $this->view('emails.notification')
+    //                 ->subject($subject)
+    //                 ->with([
+    //                     'subject' => $subject,
+    //                     'notification' => $this->notification
+    //                 ]);
+    // }
+
+    // private function getSubject()
+    // {
+    //     $notificationType = class_basename($this->notification);
+    //     switch ($notificationType) {
+    //         case 'NewProductNotification':
+    //             return 'New Product Arrival';
+    //         case 'OrderCancelledNotification':
+    //             return 'Order Cancelled';
+    //         case 'OrderStatusChangedNotification':
+    //             return 'Order Status Updated';
+    //         case 'NewBuyerOrderNotification':
+    //         case 'NewOrderNotification':
+    //             return 'New Order Placed';
+    //         case 'ImportedProductsNotification':
+    //             return 'Products Imported Successfully';
+    //         case 'NewBuyer':
+    //             return 'New Buyer Registration';
+    //         default:
+    //             return 'New Notification';
+    //     }
+    // }
 }

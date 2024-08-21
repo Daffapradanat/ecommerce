@@ -22,7 +22,7 @@ class NewBuyerOrderNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database','mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail($notifiable)
