@@ -10,7 +10,7 @@
 
     ## Rincian Pembelian
 
-    @foreach ($order->items as $item)
+    @foreach ($order->orderItems as $item)
         - {{ $item->name }} - Rp {{ number_format($item->price, 0, ',', '.') }} x {{ $item->quantity }} = Rp
         {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
     @endforeach
