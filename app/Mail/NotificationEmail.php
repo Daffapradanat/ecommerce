@@ -36,7 +36,7 @@ class NotificationEmail extends Mailable
 
     public function build()
     {
-        $pdf = PDF::loadView('emails.invoice', ['notification' => $this->notification]);
+        $pdf = PDF::loadView('emails.invoiceBuyer', ['notification' => $this->notification]);
 
         return $this->markdown('emails.new_order')
                     ->subject('Pesanan Baru - ' . $this->notification->order_id)
