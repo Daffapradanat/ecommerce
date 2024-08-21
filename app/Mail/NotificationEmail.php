@@ -53,3 +53,5 @@ class NotificationEmail extends Mailable
         }
     }
 }
+
+// NOT USED

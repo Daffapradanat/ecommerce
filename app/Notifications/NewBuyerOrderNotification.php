@@ -5,7 +5,7 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
-use App\Mail\NotificationEmail;
+use App\Mail\NewOrderMail;
 use App\Models\Order;
 use App\Models\Buyer;
 
