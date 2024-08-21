@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Invoice for Order #{{ $order->order_id }}</title>
     <style>
@@ -13,51 +12,62 @@
             padding: 20px;
         }
 
-        h1 {
-            color: #2c3e50;
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #3498db;
             padding-bottom: 10px;
-        }
-
-        .info-section {
             margin-bottom: 20px;
         }
 
-        table {
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .invoice-items {
+            margin-bottom: 20px;
+        }
+
+        .invoice-items table {
             width: 100%;
             border-collapse: collapse;
+        }
+
+        .invoice-items th, .invoice-items td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .invoice-total {
+            display: flex;
+            justify-content: flex-end;
+            font-weight: bold;
             margin-bottom: 20px;
         }
 
-        th,
-        td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        .total {
-            font-weight: bold;
-        }
-
-        .footer {
-            margin-top: 30px;
+        .invoice-footer {
             font-size: 0.9em;
             color: #7f8c8d;
+            text-align: center;
         }
     </style>
 </head>
-
 <body>
-    <h1>Invoice for Order #{{ $order->order_id }}</h1>
+    <div class="invoice-header">
+        <h1>Invoice for Order #{{ $order->order_id }}</h1>
+        <p>Amount Due: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+    </div>
 
-    <div class="info-section">
-        <p><strong>Amount Due:</strong> Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+    <div class="invoice-details">
         <p><strong>Order Date:</strong> {{ $order->created_at->format('F j, Y') }}</p>
     </div>
 
-    <div class="info-section">
-        <h2>Invoice Items</h2>
-        <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <div class="invoice-items">
+        <table>
             <thead>
                 <tr>
                     <th>Product Name</th>
@@ -81,18 +91,16 @@
         </table>
     </div>
 
-    <div class="total">
+    <div class="invoice-total">
         <p>Sub Total: Rp {{ number_format($order->orderItems->sum('price'), 0, ',', '.') }}</p>
         <p>Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
     </div>
 
-    <div class="info-section">
-        <p>Payment will be taken automatically from the credit card Visa-6566 on {{ $order->created_at->format('m/d/Y') }}. To change or pay with a
+    <div class="invoice-footer">
+        {{-- <p>Payment will be taken automatically from the credit card Visa-6566 on {{ $order->created_at->format('m/d/Y') }}. To change or pay with a
             different payment method, please login at <a href="https://my.racknerd.com/viewinvoice.php?id=52335805">this
                 link</a> and click Pay Now, then follow the instructions on screen.</p>
-    </div>
-
-    <div class="footer">
+        <hr> --}}
         <p>Thanks!</p>
         <p>Your ecommerce.com Team</p>
         <p>Introducing Infrastructure Stability</p>
@@ -103,5 +111,4 @@
         <p><a href="https://intern-daffa.arfani.my.id">Visit our website</a> | <a href="#">Log in to your account</a> | <a href="#">Get support</a></p>
     </div>
 </body>
-
 </html>

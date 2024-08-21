@@ -30,7 +30,7 @@ class NotificationController extends Controller
             ->addColumn('actions', function ($notification) {
                 $actions = '';
                 if (!$notification->read_at) {
-                    $actions .= '<a href="' . route('notifications.markAsRead', $notification->id) . '" class="btn btn-sm btn-primary me-2"><i class="fas fa-eye"></i></a>';
+                    $actions .= '<a href="' . route('notifications.markAsRead', $notification->order_id) . '" class="btn btn-sm btn-primary me-2"><i class="fas fa-eye"></i></a>';
                 }
                 $actions .= '<button type="button" class="btn btn-sm btn-danger delete-notification" data-notification-id="' . $notification->id . '"><i class="fas fa-trash"></i></button>';
                 return $actions;
