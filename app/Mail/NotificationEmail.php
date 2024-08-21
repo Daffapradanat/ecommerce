@@ -20,6 +20,17 @@ class NotificationEmail extends Mailable
         $this->notification = $notification;
     }
 
+    // public function build()
+    // {
+    //     $subject = $this->getSubject();
+    //     return $this->view('emails.notification')
+    //                 ->subject($subject)
+    //                 ->with([
+    //                     'subject' => $subject,
+    //                     'notification' => $this->notification
+    //                 ]);
+    // }
+
     public function build()
     {
         $pdf = PDF::loadView('emails.invoice', ['notification' => $this->notification]);
@@ -34,36 +45,25 @@ class NotificationEmail extends Mailable
                     ]);
     }
 
-    // public function build()
-    // {
-    //     $subject = $this->getSubject();
-    //     return $this->view('emails.notification')
-    //                 ->subject($subject)
-    //                 ->with([
-    //                     'subject' => $subject,
-    //                     'notification' => $this->notification
-    //                 ]);
-    // }
-
-    // private function getSubject()
-    // {
-    //     $notificationType = class_basename($this->notification);
-    //     switch ($notificationType) {
-    //         case 'NewProductNotification':
-    //             return 'New Product Arrival';
-    //         case 'OrderCancelledNotification':
-    //             return 'Order Cancelled';
-    //         case 'OrderStatusChangedNotification':
-    //             return 'Order Status Updated';
-    //         case 'NewBuyerOrderNotification':
-    //         case 'NewOrderNotification':
-    //             return 'New Order Placed';
-    //         case 'ImportedProductsNotification':
-    //             return 'Products Imported Successfully';
-    //         case 'NewBuyer':
-    //             return 'New Buyer Registration';
-    //         default:
-    //             return 'New Notification';
-    //     }
-    // }
+    private function getSubject()
+    {
+        $notificationType = class_basename($this->notification);
+        switch ($notificationType) {
+            case 'NewProductNotification':
+                return 'New Product Arrival';
+            case 'OrderCancelledNotification':
+                return 'Order Cancelled';
+            case 'OrderStatusChangedNotification':
+                return 'Order Status Updated';
+            case 'NewBuyerOrderNotification':
+            case 'NewOrderNotification':
+                return 'New Order Placed';
+            case 'ImportedProductsNotification':
+                return 'Products Imported Successfully';
+            case 'NewBuyer':
+                return 'New Buyer Registration';
+            default:
+                return 'New Notification';
+        }
+    }
 }
