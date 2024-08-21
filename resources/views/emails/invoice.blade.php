@@ -52,7 +52,7 @@
 
     <div class="info-section">
         <p><strong>Amount Due:</strong> Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
-        <p><strong>Due Date:</strong> {{ $order->created_at->format('F j, Y') }}</p>
+        <p><strong>Order Date:</strong> {{ $order->created_at->format('F j, Y') }}</p>
     </div>
 
     <div class="info-section">
@@ -83,26 +83,24 @@
 
     <div class="total">
         <p>Sub Total: Rp {{ number_format($order->orderItems->sum('price'), 0, ',', '.') }}</p>
-        <p>Credit: Rp 0,00</p>
         <p>Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
     </div>
 
     <div class="info-section">
-        <p>Payment will be taken automatically from the credit card Visa-6566 on 12/30/2023. To change or pay with a
+        <p>Payment will be taken automatically from the credit card Visa-6566 on {{ $order->created_at->format('m/d/Y') }}. To change or pay with a
             different payment method, please login at <a href="https://my.racknerd.com/viewinvoice.php?id=52335805">this
                 link</a> and click Pay Now, then follow the instructions on screen.</p>
     </div>
 
     <div class="footer">
         <p>Thanks!</p>
-        <p>Your RackNerd Team</p>
+        <p>Your ecommerce.com Team</p>
         <p>Introducing Infrastructure Stability</p>
-        <p><a href="https://www.racknerd.com/">https://www.racknerd.com/</a></p>
+        <p><a href="https://intern-daffa.arfani.my.id">https://intern-daffa.arfani.my.id</a></p>
         <p>Dedicated Servers, Private Cloud, DRaaS, Colocation & VPS</p>
-        <p>Technical Support: <a href="mailto:support@racknerd.com">support@racknerd.com</a></p>
-        <p>Sales Inquiries: <a href="mailto:sales@racknerd.com">sales@racknerd.com</a></p>
-        <p><a href="#">Visit our website</a> | <a href="#">Log in to your account</a> | <a
-                href="#">Get support</a></p>
+        <p>Technical Support: <a href="mailto:support@ecommerce.com">support@ecommerce.com</a></p>
+        <p>Sales Inquiries: <a href="mailto:sales@ecommerce.com">sales@ecommerce.com</a></p>
+        <p><a href="https://intern-daffa.arfani.my.id">Visit our website</a> | <a href="#">Log in to your account</a> | <a href="#">Get support</a></p>
     </div>
 </body>
 

@@ -1,19 +1,39 @@
 @component('mail::message')
-# Pesanan Baru #{{ $order->order_id }}
+    # Invoice Pesanan #{{ $order->order_id }}
 
-Terima kasih atas pesanan Anda, {{ $order->buyer->name }}.
+    Terima kasih atas pembelian Anda, {{ $order->buyer->name }}.
 
-Rincian pesanan Anda:
+    ## Detail Pesanan
 
-**ID Pesanan:** {{ $order->order_id }}
-**Total Harga:** Rp {{ number_format($order->total_price, 0, ',', '.') }}
+    **ID Pesanan:** {{ $order->order_id }}
+    **Tanggal Pemesanan:** {{ $order->created_at->format('d F Y') }}
 
-Invoice lengkap terlampir dalam email ini.
+    ## Rincian Pembelian
 
-@component('mail::button', ['url' => route('orders.public-invoice', ['order' => $order->id, 'token' => $order->generateInvoiceToken()])])
-Lihat Invoice
-@endcomponent
+    @foreach ($order->items as $item)
+        - {{ $item->name }} - Rp {{ number_format($item->price, 0, ',', '.') }} x {{ $item->quantity }} = Rp
+        {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
+    @endforeach
 
-Terima kasih,<br>
-{{ config('app.name') }}
+    <p>Sub Total: Rp {{ number_format($order->orderItems->sum('price'), 0, ',', '.') }}</p>
+    **Total Harga:** Rp {{ number_format($order->total_price, 0, ',', '.') }}
+
+    Terima kasih telah memilih kami. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami melalui email di
+    support@commerce.com atau telepon di +62 123 4567.
+
+    @component('mail::button', [
+        'url' => route('orders.public-invoice', ['order' => $order->id, 'token' => $order->generateInvoiceToken()]),
+    ])
+        Lihat Invoice
+    @endcomponent
+
+    Salam,<br>
+    {{ config('app.name') }}
+
+    ---
+
+    Ikuti kami di sosial media:
+    - [Facebook](https://www.facebook.com/example)
+    - [Twitter](https://twitter.com/example)
+    - [Instagram](https://www.instagram.com/example)
 @endcomponent

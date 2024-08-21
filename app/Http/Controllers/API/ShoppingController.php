@@ -388,57 +388,20 @@ class ShoppingController extends Controller
         ]);
     }
 
-    // public function downloadInvoice($id)
-    // {
-    //     $order = Order::findOrFail($id);
-    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-    //     return $pdf->stream('invoice-'.$order->order_id.'.pdf');
-    // }
+    public function showPublicInvoice($orderId, $token)
+    {
+        $order = Order::findOrFail($orderId);
 
-    // public function showPublicInvoice($orderId, $token)
-    // {
-    //     $order = Order::findOrFail($orderId);
+        if ($token !== $this->generateInvoiceToken($order)) {
+            abort(403, 'Invalid token');
+        }
 
-    //     if ($token !== $this->generateInvoiceToken($order)) {
-    //         abort(403, 'Invalid token');
-    //     }
+        $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
+        return $pdf->stream('invoice-'.$order->order_id.'.pdf');
+    }
 
-    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-    //     return $pdf->stream('invoice-'.$order->order_id.'.pdf');
-    // }
-
-    // private function generateInvoiceToken($order)
-    // {
-    //     return hash('sha256', $order->id . $order->order_id . $order->created_at);
-    // }
-
-    // penyimpanan file PDF agar hanya dihasilkan secara publik tanpa menyimpannya di dalam storage,
-    // public function downloadInvoice(Request $request)
-    // {
-    //     $request->validate([
-    //         'order_id' => 'required|string'
-    //     ]);
-
-    //     $order = Order::where('order_id', $request->order_id)->firstOrFail();
-    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-    //     return $pdf->stream('invoice-' . $order->order_id . '.pdf');
-    // }
-
-
-    // public function downloadInvoice(Request $request)
-    // {
-    //     $request->validate([
-    //         'order_id' => 'required|string|exists:orders,order_id'
-    //     ]);
-
-    //     $order = Order::where('order_id', $request->order_id)
-    //                   ->with(['buyer', 'orderItems.product'])
-    //                   ->firstOrFail();
-
-    //     $pdf = PDF::loadView('emails.invoice', ['order' => $order]);
-
-    //     $filename = 'invoice-' . $order->order_id . '.pdf';
-
-    //     return $pdf->download($filename);
-    // }
+    private function generateInvoiceToken($order)
+    {
+        return hash('sha256', $order->id . $order->order_id . $order->created_at);
+    }
 }
