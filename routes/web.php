@@ -33,11 +33,10 @@ Route::middleware('auth')->group(function () {
     // Notification Routes
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/get', [NotificationController::class, 'getNotifications'])->name('getNotifications');
         Route::post('mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
         Route::post('batch-action', [NotificationController::class, 'batchAction'])->name('batchAction');
         Route::post('delete-selected', [NotificationController::class, 'deleteSelected'])->name('deleteSelected');
-        Route::get('/get', [NotificationController::class, 'getNotifications'])->name('getNotifications');
-        Route::get('/create', [NotificationController::class, 'createNotification'])->name('notifications.create');
         Route::get('{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
         Route::delete('{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
