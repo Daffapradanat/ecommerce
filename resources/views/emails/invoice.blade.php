@@ -14,16 +14,22 @@
 
         .invoice-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #3498db;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
 
+        .invoice-header img {
+            max-height: 60px;
+            margin-right: 20px;
+        }
+
+        .invoice-header h1 {
+            margin: 0;
+        }
+
         .invoice-details {
-            display: flex;
-            justify-content: space-between;
             margin-bottom: 20px;
         }
 
@@ -54,12 +60,28 @@
             color: #7f8c8d;
             text-align: center;
         }
+
+        .invoice-footer p {
+            margin: 0;
+        }
+
+        .invoice-footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .invoice-footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="invoice-header">
-        <h1>Invoice for Order #{{ $order->order_id }}</h1>
-        <p>Amount Due: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+        <img src="{{ public_path('Asset/Logo.png') }}" alt="Logo">
+        <div>
+            <h1>Invoice for Order #{{ $order->order_id }}</h1>
+            <p>Amount Due: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+        </div>
     </div>
 
     <div class="invoice-details">
@@ -92,23 +114,21 @@
     </div>
 
     <div class="invoice-total">
-        <p>Sub Total: Rp {{ number_format($order->orderItems->sum('price'), 0, ',', '.') }}</p>
+        <p>Sub Total: Rp {{ number_format($order->orderItems->sum(function($item) { return $item->price; }), 0, ',', '.') }}</p>
         <p>Total: Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
     </div>
 
     <div class="invoice-footer">
-        {{-- <p>Payment will be taken automatically from the credit card Visa-6566 on {{ $order->created_at->format('m/d/Y') }}. To change or pay with a
-            different payment method, please login at <a href="https://my.racknerd.com/viewinvoice.php?id=52335805">this
-                link</a> and click Pay Now, then follow the instructions on screen.</p>
-        <hr> --}}
-        <p>Thanks!</p>
-        <p>Your ecommerce.com Team</p>
-        <p>Introducing Infrastructure Stability</p>
-        <p><a href="https://intern-daffa.arfani.my.id">https://intern-daffa.arfani.my.id</a></p>
-        <p>Dedicated Servers, Private Cloud, DRaaS, Colocation & VPS</p>
-        <p>Technical Support: <a href="mailto:support@ecommerce.com">support@ecommerce.com</a></p>
-        <p>Sales Inquiries: <a href="mailto:sales@ecommerce.com">sales@ecommerce.com</a></p>
-        <p><a href="https://intern-daffa.arfani.my.id">Visit our website</a> | <a href="#">Log in to your account</a> | <a href="#">Get support</a></p>
+        <div class="invoice-footer">
+            <p style="margin: 0;">Thanks!</p>
+            <p style="margin: 0;">Your ecommerce.com Team</p>
+            <p style="margin: 0;">Introducing Infrastructure Stability</p>
+            <p style="margin: 0;"><a href="https://intern-daffa.arfani.my.id">https://intern-daffa.arfani.my.id</a></p>
+            <p style="margin: 0;">Dedicated Servers, Private Cloud, DRaaS, Colocation & VPS</p>
+            <p style="margin: 0;">Technical Support: <a href="mailto:support@ecommerce.com">support@ecommerce.com</a></p>
+            <p style="margin: 0;">Sales Inquiries: <a href="mailto:sales@ecommerce.com">sales@ecommerce.com</a></p>
+            <p style="margin: 0;"><a href="https://intern-daffa.arfani.my.id">Visit our website</a> | <a href="#">Log in to your account</a> | <a href="#">Get support</a></p>
+        </div>
     </div>
 </body>
 </html>
