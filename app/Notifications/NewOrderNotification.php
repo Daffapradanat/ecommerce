@@ -42,3 +42,5 @@ class NewOrderNotification extends Notification
         ];
     }
 }
+
+// TIDAK KEPAKAI

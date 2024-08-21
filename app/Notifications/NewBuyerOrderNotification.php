@@ -41,7 +41,7 @@ class NewBuyerOrderNotification extends Notification
             'message' => $this->order->buyer->name . 'order has been placed successfully. ' . $this->order->order_id,
             'order_id' => $this->order->order_id,
             'total_price' => $this->order->total_price,
-            'url' => '/orders/' . $this->order->order_id
+            'url' => route('order.show', ['order' => $this->order->id])
         ];
     }
 }
