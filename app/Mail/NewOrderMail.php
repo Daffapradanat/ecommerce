@@ -22,14 +22,19 @@ class NewOrderMail extends Mailable
     public function build()
     {
         $pdf = Pdf::loadView('emails.invoice', ['order' => $this->order]);
+        $pdfContent = $pdf->output();
 
         return $this->markdown('emails.new_order')
-                    ->subject('Pesanan Baru - ' . $this->order->order_id)
-                    ->with([
-                        'order' => $this->order,
-                    ])
-                    ->attachData($pdf->stream('invoice-'.$this->order->order_id.'.pdf'), 'invoice-'.$this->order->order_id.'.pdf', [
-                        'mime' => 'application/pdf',
-                    ]);
+            ->subject('Pesanan Baru - ' . $this->order->order_id)
+            ->with([
+                'order' => $this->order,
+            ])
+            ->attach(
+                $pdfContent,
+                [
+                    'as' => 'invoice-'.$this->order->order_id.'.pdf',
+                    'mime' => 'application/pdf',
+                ]
+            );
     }
 }
