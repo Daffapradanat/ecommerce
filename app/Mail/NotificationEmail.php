@@ -13,29 +13,23 @@ class NotificationEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $order;
-    // public $notification;
+    public $notification;
 
-    public function __construct(Order $order)
+    public function __construct($notification)
     {
-        $this->order = $order;
+        $this->notification = $notification;
     }
-
-    // public function __construct($notification)
-    // {
-    //     $this->notification = $notification;
-    // }
 
     public function build()
     {
-        $pdf = PDF::loadView('emails.invoice', ['order' => $this->order]);
+        $pdf = PDF::loadView('emails.invoice', ['notification' => $this->notification]);
 
         return $this->markdown('emails.new_order')
-                    ->subject('Pesanan Baru - ' . $this->order->order_id)
+                    ->subject('Pesanan Baru - ' . $this->notification->order_id)
                     ->with([
-                        'order' => $this->order,
+                        'notification' => $this->notification,
                     ])
-                    ->attachData($pdf->output(), 'invoice-'.$this->order->order_id.'.pdf', [
+                    ->attachData($pdf->output(), 'invoice-'.$this->notification->order_id.'.pdf', [
                         'mime' => 'application/pdf',
                     ]);
     }
