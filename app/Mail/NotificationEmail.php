@@ -8,9 +8,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\Order;
-use App\Models\Buyer;
 
 class NotificationEmail extends Mailable
 {
@@ -23,28 +20,14 @@ class NotificationEmail extends Mailable
         $this->notification = $notification;
     }
 
-    // public function build()
-    // {
-    //     $subject = $this->getSubject();
-    //     return $this->view('emails.notification')
-    //                 ->subject($subject)
-    //                 ->with([
-    //                     'subject' => $subject,
-    //                     'notification' => $this->notification
-    //                 ]);
-    // }
-
     public function build()
     {
-        $pdf = PDF::loadView('emails.invoiceBuyer', ['notification' => $this->notification]);
-
-        return $this->markdown('emails.new_order')
-                    ->subject('Pesanan Baru - ' . $this->notification->order_id)
+        $subject = $this->getSubject();
+        return $this->view('emails.notification')
+                    ->subject($subject)
                     ->with([
-                        'notification' => $this->notification,
-                    ])
-                    ->attachData($pdf->output(), 'invoice-'.$this->notification->order_id.'.pdf', [
-                        'mime' => 'application/pdf',
+                        'subject' => $subject,
+                        'notification' => $this->notification
                     ]);
     }
 
