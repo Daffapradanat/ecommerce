@@ -38,8 +38,7 @@ class NewOrderNotification extends Notification
             'order_id' => $this->order->order_id,
             'buyer_name' => $this->order->buyer->name,
             'total_price' => $this->order->total_price,
-            'url' => route('order.show', ['order' => $this->order->order_id])
-            // 'url' => '/orders/' . $this->order->order_id
+            'url' => '/orders/' . $this->order->order_id
         ];
     }
 }
