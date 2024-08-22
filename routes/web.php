@@ -10,6 +10,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 Route::view('/', 'layouts');
 
@@ -20,13 +22,27 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');
     Route::post('/login', 'authenticate')->name('login.post');
     Route::post('/logout', 'logout')->name('logout');
+
+    // Email Verification Routes
+    Route::get('/email/verify', 'verificationNotice')->middleware('auth')->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::post('/email/verification-notification', 'resendVerificationEmail')->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    // Change Email Routes
+    Route::get('/change-email', 'showChangeEmailForm')->middleware('auth')->name('change.email');
+    Route::post('/change-email', 'changeEmail')->middleware('auth');
+
+    // Password Reset Routes
+    Route::get('/forgot-password', 'showForgotPasswordForm')->middleware('guest')->name('password.request');
+    Route::post('/forgot-password', 'sendResetLinkEmail')->middleware('guest')->name('password.email');
+    Route::get('/reset-password/{token}', 'showResetPasswordForm')->middleware('guest')->name('password.reset');
+    Route::post('/reset-password', 'resetPassword')->middleware('guest')->name('password.update');
 });
 
 // Invoice for email
 Route::get('/public-invoice/{order}/{token}', [OrderController::class, 'showPublicInvoice'])->name('orders.public-invoice');
 
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lobby', [LobbyController::class, 'index'])->name('lobby.index');
     Route::get('/home', [AuthController::class, 'layouts'])->name('home');
 

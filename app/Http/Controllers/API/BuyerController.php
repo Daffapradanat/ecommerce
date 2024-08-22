@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class BuyerController extends Controller
 {
 
-    
+
     public function update(Request $request)
     {
         $buyer = Auth::user();
@@ -33,9 +34,14 @@ class BuyerController extends Controller
         if ($request->has('name')) {
             $buyer->name = $request->name;
         }
-        if ($request->has('email')) {
+
+        if ($request->has('email') && $request->email !== $buyer->email) {
             $buyer->email = $request->email;
+            $buyer->email_verified_at = null;
+            $buyer->email_verification_token = Str::random(60);
+            $this->sendVerificationEmail($buyer);
         }
+
         if ($request->has('password')) {
             $buyer->password = Hash::make($request->password);
         }

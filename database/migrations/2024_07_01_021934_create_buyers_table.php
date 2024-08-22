@@ -15,6 +15,9 @@ class CreateBuyersTable extends Migration
             $table->string('email')->unique();
             $table->enum('status', ['active', 'deleted'])->default('active');
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('email_verification_token')->nullable();
+            $table->string('password_reset_code')->nullable();
+            $table->timestamp('password_reset_code_expires_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

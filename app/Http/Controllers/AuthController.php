@@ -3,8 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
@@ -33,9 +40,41 @@ class AuthController extends Controller
             'password' => bcrypt($validatedData['password']),
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'You have successfully registered and logged in!');
+        return redirect()->route('verification.notice')->with('success', 'Please check your email to verify your account.');
+    }
+
+    public function verificationNotice()
+    {
+        return view('auth.verify-email');
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended(RouteServiceProvider::HOME);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('resent', true);
+    }
+
+
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
+        }
+
+        if ($request->user()->markEmailAsVerified()) {
+            event(new Verified($request->user()));
+        }
+
+        return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
     }
 
     /**
@@ -70,6 +109,74 @@ class AuthController extends Controller
     public function layouts()
     {
         return view('layouts');
+    }
+
+    public function showChangeEmailForm()
+    {
+        return view('auth.change-email');
+    }
+
+    public function changeEmail(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'max:250', 'unique:users'],
+        ]);
+
+        $user = Auth::user();
+        $user->email = $request->email;
+        $user->email_verified_at = null;
+        $user->save();
+
+        $user->sendEmailVerificationNotification();
+
+        return redirect()->route('verification.notice')->with('success', 'Email changed. Please verify your new email address.');
+    }
+
+        public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    public function showResetPasswordForm($token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => bcrypt($password)
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 
     /**
