@@ -5,7 +5,7 @@ use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ShoppingController;
 use App\Http\Controllers\API\BuyerController;
 use App\Http\Controllers\API\NotificationController;
-use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\API\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
