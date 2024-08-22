@@ -34,17 +34,20 @@ class AuthController extends Controller
             'password' => ['required', 'min:8', 'confirmed'],
         ]);
 
+        $verificationCode = Str::random(6);
+
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => bcrypt($validatedData['password']),
+            'verification_code' => $verificationCode,
         ]);
 
         $user->sendEmailVerificationNotification();
 
         Auth::login($user);
 
-        return redirect()->route('verification.notice')->with('success', 'Please check your email to verify your account.');
+        return redirect()->route('verification.notice')->with('success', 'Please check your email for the verification code.');
     }
 
     public function verificationNotice()
@@ -64,17 +67,25 @@ class AuthController extends Controller
     }
 
 
-    public function verifyEmail(EmailVerificationRequest $request)
+    public function verifyEmail(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
+        $request->validate([
+            'verification_code' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        if ($user->verification_code === $request->verification_code) {
+            $user->email_verified_at = now();
+            $user->verification_code = null;
+            $user->save();
+
+            event(new Verified($user));
+
+            return redirect()->route('home')->with('success', 'Your email has been verified.');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
-        }
-
-        return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
+        return back()->withErrors(['verification_code' => 'The verification code is invalid.']);
     }
 
     /**
