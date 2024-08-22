@@ -25,7 +25,7 @@ Route::controller(AuthController::class)->group(function () {
 
     // Email Verification Routes
     Route::get('/email/verify', 'verificationNotice')->middleware('auth')->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
     Route::post('/email/verification-notification', 'resendVerificationEmail')->middleware(['auth', 'throttle:6,1'])->name('verification.send');
     // Change Email Routes
     Route::get('/change-email', 'showChangeEmailForm')->middleware('auth')->name('change.email');

@@ -67,14 +67,16 @@ class AuthController extends Controller
     public function verifyEmail(EmailVerificationRequest $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
+            return redirect()->intended(RouteServiceProvider::HOME)->with('verified', true);
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        return redirect()->intended(config('app.url') . '?verified=1')->with('verified', true);
+        Auth::login($request->user());
+
+        return redirect()->intended(RouteServiceProvider::HOME)->with('verified', true);
     }
 
     /**

@@ -10,10 +10,11 @@
                 <div class="card-body">
                     @if (session('resent'))
                         <div class="alert alert-success" role="alert">
-                            {{ __('A fresh verification link has been sent to your email address.') }}
+                            {{ __('A fresh verification link has been sent to your email address. Please check your email and click on the verification link to complete the process.') }}
                         </div>
                     @endif
 
+                    {{ __('If you have already verified your email, please') }} <a href="{{ route('login') }}">{{ __('login here') }}</a>.
                     {{ __('Before proceeding, please check your email for a verification link.') }}
                     {{ __('If you did not receive the email') }},
                     <form class="d-inline" method="POST" action="{{ route('verification.send') }}">
