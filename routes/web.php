@@ -24,12 +24,15 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', 'logout')->name('logout');
 
     // Email Verification Routes
-    Route::get('/email/verify', 'verificationNotice')->middleware('auth')->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-    Route::post('/email/verification-notification', 'resendVerificationEmail')->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    Route::get('/email/verify', [AuthController::class, 'verificationNotice'])->name('verification.notice');
+    Route::post('/email/verify', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+    Route::post('/email/resend', [AuthController::class, 'resendVerificationCode'])->name('verification.send');
+    
     // Change Email Routes
-    Route::get('/change-email', 'showChangeEmailForm')->middleware('auth')->name('change.email');
-    Route::post('/change-email', 'changeEmail')->middleware('auth');
+    Route::get('/email/change', [AuthController::class, 'showChangeEmailForm'])->name('email.change');
+    Route::post('/email/change', [AuthController::class, 'changeEmail'])->name('change.email');
+    Route::get('/email/change/verify', [AuthController::class, 'showVerifyEmailChangeForm'])->name('email.change.verify');
+    Route::post('/email/change/verify', [AuthController::class, 'verifyEmailChange']);
 
     // Password Reset Routes
     Route::get('/forgot-password', 'showForgotPasswordForm')->middleware('guest')->name('password.request');

@@ -45,48 +45,63 @@ class AuthController extends Controller
 
         $user->sendEmailVerificationNotification();
 
-        Auth::login($user);
+        // Auth::login($user);
 
         return redirect()->route('verification.notice')->with('success', 'Please check your email for the verification code.');
     }
-
     public function verificationNotice()
     {
-        return view('auth.verify-email');
-    }
-
-    public function resendVerificationEmail(Request $request)
-    {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(RouteServiceProvider::HOME);
+        if (Auth::check() && Auth::user()->hasVerifiedEmail()) {
+            return redirect()->route('home');
         }
 
-        $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('resent', true);
+        return view('auth.verify-email');
     }
-
 
     public function verifyEmail(Request $request)
     {
         $request->validate([
+            'email' => 'required|email',
             'verification_code' => 'required|string',
         ]);
 
-        $user = Auth::user();
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'No user found with this email address.']);
+        }
 
         if ($user->verification_code === $request->verification_code) {
-            $user->email_verified_at = now();
+            $user->markEmailAsVerified();
             $user->verification_code = null;
             $user->save();
 
-            event(new Verified($user));
+            Auth::login($user);
 
-            return redirect()->route('home')->with('success', 'Your email has been verified.');
+            return redirect()->route('home')->with('success', 'Your email has been verified! You are now logged in.');
         }
 
         return back()->withErrors(['verification_code' => 'The verification code is invalid.']);
     }
+
+    public function resendVerificationCode()
+    {
+        $user = Auth::user();
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('home');
+        }
+
+        $user->verification_code = Str::random(6);
+        $user->save();
+
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('success', 'A new verification code has been sent to your email address.');
+    }
+
+
+
 
     /**
      * Display a login form.
@@ -106,15 +121,21 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
-            return back()
-                ->withErrors([
-                    'password' => 'Your provided credentials do not match our records.',
-                ])
-                ->withInput($request->only('email'));
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if (!$user->hasVerifiedEmail()) {
+                Auth::logout();
+                return redirect()->route('verification.notice')
+                    ->withErrors(['email' => 'You need to verify your email first.']);
+            }
+
+            $request->session()->regenerate();
+            return redirect()->intended('home');
         }
 
-        return redirect()->route('home')->with('success', 'You have successfully logged in!');
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     public function layouts()
@@ -134,13 +155,41 @@ class AuthController extends Controller
         ]);
 
         $user = Auth::user();
-        $user->email = $request->email;
-        $user->email_verified_at = null;
+        $verificationCode = Str::random(6);
+
+        $user->new_email = $request->email;
+        $user->email_change_verification_code = $verificationCode;
         $user->save();
 
-        $user->sendEmailVerificationNotification();
+        $user->sendEmailChangeVerificationNotification();
 
-        return redirect()->route('verification.notice')->with('success', 'Email changed. Please verify your new email address.');
+        return redirect()->route('email.change.verify')->with('success', 'Please check your new email for the verification code.');
+    }
+
+    public function showVerifyEmailChangeForm()
+    {
+        return view('auth.verify-email-change');
+    }
+
+    public function verifyEmailChange(Request $request)
+    {
+        $request->validate([
+            'verification_code' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        if ($user->email_change_verification_code === $request->verification_code) {
+            $user->email = $user->new_email;
+            $user->new_email = null;
+            $user->email_change_verification_code = null;
+            $user->email_verified_at = now();
+            $user->save();
+
+            return redirect()->route('home')->with('success', 'Your email has been changed and verified successfully.');
+        }
+
+        return back()->withErrors(['verification_code' => 'The verification code is invalid.']);
     }
 
         public function showForgotPasswordForm()

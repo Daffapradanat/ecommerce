@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Change Email Address</div>
+                <div class="card-header">Verify Email Change</div>
 
                 <div class="card-body">
                     @if (session('success'))
@@ -14,16 +14,16 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('change.email') }}">
+                    <form method="POST" action="{{ route('email.change.verify') }}">
                         @csrf
 
                         <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">New Email Address</label>
+                            <label for="verification_code" class="col-md-4 col-form-label text-md-right">Verification Code</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
+                                <input id="verification_code" type="text" class="form-control @error('verification_code') is-invalid @enderror" name="verification_code" required>
 
-                                @error('email')
+                                @error('verification_code')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -34,7 +34,7 @@
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Request Email Change
+                                    Verify Email Change
                                 </button>
                             </div>
                         </div>

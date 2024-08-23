@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailNotification;
+use App\Notifications\EmailChangeVerificationNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -24,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'image',
         'role',
         'verification_code',
+        'email_change_verification_code',
     ];
 
     /**
@@ -54,5 +57,15 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->role = 'admin';
             }
         });
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
+
+    public function sendEmailChangeVerificationNotification()
+    {
+        $this->notify(new EmailChangeVerificationNotification);
     }
 }

@@ -18,6 +18,9 @@ class CreateBuyersTable extends Migration
             $table->string('email_verification_token')->nullable();
             $table->string('password_reset_code')->nullable();
             $table->timestamp('password_reset_code_expires_at')->nullable();
+            $table->string('email_change_code')->nullable();
+            $table->string('email_change_new_email')->nullable();
+            $table->timestamp('email_change_code_expires_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

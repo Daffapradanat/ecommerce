@@ -25,13 +25,13 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
                         <div class="mb-3">
                             <label class="form-label">Profile Image</label>
                             <div id="drop-area" class="border rounded p-4 text-center position-relative" style="background-color: #f8f9fa; border: 2px dashed #ced4da !important; transition: all 0.3s ease;">
@@ -144,7 +144,7 @@
             removeBtn.className = 'btn btn-sm btn-danger mt-2';
             removeBtn.onclick = function() {
                 previewContainer.innerHTML = '';
-                fileElem.value = ''; // Clear the file input
+                fileElem.value = '';
             };
             previewContainer.appendChild(removeBtn);
         }

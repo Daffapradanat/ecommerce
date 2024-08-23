@@ -39,8 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Buyer
+    Route::post('/request-email-change', [BuyerController::class, 'requestEmailChange']);
+    Route::post('/verify-email-change', [BuyerController::class, 'verifyEmailChange']);
     Route::put('/buyer', [BuyerController::class, 'update']);
-
     // Product
     Route::get('/products', [ProductController::class, 'index']);
 

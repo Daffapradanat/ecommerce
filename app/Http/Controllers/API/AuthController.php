@@ -7,11 +7,11 @@ use App\Notifications\NewBuyer;
 use App\Models\User;
 use App\Models\Buyer;
 use App\Mail\PasswordResetCodeMail;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -31,7 +31,6 @@ class AuthController extends Controller
             'email_verification_token' => Str::random(60),
         ]);
 
-        // Send verification email
         $this->sendVerificationEmail($buyer);
 
         $users = User::all();

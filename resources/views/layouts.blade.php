@@ -175,6 +175,7 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <li><a class="dropdown-item" href="{{ route('users.edit', Auth::id()) }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ route('email.change') }}">Change Email</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>

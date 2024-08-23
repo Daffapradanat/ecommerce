@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -44,10 +45,13 @@ class UserController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        $verificationCode = Str::random(6);
+
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
+        $user->verification_code = $verificationCode;
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('users', 'public');
@@ -56,7 +60,9 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        $user->sendEmailVerificationNotification();
+
+        return redirect()->route('verification.notice')->with('success', 'Administrator created. Please check the email for the verification code.');
     }
 
     public function show(User $user)
@@ -73,12 +79,12 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            // 'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user->name = $request->name;
-        $user->email = $request->email;
+        // $user->email = $request->email;
 
         if ($request->hasFile('image')) {
             if ($user->image) {
