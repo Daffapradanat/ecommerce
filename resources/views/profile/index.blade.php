@@ -45,11 +45,6 @@
                                     <label for="role" class="form-label">{{ __('administrator.role') }}</label>
                                     <input type="text" class="form-control" id="role" value="{{ $user->role ? $user->role->name : 'N/A' }}" readonly>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label for="about" class="form-label">{{ __('administrator.about_me') }}</label>
-                                    <textarea class="form-control" id="about" name="about" rows="3">{{ $user->about }}</textarea>
-                                </div>
                             </div>
                         </div>
 
