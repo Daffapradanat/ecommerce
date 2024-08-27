@@ -29,4 +29,16 @@ return [
     'request_email_change' => 'Minta Perubahan Email',
     'new_email_address' => 'Alamat Email Baru',
     'change_email_address' => 'Ubah Alamat Email',
+
+    'registration_successful' => 'Pendaftaran berhasil. Silakan periksa email Anda untuk memverifikasi akun.',
+    'invalid_credentials' => 'Kredensial yang diberikan tidak valid.',
+    'verify_email_before_login' => 'Harap verifikasi email Anda sebelum masuk.',
+    'email_verified_successfully' => 'Email berhasil diverifikasi.',
+    'password_reset_code_sent' => 'Kode reset kata sandi telah dikirim ke email Anda.',
+    'password_reset_successful' => 'Kata sandi berhasil diatur ulang.',
+    'logout_successful' => 'Berhasil keluar',
+    'language_changed' => 'Bahasa berhasil diubah',
+    'invalid_verification_token' => 'Token verifikasi tidak valid.',
+    'no_account_found' => 'Tidak ada akun yang ditemukan dengan email ini.',
+    'invalid_reset_code' => 'Kode reset kata sandi tidak valid atau sudah kedaluwarsa.',
 ];

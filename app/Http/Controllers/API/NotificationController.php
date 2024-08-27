@@ -43,7 +43,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Notification marked as read'
+            'message' => __('notification.notification_marked_as_read')
         ]);
     }
 
@@ -53,7 +53,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'All notifications marked as read'
+            'message' => __('notification.all_notifications_marked_as_read')
         ]);
     }
 
@@ -86,7 +86,11 @@ class NotificationController extends Controller
         $notification = new Notification([
             'type' => 'App\Notifications\OrderStatusChangedNotification',
             'data' => [
-                'message' => "Order #{$order->id} status has been changed from {$oldStatus} to {$order->status}.",
+                'message' => __('notification.order_status_changed', [
+                    'id' => $order->id,
+                    'oldStatus' => $oldStatus,
+                    'newStatus' => $order->status
+                ]),
                 'order_id' => $order->id,
             ]
         ]);
@@ -95,7 +99,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Order status change notification created'
+            'message' => __('notification.order_status_change_notification_created')
         ]);
     }
 
@@ -112,7 +116,7 @@ class NotificationController extends Controller
         if ($unreadNotifications->isEmpty()) {
             return response()->json([
                 'success' => true,
-                'message' => 'No unread notifications',
+                'message' => __('notification.no_unread_notifications'),
                 'unread_notifications' => []
             ]);
         }
@@ -143,7 +147,7 @@ class NotificationController extends Controller
         if ($readNotifications->isEmpty()) {
             return response()->json([
                 'success' => true,
-                'message' => 'No read notifications',
+                'message' => __('notification.no_read_notifications'),
                 'read_notifications' => []
             ]);
         }

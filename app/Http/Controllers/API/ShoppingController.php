@@ -3,22 +3,23 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Cart;
-use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Notifications\NewBuyerOrderNotification;
-use App\Notifications\NewOrderNotification;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\Cart;
 use App\Notifications\OrderStatusChangedNotification;
 use App\Notifications\OrderCancelledNotification;
+use App\Notifications\NewBuyerOrderNotification;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Midtrans\Transaction;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Midtrans\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ShoppingController extends Controller
@@ -44,7 +45,7 @@ class ShoppingController extends Controller
 
         if ($product->stock < $request->quantity) {
             return response()->json([
-                'message' => "Product '{$product->name}' is out of stock or doesn't have enough stock. Available stock: {$product->stock}"
+                'message' => __('order.insufficient_stock', ['product' => $product->name, 'stock' => $product->stock])
             ], 400);
         }
 
@@ -58,7 +59,7 @@ class ShoppingController extends Controller
             ]
         );
 
-        return response()->json(['message' => 'Product added to cart', 'cart' => $cart], 201);
+        return response()->json(['message' => __('order.product_added_to_cart'), 'cart' => $cart], 201);
     }
 
     public function showCart()
@@ -105,7 +106,7 @@ class ShoppingController extends Controller
 
         if ($product->stock < $request->quantity) {
             return response()->json([
-                'message' => "Product '{$product->name}' is out of stock or doesn't have enough stock. Available stock: {$product->stock}"
+                'message' => __('cart.insufficient_stock', ['product' => $product->name, 'stock' => $product->stock])
             ], 400);
         }
 
@@ -114,12 +115,12 @@ class ShoppingController extends Controller
             ->first();
 
         if (! $cart) {
-            return response()->json(['message' => 'Cart item not found'], 404);
+            return response()->json(['message' => __('cart.item_not_found')], 404);
         }
 
         $cart->update(['quantity' => $request->quantity]);
 
-        return response()->json(['message' => 'Cart updated', 'cart' => $cart]);
+        return response()->json(['message' => __('cart.updated'), 'cart' => $cart]);
     }
 
     public function removeFromCart(Request $request)
@@ -133,9 +134,9 @@ class ShoppingController extends Controller
             ->delete();
 
         if ($deleted) {
-            return response()->json(['message' => 'Product removed from cart']);
+            return response()->json(['message' => __('cart.product_removed')]);
         } else {
-            return response()->json(['message' => 'Product not found in cart'], 404);
+            return response()->json(['message' => __('cart.product_not_found')], 404);
         }
     }
 
@@ -161,7 +162,7 @@ class ShoppingController extends Controller
         $cartItems = Cart::where('buyer_id', $buyer->id)->with('product')->get();
 
         if ($cartItems->isEmpty()) {
-            return response()->json(['message' => 'Cart is empty'], 400);
+            return response()->json(['message' => __('order.cart_empty')], 400);
         }
 
         DB::beginTransaction();
@@ -247,14 +248,17 @@ class ShoppingController extends Controller
             }
 
             return response()->json([
-                'message' => 'Order created successfully',
+                'message' => __('order.order_created_successfully'),
                 'order' => $order->load('orderItems'),
                 'payment_token' => $snapToken,
                 'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Checkout failed', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => __('order.checkout_failed'),
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -320,15 +324,15 @@ class ShoppingController extends Controller
             ->first();
 
         if (!$order) {
-            return response()->json(['message' => 'Order not found or you are not authorized to cancel this order'], 404);
+            return response()->json(['message' => __('order.order_not_found_or_unauthorized')], 404);
         }
 
         if ($order->payment_status === 'paid') {
-            return response()->json(['message' => 'Paid orders cannot be cancelled'], 400);
+            return response()->json(['message' => __('order.paid_orders_cannot_be_cancelled')], 400);
         }
 
         if ($order->payment_status === 'cancelled') {
-            return response()->json(['message' => 'This order is already cancelled'], 400);
+            return response()->json(['message' => __('order.order_already_cancelled')], 400);
         }
 
         $oldStatus = $order->payment_status;
@@ -340,7 +344,7 @@ class ShoppingController extends Controller
         $admins = User::where('role', 'admin')->get();
         Notification::send($admins, new OrderCancelledNotification($order));
 
-        return response()->json(['message' => 'Order cancelled successfully', 'order' => $order]);
+        return response()->json(['message' => __('order.order_cancelled_successfully'), 'order' => $order]);
     }
 
     public function getPaymentLink($orderId)
@@ -348,13 +352,13 @@ class ShoppingController extends Controller
         $order = Order::findOrFail($orderId);
 
         if ($order->payment_status !== 'pending') {
-            return response()->json(['error' => 'This order is not pending payment'], 400);
+            return response()->json(['error' => __('order.not_pending_payment')], 400);
         }
 
         $paymentToken = $order->payment_token;
 
         if (! $paymentToken) {
-            return response()->json(['error' => 'Payment token not found'], 404);
+            return response()->json(['error' => __('order.payment_token_not_found')], 404);
         }
 
         Config::$serverKey = config('services.midtrans.server_key');
@@ -365,7 +369,7 @@ class ShoppingController extends Controller
 
             return response()->json(['payment_url' => $paymentUrl]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to get payment URL: '.$e->getMessage()], 500);
+            return response()->json(['error' => __('order.failed_to_get_payment_url', ['message' => $e->getMessage()])], 500);
         }
     }
 
@@ -383,7 +387,7 @@ class ShoppingController extends Controller
         $url = url('storage/' . $filename);
 
         return response()->json([
-            'message' => 'Invoice generated successfully',
+            'message' => __('order.invoice_generated_successfully'),
             'invoice_url' => $url,
         ]);
     }

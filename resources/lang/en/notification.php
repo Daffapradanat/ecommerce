@@ -15,4 +15,11 @@ return [
     'delete_selected_confirmation' => 'Are you sure you want to delete these notifications?',
     'cancel' => 'Cancel',
     'delete_notifications' => 'Delete Notifications',
+
+    'notification_marked_as_read' => 'Notification marked as read',
+    'all_notifications_marked_as_read' => 'All notifications marked as read',
+    'order_status_changed' => 'Order status #:id has been changed from :oldStatus to :newStatus.',
+    'order_status_change_notification_created' => 'Order status change notification has been created',
+    'no_unread_notifications' => 'No unread notifications',
+    'no_read_notifications' => 'No read notifications',
 ];

@@ -39,7 +39,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
+            'message' => __('messages.registration_successful'),
         ], 201);
     }
 
@@ -54,13 +54,13 @@ class AuthController extends Controller
 
         if (!$buyer || !Hash::check($request->password, $buyer->password)) {
             return response()->json([
-                'message' => 'The provided credentials are incorrect.'
+                'message' => __('messages.invalid_credentials')
             ], 401);
         }
 
         if (!$buyer->email_verified_at) {
             return response()->json([
-                'message' => 'Please verify your email before logging in.'
+                'message' => __('messages.verify_email_before_login')
             ], 403);
         }
 
@@ -78,7 +78,7 @@ class AuthController extends Controller
 
         if (!$buyer) {
             return response()->json([
-                'message' => 'Invalid verification token.'
+                'message' => __('messages.invalid_verification_token')
             ], 400);
         }
 
@@ -87,7 +87,7 @@ class AuthController extends Controller
         $buyer->save();
 
         return response()->json([
-            'message' => 'Email verified successfully.'
+            'message' => __('messages.email_verified_successfully')
         ]);
     }
 
@@ -108,7 +108,7 @@ class AuthController extends Controller
         $buyer = Buyer::where('email', $request->email)->first();
 
         if (!$buyer) {
-            return response()->json(['message' => 'No account found with this email.'], 404);
+            return response()->json(['message' => __('messages.no_account_found')], 404);
         }
 
         $code = Str::random(6);
@@ -118,7 +118,7 @@ class AuthController extends Controller
 
         Mail::to($buyer->email)->send(new PasswordResetCodeMail($code));
 
-        return response()->json(['message' => 'Password reset code has been sent to your email.']);
+        return response()->json(['message' => __('messages.password_reset_code_sent')]);
     }
 
     public function resetPassword(Request $request)
@@ -135,7 +135,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$buyer) {
-            return response()->json(['message' => 'Invalid or expired password reset code.'], 400);
+            return response()->json(['message' => __('messages.invalid_reset_code')], 400);
         }
 
         $buyer->password = Hash::make($request->password);
@@ -143,13 +143,13 @@ class AuthController extends Controller
         $buyer->password_reset_code_expires_at = null;
         $buyer->save();
 
-        return response()->json(['message' => 'Password has been reset successfully.']);
+        return response()->json(['message' => __('messages.password_reset_successful')]);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(['message' => __('messages.logout_successful')]);
     }
 }

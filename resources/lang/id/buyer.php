@@ -32,4 +32,12 @@ return [
     'password' => 'Kata Sandi',
     'confirm_password' => 'Konfirmasi Kata Sandi',
     'create_buyer' => 'Buat Pembeli',
+
+    'profile_updated_successfully' => 'Profil berhasil diperbarui',
+    'verification_code_sent' => 'Kode verifikasi telah dikirim ke email baru.',
+    'invalid_expired_email_change_request' => 'Permintaan perubahan email tidak valid atau sudah kedaluwarsa.',
+    'invalid_verification_code' => 'Kode verifikasi tidak valid.',
+    'email_changed_successfully' => 'Email berhasil diubah.',
+    'email_change_verification_code' => 'Kode verifikasi perubahan email Anda adalah: :code',
+    'email_change_verification_subject' => 'Kode Verifikasi Perubahan Email',
 ];

@@ -46,7 +46,7 @@ class BuyerController extends Controller
         $imageUrl = $buyer->image ? url('storage/buyers/'.$buyer->image) : null;
 
         return response()->json([
-            'message' => 'Profile updated successfully',
+            'message' => __('buyer.profile_updated_successfully'),
             'buyer' => array_merge($buyer->toArray(), ['image_url' => $imageUrl]),
         ], 200);
     }
@@ -65,12 +65,12 @@ class BuyerController extends Controller
         $buyer->email_change_code_expires_at = now()->addMinutes(15);
         $buyer->save();
 
-        Mail::raw("Your email change verification code is: {$code}", function ($message) use ($request) {
+        Mail::raw(__('buyer.email_change_verification_code', ['code' => $code]), function ($message) use ($request) {
             $message->to($request->new_email)
-                ->subject('Email Change Verification Code');
+                ->subject(__('buyer.email_change_verification_subject'));
         });
 
-        return response()->json(['message' => 'Verification code sent to new email.']);
+        return response()->json(['message' => __('buyer.verification_code_sent')]);
     }
 
     public function verifyEmailChange(Request $request)
@@ -82,11 +82,11 @@ class BuyerController extends Controller
         $buyer = Auth::user();
 
         if (!$buyer->email_change_code || !$buyer->email_change_new_email || $buyer->email_change_code_expires_at < now()) {
-            return response()->json(['message' => 'Invalid or expired email change request.'], 400);
+            return response()->json(['message' => __('buyer.invalid_expired_email_change_request')], 400);
         }
 
         if ($request->code !== $buyer->email_change_code) {
-            return response()->json(['message' => 'Invalid verification code.'], 400);
+            return response()->json(['message' => __('buyer.invalid_verification_code')], 400);
         }
 
         $oldEmail = $buyer->email;
@@ -100,7 +100,7 @@ class BuyerController extends Controller
         $buyer->save();
 
         return response()->json([
-            'message' => 'Email changed successfully.',
+            'message' => __('buyer.email_changed_successfully'),
             'old_email' => $oldEmail,
             'new_email' => $newEmail
         ], 200);

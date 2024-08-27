@@ -6,6 +6,7 @@ use App\Http\Controllers\API\ShoppingController;
 use App\Http\Controllers\API\BuyerController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,7 @@ Route::get('/verify-email', [AuthController::class, 'verifyEmail']);
 Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify.email');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::post('/change-language', [LanguageController::class, 'changeLanguage']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

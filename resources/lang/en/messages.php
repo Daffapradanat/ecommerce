@@ -29,4 +29,16 @@ return [
     'request_email_change' => 'Request Email Change',
     'new_email_address' => 'New Email Address',
     'change_email_address' => 'Change Email Address',
+
+    'registration_successful' => 'Registration successful. Please check your email to verify your account.',
+    'invalid_credentials' => 'The provided credentials are incorrect.',
+    'verify_email_before_login' => 'Please verify your email before logging in.',
+    'email_verified_successfully' => 'Email verified successfully.',
+    'password_reset_code_sent' => 'Password reset code has been sent to your email.',
+    'password_reset_successful' => 'Password has been reset successfully.',
+    'logout_successful' => 'Logged out successfully',
+    'language_changed' => 'Language changed successfully',
+    'invalid_verification_token' => 'Invalid verification token.',
+    'no_account_found' => 'No account found with this email.',
+    'invalid_reset_code' => 'Invalid or expired password reset code.',
 ];

@@ -15,4 +15,11 @@ return [
     'delete_selected_confirmation' => 'Apakah Anda yakin ingin menghapus notifikasi-notifikasi ini?',
     'cancel' => 'Batal',
     'delete_notifications' => 'Hapus Notifikasi',
+
+    'notification_marked_as_read' => 'Notifikasi ditandai sudah dibaca',
+    'all_notifications_marked_as_read' => 'Semua notifikasi ditandai sudah dibaca',
+    'order_status_changed' => 'Status pesanan #:id telah diubah dari :oldStatus menjadi :newStatus.',
+    'order_status_change_notification_created' => 'Notifikasi perubahan status pesanan telah dibuat',
+    'no_unread_notifications' => 'Tidak ada notifikasi yang belum dibaca',
+    'no_read_notifications' => 'Tidak ada notifikasi yang sudah dibaca',
 ];

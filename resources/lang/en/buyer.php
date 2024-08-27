@@ -32,4 +32,12 @@ return [
     'password' => 'Password',
     'confirm_password' => 'Confirm Password',
     'create_buyer' => 'Create Buyer',
+
+    'profile_updated_successfully' => 'Profile updated successfully',
+    'verification_code_sent' => 'Verification code sent to new email.',
+    'invalid_expired_email_change_request' => 'Invalid or expired email change request.',
+    'invalid_verification_code' => 'Invalid verification code.',
+    'email_changed_successfully' => 'Email changed successfully.',
+    'email_change_verification_code' => 'Your email change verification code is: :code',
+    'email_change_verification_subject' => 'Email Change Verification Code',
 ];
