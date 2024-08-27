@@ -5,8 +5,8 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h1 class="h3 mb-0">{{ __('administrator.create_new_administrator') }}</h1>
+                <div class="card-header bg-{{ isset($user) ? 'primary' : 'success' }} text-white">
+                    <h1 class="h3 mb-0">{{ isset($user) ? __('administrator.edit_administrator') : __('administrator.create_new_administrator') }}</h1>
                 </div>
                 <div class="card-body">
                     @if(session('error'))
@@ -15,32 +15,49 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
-                    <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ isset($user) ? route('users.update', $user->id) : route('users.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        @if(isset($user))
+                            @method('PUT')
+                        @endif
                         <div class="mb-3">
                             <label for="name" class="form-label">{{ __('administrator.name') }}</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name ?? '') }}" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">{{ __('administrator.email') }}</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email ?? '') }}" {{ isset($user) ? 'readonly' : 'required' }}>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                        @if(!isset($user))
+                            <div class="mb-3">
+                                <label for="password" class="form-label">{{ __('administrator.password') }}</label>
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="password_confirmation" class="form-label">{{ __('administrator.confirm_password') }}</label>
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                            </div>
+                        @endif
                         <div class="mb-3">
-                            <label for="password" class="form-label">{{ __('administrator.password') }}</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
-                            @error('password')
+                            <label for="role" class="form-label">{{ __('administrator.role') }}</label>
+                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                                <option value="">{{ __('administrator.select_role') }}</option>
+                                <option value="admin" {{ (old('role', $user->role ?? '') == 'admin') ? 'selected' : '' }}>Admin</option>
+                                <option value="manager" {{ (old('role', $user->role ?? '') == 'manager') ? 'selected' : '' }}>Manager</option>
+                                <option value="editor" {{ (old('role', $user->role ?? '') == 'editor') ? 'selected' : '' }}>Editor</option>
+                            </select>
+                            @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">{{ __('administrator.confirm_password') }}</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">{{ __('administrator.profile_image') }}</label>
@@ -50,7 +67,11 @@
                                 <p class="mb-2">{{ __('administrator.image_upload_instruction') }}</p>
                                 <small class="text-muted">{{ __('administrator.image_support_info') }}</small>
                                 <input type="file" id="fileElem" name="image" accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
-                                <div id="preview-container" class="mt-3 d-flex justify-content-center align-items-center"></div>
+                                <div id="preview-container" class="mt-3 d-flex justify-content-center align-items-center">
+                                    @if(isset($user) && $user->image)
+                                        <img src="{{ asset('storage/users/' . $user->image) }}" alt="{{ $user->name }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                    @endif
+                                </div>
                             </div>
                             @error('image')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -59,7 +80,9 @@
 
                         <div class="d-flex justify-content-between mt-3">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary">{{ __('administrator.cancel') }}</a>
-                            <button type="submit" class="btn btn-success">{{ __('administrator.create_user') }}</button>
+                            <button type="submit" class="btn btn-{{ isset($user) ? 'primary' : 'success' }}">
+                                {{ isset($user) ? __('administrator.update_user') : __('administrator.create_user') }}
+                            </button>
                         </div>
                     </form>
                 </div>

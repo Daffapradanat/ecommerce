@@ -12,51 +12,30 @@ use App\Notifications\EmailChangeVerificationNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory,Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'image',
-        'role',
+        'role_id',
         'verification_code',
         'email_change_verification_code',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
-    protected static function boot()
+    public function role()
     {
-        parent::boot();
-
-        static::creating(function ($user) {
-            if (empty($user->role)) {
-                $user->role = 'admin';
-            }
-        });
+        return $this->belongsTo(Role::class);
     }
 
     public function sendEmailVerificationNotification()

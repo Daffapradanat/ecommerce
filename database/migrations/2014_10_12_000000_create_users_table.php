@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,11 +12,41 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->json('permissions')->nullable();
+            $table->timestamps();
+        });
+
+        DB::table('roles')->insert([
+            [
+                'name' => 'superadmin',
+                'permissions' => json_encode(['products', 'orders', 'categories', 'roles', 'users']),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'admin',
+                'permissions' => json_encode(['products', 'orders', 'categories']),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'user',
+                'permissions' => json_encode(['products', 'orders']),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
+
+        $userRoleId = DB::table('roles')->where('name', 'user')->value('id');
+
+        Schema::create('users', function (Blueprint $table) use ($userRoleId) {
             $table->id();
             $table->string('name');
             $table->string('image')->nullable();
-            $table->string('role')->default('admin');
+            $table->foreignId('role_id')->constrained('roles')->default($userRoleId);
             $table->string('email')->unique();
             $table->string('new_email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
@@ -33,5 +64,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };

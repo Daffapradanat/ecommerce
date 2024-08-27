@@ -31,6 +31,9 @@
                                 <dt class="col-sm-3">{{ __('administrator.email') }}</dt>
                                 <dd class="col-sm-9">{{ $user->email }}</dd>
 
+                                <dt class="col-sm-3">{{ __('administrator.role') }}</dt>
+                                <dd class="col-sm-9">{{ $user->role ? $user->role->name : 'N/A' }}</dd>
+
                                 <dt class="col-sm-3">{{ __('administrator.created_at') }}</dt>
                                 <dd class="col-sm-9">{{ $user->created_at->format('d M Y H:i') }}</dd>
 

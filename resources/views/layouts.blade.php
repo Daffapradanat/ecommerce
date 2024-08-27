@@ -151,7 +151,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>                    
+                    </li>
 
                     <!-- Dropdown User -->
                     <li class="nav-item dropdown">
@@ -194,7 +194,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('users.edit', Auth::id()) }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile.index') }}">Profile</a></li>
                             <li><a class="dropdown-item" href="{{ route('email.change') }}">{{ __('messages.change_email') }}</a></li>
                             <li>
                                 <hr class="dropdown-divider">
@@ -230,7 +230,7 @@
 
             <div class="sidebar">
                 <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item">
                             <a href="{{ route('lobby.index') }}" class="nav-link">
@@ -239,18 +239,31 @@
                             </a>
                         </li>
                         @auth
+                            @if(in_array('products', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">
                                 <a href="{{ route('products.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-box"></i>
                                     <p>{{ __('messages.products') }}</p>
                                 </a>
                             </li>
+                            @endif
+                            @if(in_array('categories', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">
                                 <a href="{{ route('categories.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-tags"></i>
                                     <p>{{ __('messages.categories') }}</p>
                                 </a>
                             </li>
+                            @endif
+                            @if(in_array('roles', Auth::user()->role->permissions ?? []))
+                            <li class="nav-item">
+                                <a href="{{ route('roles.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-user-tag"></i>
+                                    <p>{{ __('messages.roles') }}</p>
+                                </a>
+                            </li>
+                            @endif
+                            @if(in_array('users', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">
                                 <a href="{{ route('users.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-users-cog"></i>
@@ -263,12 +276,15 @@
                                     <p>{{ __('messages.buyer') }}</p>
                                 </a>
                             </li>
+                            @endif
+                            @if(in_array('orders', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">
                                 <a href="{{ route('orders.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-shopping-cart"></i>
                                     <p>{{ __('messages.orders') }}</p>
                                 </a>
                             </li>
+                            @endif
                         @endauth
                     </ul>
                 </nav>

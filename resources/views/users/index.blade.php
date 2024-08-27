@@ -59,7 +59,7 @@
                             </td>
                             <td class="align-middle">{{ $user->name }}</td>
                             <td class="align-middle">{{ $user->email }}</td>
-                            <td class="align-middle">{{ $user->role ?? 'Administrator' }}</td>
+                            <td class="align-middle">{{ $user->role ? $user->role->name : 'N/A' }}</td>
                             <td class="align-middle">
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm me-2">

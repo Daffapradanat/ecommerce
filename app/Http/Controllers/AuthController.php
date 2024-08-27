@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -36,19 +37,21 @@ class AuthController extends Controller
 
         $verificationCode = Str::random(6);
 
+        $userRole = Role::where('name', 'user')->first();
+
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => bcrypt($validatedData['password']),
             'verification_code' => $verificationCode,
+            'role_id' => $userRole->id,
         ]);
 
         $user->sendEmailVerificationNotification();
 
-        // Auth::login($user);
-
         return redirect()->route('verification.notice')->with('success', 'Please check your email for the verification code.');
     }
+
     public function verificationNotice()
     {
         if (Auth::check() && Auth::user()->hasVerifiedEmail()) {
@@ -99,9 +102,6 @@ class AuthController extends Controller
 
         return back()->with('success', 'A new verification code has been sent to your email address.');
     }
-
-
-
 
     /**
      * Display a login form.

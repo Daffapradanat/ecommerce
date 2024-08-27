@@ -2,6 +2,7 @@
 return [
     'welcome' => 'Selamat Datang',
     'hello' => 'Halo',
+    'roles' => 'peran',
     'member_since' => 'Anggota sejak',
     'change_email' => 'Ubah Email',
     'login' => 'Masuk',
