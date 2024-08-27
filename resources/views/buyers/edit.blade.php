@@ -6,32 +6,32 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h1 class="h3 mb-0">Edit Buyer</h1>
+                    <h1 class="h3 mb-0">{{ __('buyer.edit_buyer') }}</h1>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('buyer.update', $buyer->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
+                            <label for="name" class="form-label">{{ __('buyer.name') }}</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $buyer->name) }}" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">{{ __('buyer.email') }}</label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $buyer->email) }}" required>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Profile Image</label>
+                            <label class="form-label">{{ __('buyer.profile_image') }}</label>
                             <div id="drop-area" class="border rounded p-4 text-center position-relative" style="background-color: #f8f9fa; border: 2px dashed #ced4da !important; transition: all 0.3s ease;">
                                 <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #6c757d;"></i>
-                                <p class="mb-2">Drag and drop an image here, or click to select a file</p>
-                                <small class="text-muted">Supports: JPG, JPEG, PNG, GIF up to 2MB</small>
+                                <p class="mb-2">{{ __('buyer.image_upload_instruction') }}</p>
+                                <small class="text-muted">{{ __('buyer.image_support_info') }}</small>
                                 <input type="file" id="fileElem" name="image" accept="image/*" style="display:none" onchange="handleFiles(this.files)">
                                 <div id="preview-container" class="mt-3 d-flex justify-content-center align-items-center">
                                     @if($buyer->image)
@@ -44,8 +44,8 @@
                             @enderror
                         </div>
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('buyer.index') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Update Buyer</button>
+                            <a href="{{ route('buyer.index') }}" class="btn btn-secondary">{{ __('buyer.cancel') }}</a>
+                            <button type="submit" class="btn btn-primary">{{ __('buyer.update_buyer') }}</button>
                         </div>
                     </form>
                 </div>

@@ -3,10 +3,10 @@
 @section('content')
 <div class="container-fluid px-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-        <h1 class="mt-4 mb-3 mb-md-0">Order Management</h1>
+        <h1 class="mt-4 mb-3 mb-md-0">{{ __('order.order_management') }}</h1>
         <div>
             <a href="{{ route('orders.export') }}" class="btn btn-info">
-                <i class="fas fa-file-export"></i> Export Orders
+                <i class="fas fa-file-export"></i> {{ __('order.export_orders') }}
             </a>
         </div>
     </div>
@@ -18,12 +18,12 @@
                 <table class="table table-hover" id="ordersTable">
                     <thead>
                         <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <th>{{ __('order.order_id') }}</th>
+                            <th>{{ __('order.customer') }}</th>
+                            <th>{{ __('order.total') }}</th>
+                            <th>{{ __('order.status') }}</th>
+                            <th>{{ __('order.date') }}</th>
+                            <th>{{ __('order.actions') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -37,15 +37,15 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Order Cancellation</h5>
+                <h5 class="modal-title" id="deleteModalLabel">{{ __('order.confirm_order_cancellation') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to cancel this order?
+                {{ __('order.cancel_order_confirmation') }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="confirmCancelButton">Cancel Order</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('order.close') }}</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelButton">{{ __('order.cancel_order') }}</button>
             </div>
         </div>
     </div>
@@ -73,12 +73,6 @@ $(document).ready(function() {
             {data: 'action', name: 'action', orderable: false, searchable: false}
         ]
     });
-
-    // $('#ordersTable').on('click', '.delete-order', function() {
-    //     var orderId = $(this).data('id');
-    //     $('#deleteModal').modal('show');
-    //     $('#confirmCancelButton').data('id', orderId);
-    // });
 
     $('#ordersTable').on('click', '.delete-order', function() {
         var orderId = $(this).data('id');
@@ -114,7 +108,6 @@ $(document).ready(function() {
         });
     }
 
-    // Alert auto-close
     window.setTimeout(function() {
         $(".alert").fadeTo(500, 0).slideUp(500, function(){
             $(this).remove();

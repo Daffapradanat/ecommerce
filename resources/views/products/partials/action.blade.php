@@ -15,18 +15,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel{{ $product->id }}">Confirm Product Deletion</h5>
+                <h5 class="modal-title" id="deleteModalLabel{{ $product->id }}">{{ __('products.confirm_product_deletion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete the product "{{ $product->name }}"?
+                {{ __('products.sure_delete_product') }} "{{ $product->name }}"?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('products.cancel') }}</button>
                 <form action="{{ route('products.destroy', $product->id) }}" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete Product</button>
+                    <button type="submit" class="btn btn-danger">{{ __('products.delete') }}</button>
                 </form>
             </div>
         </div>

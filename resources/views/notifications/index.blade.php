@@ -1,35 +1,20 @@
 @extends('layouts')
 
 @section('content')
-{{-- <div class="mt-4">
-    <h2>Create New Notification</h2>
-    <form id="createNotificationForm">
-        @csrf
-        <div class="mb-3">
-            <label for="message" class="form-label">Message</label>
-            <input type="text" class="form-control" id="message" name="message" required>
-        </div>
-        <div class="mb-3">
-            <label for="url" class="form-label">URL (optional)</label>
-            <input type="text" class="form-control" id="url" name="url">
-        </div>
-        <button type="submit" class="btn btn-primary">Create Notification</button>
-    </form>
-</div> --}}
     <div class="container mt-4">
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <h1 class="mb-0 me-3">Notifications</h1>
+                    <h1 class="mb-0 me-3">{{ __('notification.notifications') }}</h1>
                     <div class="d-flex flex-wrap gap-2">
                         <button id="refreshButton" class="btn btn-outline-secondary">
-                            <i class="fas fa-sync-alt"></i> Refresh
+                            <i class="fas fa-sync-alt"></i> {{ __('notification.refresh') }}
                         </button>
                         <button id="markAllReadButton" class="btn btn-outline-primary">
-                            <i class="fas fa-check-double"></i> Mark All as Read
+                            <i class="fas fa-check-double"></i> {{ __('notification.mark_all_as_read') }}
                         </button>
                         <button id="deleteSelectedButton" class="btn btn-outline-danger">
-                            <i class="fas fa-trash"></i> Delete Selected
+                            <i class="fas fa-trash"></i> {{ __('notification.delete_selected') }}
                         </button>
                     </div>
                 </div>
@@ -41,7 +26,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="selectAll">
                             <label class="form-check-label" for="selectAll">
-                                Select All
+                                {{ __('notification.select_all') }}
                             </label>
                         </div>
                     </div>
@@ -49,8 +34,8 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Message</th>
-                                <th>Actions</th>
+                                <th>{{ __('notification.message') }}</th>
+                                <th>{{ __('notification.actions') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -64,15 +49,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Confirm Notification Deletion</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">{{ __('notification.confirm_notification_deletion') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this notification?
+                    {{ __('notification.delete_notification_confirmation') }}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete Notification</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('notification.close') }}</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">{{ __('notification.delete_notification') }}</button>
                 </div>
             </div>
         </div>
@@ -83,15 +68,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bulkDeleteModalLabel">Confirm Selected Deletion</h5>
+                    <h5 class="modal-title" id="bulkDeleteModalLabel">{{ __('notification.confirm_selected_deletion') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete these notifications?
+                    {{ __('notification.delete_selected_confirmation') }}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmBulkDeleteButton">Delete Notifications</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('notification.cancel') }}</button>
+                    <button type="button" class="btn btn-danger" id="confirmBulkDeleteButton">{{ __('notification.delete_notification') }}</button>
                 </div>
             </div>
         </div>

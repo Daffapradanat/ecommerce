@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
-                    <h1 class="h3 mb-0">Create New Administrator</h1>
+                    <h1 class="h3 mb-0">{{ __('administrator.create_new_administrator') }}</h1>
                 </div>
                 <div class="card-body">
                     @if(session('error'))
@@ -18,37 +18,37 @@
                     <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
+                            <label for="name" class="form-label">{{ __('administrator.name') }}</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">{{ __('administrator.email') }}</label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">{{ __('administrator.password') }}</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                            <label for="password_confirmation" class="form-label">{{ __('administrator.confirm_password') }}</label>
                             <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Profile Image</label>
+                            <label class="form-label">{{ __('administrator.profile_image') }}</label>
                             <div id="drop-area" class="border rounded p-4 text-center position-relative"
                                 style="background-color: #f8f9fa; border: 2px dashed #ced4da; transition: all 0.3s ease;">
                                 <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #6c757d;"></i>
-                                <p class="mb-2">Drag and drop an image here, or click to select a file</p>
-                                <small class="text-muted">Supports: JPG, JPEG, PNG, GIF up to 2MB</small>
+                                <p class="mb-2">{{ __('administrator.image_upload_instruction') }}</p>
+                                <small class="text-muted">{{ __('administrator.image_support_info') }}</small>
                                 <input type="file" id="fileElem" name="image" accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
                                 <div id="preview-container" class="mt-3 d-flex justify-content-center align-items-center"></div>
                             </div>
@@ -58,8 +58,8 @@
                         </div>
 
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-success">Create User</button>
+                            <a href="{{ route('users.index') }}" class="btn btn-secondary">{{ __('administrator.cancel') }}</a>
+                            <button type="submit" class="btn btn-success">{{ __('administrator.create_user') }}</button>
                         </div>
                     </form>
                 </div>

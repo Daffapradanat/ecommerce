@@ -4,13 +4,13 @@
 <div class="container-fluid px-4">
     <div class="container-fluid px-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-            <h1 class="mt-4 mb-3 mb-md-0">Administrator Management</h1>
+            <h1 class="mt-4 mb-3 mb-md-0">{{ __('administrator.administrator_management') }}</h1>
             <div>
                 <a href="{{ route('users.create') }}" class="btn btn-primary me-2">
-                    <i class="fas fa-user-plus"></i> Add New Administrator
+                    <i class="fas fa-user-plus"></i> {{ __('administrator.add_new_administrator') }}
                 </a>
                 <a href="{{ route('users.export') }}" class="btn btn-info">
-                    <i class="fas fa-file-export"></i> Export Users
+                    <i class="fas fa-file-export"></i> {{ __('administrator.export_users') }}
                 </a>
             </div>
         </div>
@@ -26,7 +26,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Administrator Account</h6>
+            <h6 class="m-0 font-weight-bold text-primary">{{ __('administrator.administrator_account') }}</h6>
         </div>
 
         <div class="card-body">
@@ -34,11 +34,11 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
+                            <th>{{ __('administrator.image') }}</th>
+                            <th>{{ __('administrator.name') }}</th>
+                            <th>{{ __('administrator.email') }}</th>
+                            <th>{{ __('administrator.role') }}</th>
+                            <th>{{ __('administrator.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,18 +88,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel{{ $user->id }}">Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteModalLabel{{ $user->id }}">{{ __('administrator.confirm_deletion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete the administrator "{{ $user->name }}"?
+                {{ __('administrator.delete_administrator_confirmation') }} "{{ $user->name }}"?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('administrator.cancel') }}</button>
                 <form action="{{ route('users.destroy', $user->id) }}" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">{{ __('administrator.delete') }}</button>
                 </form>
             </div>
         </div>

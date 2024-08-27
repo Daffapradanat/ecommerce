@@ -7,24 +7,23 @@
         <div class="col-md-8">
             <div class="card shadow-lg rounded-lg">
                 <div class="card-header bg-primary text-white py-3">
-                    <h3 class="mb-0 font-weight-bold">Pay Order #{{ $order->id }}</h3>
+                    <h3 class="mb-0 font-weight-bold">{{ __('order.pay_order') }} #{{ $order->id }}</h3>
                 </div>
                 <div class="card-body">
 
-                    <!-- Custom Notification -->
                     <div id="custom-notification" class="alert d-none mb-4" role="alert"></div>
 
                     <div class="alert alert-info mb-4">
-                        <h5 class="mb-3">Time Remaining</h5>
+                        <h5 class="mb-3">{{ __('order.time_remaining') }}</h5>
                         <div class="d-flex justify-content-center align-items-center">
                             <div class="countdown-item">
                                 <span id="countdown-minutes" class="countdown-value">00</span>
-                                <span class="countdown-label">Minutes</span>
+                                <span class="countdown-label">{{ __('order.minutes') }}</span>
                             </div>
                             <div class="countdown-separator">:</div>
                             <div class="countdown-item">
                                 <span id="countdown-seconds" class="countdown-value">00</span>
-                                <span class="countdown-label">Seconds</span>
+                                <span class="countdown-label">{{ __('order.seconds') }}</span>
                             </div>
                         </div>
                         <div class="progress mt-3" style="height: 8px;">
@@ -34,16 +33,16 @@
 
                     <div class="row mb-4">
                         <div class="col-sm-6">
-                            <h6 class="mb-3">Order Details:</h6>
-                            <p class="mb-1"><strong>Order ID:</strong> {{ $order->order_id }}</p>
-                            <p class="mb-1"><strong>Date:</strong> {{ $order->created_at->format('d M Y H:i') }}</p>
-                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-warning">Awaiting Payment</span></p>
+                            <h6 class="mb-3">{{ __('order.order_details') }}:</h6>
+                            <p class="mb-1"><strong>{{ __('order.order_id') }}:</strong> {{ $order->order_id }}</p>
+                            <p class="mb-1"><strong>{{ __('order.status') }}:</strong> {{ $order->created_at->format('d M Y H:i') }}</p>
+                            <p class="mb-1"><strong>{{ __('order.date') }}:</strong> <span class="badge bg-warning">{{ __('order.awaiting_payment') }}</span></p>
                         </div>
                         <div class="col-sm-6">
-                            <h6 class="mb-3">Customer Details:</h6>
-                            <p class="mb-1"><strong>Name:</strong> {{ $order->name }}</p>
-                            <p class="mb-1"><strong>Email:</strong> {{ $order->email }}</p>
-                            <p class="mb-1"><strong>Phone:</strong> {{ $order->phone }}</p>
+                            <h6 class="mb-3">{{ __('order.customer_details') }}:</h6>
+                            <p class="mb-1"><strong>{{ __('order.name') }}:</strong> {{ $order->name }}</p>
+                            <p class="mb-1"><strong>{{ __('order.email') }}:</strong> {{ $order->email }}</p>
+                            <p class="mb-1"><strong>{{ __('order.phone') }}:</strong> {{ $order->phone }}</p>
                         </div>
                     </div>
 
@@ -51,10 +50,10 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Item</th>
-                                    <th class="text-end">Price</th>
-                                    <th class="text-center">Quantity</th>
-                                    <th class="text-end">Subtotal</th>
+                                    <th>{{ __('order.item') }}</th>
+                                    <th class="text-end">{{ __('order.price') }}</th>
+                                    <th class="text-center">{{ __('order.quantity') }}</th>
+                                    <th class="text-end">{{ __('order.subtotal') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,7 +78,7 @@
                     @if($snapToken)
                     <div class="text-center mt-4">
                         <button id="pay-button" class="btn btn-primary btn-lg px-5 py-3 mb-3">
-                            <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                            <i class="fas fa-credit-card me-2"></i>{{ __('order.proceed_to_payment') }}
                         </button>
 
                         @if($order->payment_status === 'awaiting_payment' || $order->payment_status === 'pending')
@@ -87,14 +86,14 @@
                                 @csrf
                                 @method('POST')
                                 <button type="submit" class="btn btn-danger btn-lg px-5 py-3">
-                                    <i class="fas fa-times me-2"></i>Cancel Order
+                                    <i class="fas fa-times me-2"></i>{{ __('order.cancel_order') }}
                                 </button>
                             </form>
                         @endif
                     </div>
                     @else
                     <div class="alert alert-danger">
-                        Payment token is not available. Please try again later or contact support.
+                        {{ __('order.payment_token_unavailable') }}
                     </div>
                     @endif
                 </div>

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
     {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> --}}
     <style>
         body {
@@ -133,6 +134,25 @@
                         </a>
                     </li>
 
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="flag-icon flag-icon-{{ app()->getLocale() == 'en' ? 'us' : 'id' }}"></span>
+                            {{ strtoupper(app()->getLocale()) }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('change.language', 'en') }}">
+                                    <span class="flag-icon flag-icon-us"></span> EN
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('change.language', 'id') }}">
+                                    <span class="flag-icon flag-icon-id"></span> ID
+                                </a>
+                            </li>
+                        </ul>
+                    </li>                    
+
                     <!-- Dropdown User -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
@@ -166,7 +186,7 @@
                                         style="width: 48px; height: 48px; object-fit: cover;">
                                     <div>
                                         <h6 class="mb-0">{{ Auth::user()->name }}</h6>
-                                        <small class="text-muted">Member since
+                                        <small class="text-muted">{{ __('messages.member_since') }}
                                             {{ Auth::user()->created_at->format('M. Y') }}</small>
                                     </div>
                                 </div>
@@ -175,7 +195,7 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <li><a class="dropdown-item" href="{{ route('users.edit', Auth::id()) }}">Profile</a></li>
-                            <li><a class="dropdown-item" href="{{ route('email.change') }}">Change Email</a></li>
+                            <li><a class="dropdown-item" href="{{ route('email.change') }}">{{ __('messages.change_email') }}</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -191,10 +211,10 @@
 
                 @guest
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">Login</a>
+                        <a class="nav-link" href="{{ route('login') }}">{{ __('messages.login') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('register') }}">Register</a>
+                        <a class="nav-link" href="{{ route('register') }}">{{ __('messages.register') }}</a>
                     </li>
                 @endguest
             </ul>
@@ -215,38 +235,38 @@
                         <li class="nav-item">
                             <a href="{{ route('lobby.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-home"></i>
-                                <p>Home</p>
+                                <p>{{ __('messages.home') }}</p>
                             </a>
                         </li>
                         @auth
                             <li class="nav-item">
                                 <a href="{{ route('products.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-box"></i>
-                                    <p>Products</p>
+                                    <p>{{ __('messages.products') }}</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('categories.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-tags"></i>
-                                    <p>Categories</p>
+                                    <p>{{ __('messages.categories') }}</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('users.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-users-cog"></i>
-                                    <p>Admin</p>
+                                    <p>{{ __('messages.admin') }}</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('buyer.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-users"></i>
-                                    <p>Buyer</p>
+                                    <p>{{ __('messages.buyer') }}</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('orders.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-shopping-cart"></i>
-                                    <p>Orders</p>
+                                    <p>{{ __('messages.orders') }}</p>
                                 </a>
                             </li>
                         @endauth

@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="name">Name</label>
+    <label for="name">{{ __('products.name') }}</label>
     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $product->name ?? '') }}" required>
     @error('name')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -7,7 +7,7 @@
 </div>
 
 <div class="form-group">
-    <label for="description">Description</label>
+    <label for="description">{{ __('products.description') }}</label>
     <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3" required>{{ old('description', $product->description ?? '') }}</textarea>
     @error('description')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -15,7 +15,7 @@
 </div>
 
 <div class="form-group">
-    <label for="price">Price (Rp)</label>
+    <label for="price">{{ __('products.price') }} (Rp)</label>
     <div class="input-group">
         <span class="input-group-text">Rp</span>
         <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price ?? '') }}" required>
@@ -27,7 +27,7 @@
 </div>
 
 <div class="form-group">
-    <label for="stock">Stock</label>
+    <label for="stock">{{ __('products.stock') }}</label>
     <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock" value="{{ old('stock', $product->stock ?? '') }}" required>
     @error('stock')
         <div class="invalid-feedback">{{ $message }}</div>
@@ -35,9 +35,9 @@
 </div>
 
 <div class="form-group">
-    <label for="category_id">Category</label>
+    <label for="category_id">{{ __('products.category') }}</label>
     <select class="form-control @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
-        <option value="">Select a category</option>
+        <option value="">{{ __('products.select_category') }}</option>
         @foreach($categories as $category)
             <option value="{{ $category->id }}" {{ (old('category_id', $product->category_id ?? '') == $category->id) ? 'selected' : '' }}>
                 {{ $category->name }}
@@ -50,9 +50,9 @@
 </div>
 
 <div class="form-group">
-    <label for="images">Images</label>
+    <label for="images">{{ __('products.image') }}</label>
     <div id="drop-area" class="drop-area">
-        <p>Drag and drop images here or click to select files</p>
+        <p>{{ __('products.drag_drop_images') }}</p>
         <input type="file" id="fileElem" name="images[]" multiple accept="image/*" style="display:none">
     </div>
     <div id="gallery" class="image-preview"></div>
@@ -63,7 +63,7 @@
 
 @if(isset($product) && $product->image->isNotEmpty())
     <div class="form-group mt-3">
-        <label>Current Images</label>
+        <label>{{ __('products.current_images') }}</label>
         <div class="row">
             @foreach($product->image as $images)
                 <div class="col-md-3 mb-3">
@@ -73,7 +73,7 @@
                             <input type="checkbox" name="remove_images[]" value="{{ $images->id }}" id="remove_image_{{ $loop->index }}" class="remove-checkbox">
                             <label for="remove_image_{{ $loop->index }}" class="remove-label">
                                 <span class="checkbox-custom"></span>
-                                Remove
+                                {{ __('products.remove') }}
                             </label>
                         </div>
                     </div>

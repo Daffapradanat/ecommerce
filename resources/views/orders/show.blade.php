@@ -38,27 +38,27 @@
                             $paymentStatusClass = $paymentStatusClasses[$order->payment_status] ?? 'secondary';
                         @endphp
                         <span class="badge bg-{{ $paymentStatusClass }} fs-6">
-                            Payment Status: {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
+                            {{ __('order.payment_status') }}:{{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
                         </span>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-sm-6">
-                            <h6 class="mb-3">From:</h6>
-                            <div><strong>Your Store Name</strong></div>
+                            <h6 class="mb-3">{{ __('order.from') }}:</h6>
+                            <div><strong>Toko serba guna</strong></div>
                             <div>123 Store Street</div>
-                            <div>Store City, ST 12345</div>
-                            <div>Email: store@example.com</div>
-                            <div>Phone: +1 234 567 8901</div>
+                            <div>Surabaya, ST 12345</div>
+                            <div>{{ __('order.email') }}: store@example.com</div>
+                            <div>{{ __('order.phone') }}: +64 834 567 8901</div>
                         </div>
                         <div class="col-sm-6">
                             <h6 class="mb-3">To:</h6>
                             <div><strong>{{ $order->name }}</strong></div>
                             <div>{{ $order->address }}</div>
                             <div>{{ $order->city }}, {{ $order->postal_code }}</div>
-                            <div>Email: {{ $order->email }}</div>
-                            <div>Phone: {{ $order->phone }}</div>
+                            <div>{{ __('order.email') }}: {{ $order->email }}</div>
+                            <div>{{ __('order.phone') }}: {{ $order->phone }}</div>
                         </div>
                     </div>
 
@@ -66,9 +66,9 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Item</th>
-                                    <th class="text-end">Price</th>
-                                    <th class="text-center">Quantity</th>
+                                    <th>{{ __('order.item') }}</th>
+                                    <th class="text-end">{{ __('order.price') }}</th>
+                                    <th class="text-center">{{ __('order.quantity') }}</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -90,7 +90,7 @@
                             <table class="table table-clear">
                                 <tbody>
                                     <tr>
-                                        <td class="left"><strong>Total</strong></td>
+                                        <td class="left"><strong>{{ __('order.total') }}</strong></td>
                                         <td class="text-end"><strong>Rp
                                                 {{ number_format($order->total_price, 0, ',', '.') }}</strong></td>
                                     </tr>
@@ -103,7 +103,7 @@
                     <div class="row align-items-center">
                         <div class="col-lg-6 mb-3 mb-lg-0">
                             <p class="mb-0 fw-bold">
-                                <i class="fas fa-credit-card me-2"></i>Payment Method:
+                                <i class="fas fa-credit-card me-2"></i>{{ __('order.payment_method') }}:
                                 <span
                                     class="fw-normal">{{ ucfirst(str_replace('_', ' ', $order->payment_method ?? 'Not available')) }}</span>
                             </p>
@@ -111,15 +111,15 @@
                         <div class="col-lg-6 text-lg-end">
                             <div class="btn-group" role="group" aria-label="Order actions">
                                 <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                                    <i class="fas fa-arrow-left me-2"></i>{{ __('order.back_to_orders') }}
                                 </a>
                                 @if ($order->payment_status === 'pending' || $order->payment_status === 'awaiting_payment')
                                     <a href="{{ route('orders.pay', $order->id) }}" class="btn btn-primary">
-                                        <i class="fas fa-credit-card me-2"></i>Pay Now
+                                        <i class="fas fa-credit-card me-2"></i>{{ __('order.pay_now') }}
                                     </a>
                                 @endif
                                 <a href="{{ route('orders.download-invoice', $order->id) }}" class="btn btn-success">
-                                    <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                                    <i class="fas fa-file-invoice me-2"></i>{{ __('order.download_invoice') }}
                                 </a>
                             </div>
                         </div>

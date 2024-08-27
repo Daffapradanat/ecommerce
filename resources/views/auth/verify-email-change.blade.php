@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Verify Email Change</div>
+                <div class="card-header">{{ __('messages.verify_email_change') }}</div>
 
                 <div class="card-body">
                     @if (session('success'))
@@ -18,7 +18,7 @@
                         @csrf
 
                         <div class="form-group row">
-                            <label for="verification_code" class="col-md-4 col-form-label text-md-right">Verification Code</label>
+                            <label for="verification_code" class="col-md-4 col-form-label text-md-right">{{ __('messages.verification_code') }}</label>
 
                             <div class="col-md-6">
                                 <input id="verification_code" type="text" class="form-control @error('verification_code') is-invalid @enderror" name="verification_code" required>
@@ -34,7 +34,7 @@
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Verify Email Change
+                                    {{ __('messages.verify_email_change') }}
                                 </button>
                             </div>
                         </div>

@@ -7,7 +7,7 @@
         <div class="col-md-9">
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h1 class="h3 mb-0">Product Details</h1>
+                    <h1 class="h3 mb-0">{{ __('products.product_details') }}</h1>
                 </div>
 
                 <div class="card-body">
@@ -30,17 +30,17 @@
                                 @if($product->image->count() > 1)
                                     <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Previous</span>
+                                        <span class="visually-hidden">{{ __('products.previous') }}</span>
                                     </button>
                                     <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Next</span>
+                                        <span class="visually-hidden">{{ __('products.next') }}</span>
                                     </button>
                                 @endif
                             </div>
                             @else
                                 <div class="bg-light text-center p-5 rounded">
-                                    <span class="text-muted">No image available</span>
+                                    <span class="text-muted">{{ __('products.no_image_available') }}</span>
                                 </div>
                             @endif
                         </div>
@@ -50,23 +50,23 @@
                             <p class="text-muted mb-4">{{ $product->description }}</p>
                             <table class="table table-sm">
                                 <tr>
-                                    <th class="w-35">Price:</th>
+                                    <th class="w-35">{{ __('products.price') }}:</th>
                                     <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Stock:</th>
+                                    <th>{{ __('products.stock') }}:</th>
                                     <td>{{ $product->stock }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Category:</th>
+                                    <th>{{ __('products.category') }}:</th>
                                     <td>{{ $product->category->name }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Created at:</th>
+                                    <th>{{ __('products.created_at') }}:</th>
                                     <td>{{ $product->created_at->format('d M Y H:i') }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Last updated:</th>
+                                    <th>{{ __('products.update_product') }}:</th>
                                     <td>{{ $product->updated_at->format('d M Y H:i') }}</td>
                                 </tr>
                             </table>
@@ -75,11 +75,11 @@
                 </div>
                 <div class="card-footer bg-light">
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ route('products.index') }}" class="btn btn-secondary">Back to List</a>
+                        <a href="{{ route('products.index') }}" class="btn btn-secondary">{{ __('products.back_to_list') }}</a>
                         <div>
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning me-2">Edit</a>
+                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning me-2">{{ __('products.edit') }}</a>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                Delete
+                                {{ __('products.delete') }}
                             </button>
                         </div>
                     </div>
@@ -94,18 +94,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <h5 class="modal-title" id="deleteModalLabel">{{ __('products.confirm_product_deletion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete the product "{{ $product->name }}"?
+                {{ __('products.sure_delete_product') }} "{{ $product->name }}"?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('products.cancel') }}</button>
                 <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">{{ __('products.delete') }}</button>
                 </form>
             </div>
         </div>

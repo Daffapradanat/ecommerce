@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h1 class="h3 mb-0">Administrator Details</h1>
+                    <h1 class="h3 mb-0">{{ __('administrator.administrator_details') }}</h1>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -28,13 +28,13 @@
                         <div class="col-md-8">
                             <h2 class="h4 mb-3">{{ $user->name }}</h2>
                             <dl class="row">
-                                <dt class="col-sm-3">Email</dt>
+                                <dt class="col-sm-3">{{ __('administrator.email') }}</dt>
                                 <dd class="col-sm-9">{{ $user->email }}</dd>
 
-                                <dt class="col-sm-3">Created at</dt>
+                                <dt class="col-sm-3">{{ __('administrator.created_at') }}</dt>
                                 <dd class="col-sm-9">{{ $user->created_at->format('d M Y H:i') }}</dd>
 
-                                <dt class="col-sm-3">Updated at</dt>
+                                <dt class="col-sm-3">{{ __('administrator.updated_at') }}</dt>
                                 <dd class="col-sm-9">{{ $user->updated_at->format('d M Y H:i') }}</dd>
                             </dl>
                         </div>
@@ -43,10 +43,10 @@
                 <div class="card-footer bg-light">
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('users.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to List
+                            <i class="fas fa-arrow-left"></i> {{ __('administrator.back_to_list') }}
                         </a>
                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">
-                            <i class="fas fa-edit"></i> Edit
+                            <i class="fas fa-edit"></i> {{ __('administrator.edit') }}
                         </a>
                     </div>
                 </div>

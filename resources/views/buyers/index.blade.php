@@ -11,14 +11,14 @@
     <div class="container-fluid py-4">
         <div class="row mb-4 align-items-center">
             <div class="col-md-6">
-                <h1 class="display-4">Buyer List</h1>
+                <h1 class="display-4">{{ __('buyer.buyer_list') }}</h1>
             </div>
             <div class="col-md-6 text-md-end">
                 <a href="{{ route('buyer.create') }}" class="btn btn-primary me-2">
-                    <i class="fas fa-user-plus"></i> Add New Buyer
+                    <i class="fas fa-user-plus"></i> {{ __('buyer.add_new_buyer') }}
                 </a>
                 <a href="{{ route('buyer.export') }}" class="btn btn-info">
-                    <i class="fas fa-file-export"></i> Export Buyers
+                    <i class="fas fa-file-export"></i> {{ __('buyer.export_buyers') }}
                 </a>
             </div>
         </div>
@@ -27,18 +27,18 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Buyer Account</h6>
+            <h6 class="m-0 font-weight-bold text-primary">{{ __('buyer.buyer_account') }}</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover" id="buyers-table">
                     <thead class="table-light">
                         <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>{{ __('buyer.image') }}</th>
+                            <th>{{ __('buyer.name') }}</th>
+                            <th>{{ __('buyer.email') }}</th>
+                            <th>{{ __('buyer.status') }}</th>
+                            <th>{{ __('buyer.actions') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -52,18 +52,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteModalLabel">{{ __('buyer.confirm_deletion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to mark this buyer as deleted?
+                {{ __('buyer.delete_confirmation') }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('buyer.cancel') }}</button>
                 <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">{{ __('buyer.delete') }}</button>
                 </form>
             </div>
         </div>

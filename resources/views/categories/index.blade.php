@@ -4,27 +4,24 @@
 <div class="container-fluid py-4">
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <h1 class="display-4">Category List</h1>
+            <h1 class="display-4">{{ __('category_list.category_list') }}</h1>
         </div>
         <div class="col-md-6 text-md-end">
             <a href="{{ route('categories.create') }}" class="btn btn-primary me-2">
-                <i class="fas fa-plus"></i> Create New Category
+                <i class="fas fa-plus"></i> {{ __('category_list.create_new_category') }}
             </a>
             <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fas fa-file-import"></i> Import
+                <i class="fas fa-file-import"></i> {{ __('category_list.import') }}
             </button>
             <a href="{{ route('categories.export') }}" class="btn btn-info">
-                <i class="fas fa-file-export"></i> Export
+                <i class="fas fa-file-export"></i> {{ __('category_list.export') }}
             </a>
-            {{-- <a href="{{ route('categories.export') }}" class="btn btn-info" id="exportBtn">
-                <i class="fas fa-file-export"></i> Export
-            </a> --}}
         </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Categories</h6>
+            <h6 class="m-0 font-weight-bold text-primary">{{ __('category_list.categories') }}</h6>
         </div>
         <div class="card-body">
             @if(session('success'))
@@ -45,10 +42,10 @@
                 <table class="table table-hover" id="categoriesTable">
                     <thead class="table-light">
                         <tr>
-                            <th>Name</th>
-                            <th>Slug</th>
-                            <th>Product Count</th>
-                            <th>Actions</th>
+                            <th>{{ __('category_list.name') }}</th>
+                            <th>{{ __('category_list.slug') }}</th>
+                            <th>{{ __('category_list.product_count') }}</th>
+                            <th>{{ __('category_list.actions') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -62,20 +59,20 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteCategoryModalLabel">Confirm Delete</h5>
+                <h5 class="modal-title" id="deleteCategoryModalLabel">{{ __('category_list.confirm_delete') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this category?
+                {{ __('category_list.sure_delete_category') }}
                 <br><br>
-                <strong class="text-danger">Warning:</strong> This action may affect associated products.
+                <strong class="text-danger">{{ __('category_list.warning') }}:</strong> {{ __('category_list.delete_affect_products') }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('category_list.cancel') }}</button>
                 <form id="deleteCategoryForm" action="" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">{{ __('category_list.delete') }}</button>
                 </form>
             </div>
         </div>
@@ -87,21 +84,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importModalLabel">Import Categories</h5>
+                <h5 class="modal-title" id="importModalLabel">{{ __('category_list.import_categories') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('categories.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="file" class="form-label">Choose Excel File</label>
+                        <label for="file" class="form-label">{{ __('category_list.choose_excel_file') }}</label>
                         <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
                     </div>
-                    <p>Download the <a href="{{ route('categories.template') }}">Excel template</a> for import.</p>
+                    <p>{{ __('category_list.download_the') }} <a href="{{ route('categories.template') }}">{{ __('category_list.excel_template') }}</a> {{ __('category_list.for_import') }}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Import</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('category_list.close') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('category_list.import') }}</button>
                 </div>
             </form>
         </div>
@@ -121,18 +118,6 @@
 
 @push('scripts')
 <script>
-
-// document.getElementById('exportBtn').addEventListener('click', function(event) {
-//         event.preventDefault();
-//         var iframe = document.createElement('iframe');
-//         iframe.style.display = 'none';
-//         iframe.src = '{{ route('categories.export') }}';
-//         document.body.appendChild(iframe);
-
-//         setTimeout(function() {
-//             window.location.href = "{{ route('categories.index') }}";
-//         }, 1000);
-//     });
 
 $(document).ready(function() {
     $('#categoriesTable').DataTable({

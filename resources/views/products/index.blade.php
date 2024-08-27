@@ -3,16 +3,16 @@
 @section('content')
 <div class="container-fluid px-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-        <h1 class="mt-4 mb-3 mb-md-0">Product Management</h1>
+        <h1 class="mt-4 mb-3 mb-md-0">{{ __('products.product_management') }}</h1>
         <div>
             <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
-                <i class="fas fa-plus"></i> Add New Product
+                <i class="fas fa-plus"></i> {{ __('products.add_new_product') }}
             </a>
             <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fas fa-file-import"></i> Import
+                <i class="fas fa-file-import"></i> {{ __('products.import') }}
             </button>
             <a href="{{ route('products.export') }}" class="btn btn-info">
-                <i class="fas fa-file-export"></i> Export
+                <i class="fas fa-file-export"></i> {{ __('products.export') }}
             </a>
         </div>
     </div>
@@ -30,19 +30,19 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
-            Products List
+            {{ __('products.products_list') }}
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover" id="productsTable">
                     <thead>
                         <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Category</th>
-                            <th>Actions</th>
+                            <th>{{ __('products.images') }}</th>
+                            <th>{{ __('products.name') }}</th>
+                            <th>{{ __('products.price') }}</th>
+                            <th>{{ __('products.stock') }}</th>
+                            <th>{{ __('products.category') }}</th>
+                            <th>{{ __('products.actions') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -56,18 +56,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Product Deletion</h5>
+                <h5 class="modal-title" id="deleteModalLabel">{{ __('products.confirm_product_deletion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this product?
+                {{ __('products.sure_delete_product') }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('products.cancel') }}</button>
                 <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete Product</button>
+                    <button type="submit" class="btn btn-danger">{{ __('products.delete_product') }}</button>
                 </form>
             </div>
         </div>
@@ -79,21 +79,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="importModalLabel">Import Products</h5>
+                <h5 class="modal-title" id="importModalLabel">{{ __('products.import_products') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="file" class="form-label">Choose Excel File</label>
+                        <label for="file" class="form-label">{{ __('products.choose_excel_file') }}</label>
                         <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
                     </div>
-                    <p>Download the <a href="{{ route('products.download.template') }}">import template</a>.</p>
+                    <p>{{ __('products.download_the') }} <a href="{{ route('products.download.template') }}">{{ __('products.import_template') }}</a>.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Import</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('products.close') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('products.import') }}</button>
                 </div>
             </form>
         </div>

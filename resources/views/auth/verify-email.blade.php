@@ -21,7 +21,7 @@
                         @csrf
                         <div class="form-floating mb-3">
                             <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="Enter your email">
-                            <label for="email">Email address</label>
+                            <label for="email">{{ __('messages.email_address') }}</label>
                             @error('email')
                                 <div class="invalid-feedback">
                                     {{ $message }}
@@ -30,7 +30,7 @@
                         </div>
                         <div class="form-floating mb-3">
                             <input id="verification_code" type="text" class="form-control @error('verification_code') is-invalid @enderror" name="verification_code" required autocomplete="verification_code" placeholder="Enter verification code">
-                            <label for="verification_code">Verification Code</label>
+                            <label for="verification_code">{{ __('messages.verification_code') }}</label>
                             @error('verification_code')
                                 <div class="invalid-feedback">
                                     {{ $message }}
@@ -49,7 +49,7 @@
                     </form>
                 </div>
                 <div class="card-footer text-center py-3">
-                    <div class="small"><a href="{{ route('login') }}">Already verified? Sign in</a></div>
+                    <div class="small"><a href="{{ route('login') }}">{{ __('messages.already_verified') }}</a></div>
                 </div>
             </div>
         </div>

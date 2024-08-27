@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-warning">
-                    <h1 class="h3 mb-0">Edit Product: {{ $product->name }}</h1>
+                    <h1 class="h3 mb-0">{{ __('products.edit_product') }}: {{ $product->name }}</h1>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
@@ -16,8 +16,8 @@
                         @include('products.partials.form')
 
                         <div class="text-end mt-4">
-                            <a href="{{ route('products.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-warning">Update Product</button>
+                            <a href="{{ route('products.index') }}" class="btn btn-secondary me-2">{{ __('products.cancel') }}</a>
+                            <button type="submit" class="btn btn-warning">{{ __('products.update_product') }}</button>
                         </div>
                     </form>
                 </div>

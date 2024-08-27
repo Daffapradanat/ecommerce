@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Change Email Address</div>
+                <div class="card-header">{{ __('messages.change_email_address') }}</div>
 
                 <div class="card-body">
                     @if (session('success'))
@@ -18,7 +18,7 @@
                         @csrf
 
                         <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">New Email Address</label>
+                            <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('messages.new_email_address') }}</label>
 
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
@@ -34,8 +34,7 @@
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Request Email Change
-                                </button>
+                                    {{ __('messages.request_email_change') }}
                             </div>
                         </div>
                     </form>

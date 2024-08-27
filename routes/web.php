@@ -11,9 +11,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Http\Request;
 
 Route::view('/', 'layouts');
+Route::get('change-language/{locale}', [LanguageController::class, 'changeLanguage'])->name('change.language');
 
 // Authentication Routes
 Route::controller(AuthController::class)->group(function () {
@@ -27,7 +29,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/email/verify', [AuthController::class, 'verificationNotice'])->name('verification.notice');
     Route::post('/email/verify', [AuthController::class, 'verifyEmail'])->name('verification.verify');
     Route::post('/email/resend', [AuthController::class, 'resendVerificationCode'])->name('verification.send');
-    
+
     // Change Email Routes
     Route::get('/email/change', [AuthController::class, 'showChangeEmailForm'])->name('email.change');
     Route::post('/email/change', [AuthController::class, 'changeEmail'])->name('change.email');

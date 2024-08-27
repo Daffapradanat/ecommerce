@@ -4,7 +4,7 @@
     <div class="container-fluid mt-4">
         <div class="row mb-4">
             <div class="col-12">
-                <h1 class="mb-0 text-primary">Dashboard</h1>
+                <h1 class="mb-0 text-primary">{{ __('home.dashboard') }}</h1>
             </div>
         </div>
 
@@ -12,7 +12,7 @@
             <div class="col-md col-sm-6 mb-4">
                 <div class="card bg-gradient-primary text-white h-100 shadow">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title">Admin</h5>
+                        <h5 class="card-title">{{ __('home.admin') }}</h5>
                         <p class="card-text display-4 mb-0">{{ \App\Models\User::count() }}</p>
                     </div>
                 </div>
@@ -20,7 +20,7 @@
             <div class="col-md col-sm-6 mb-4">
                 <div class="card bg-gradient-purple text-white h-100 shadow">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title">Buyers</h5>
+                        <h5 class="card-title">{{ __('home.buyers') }}</h5>
                         <p class="card-text display-4 mb-0">{{ \App\Models\Buyer::count() }}</p>
                     </div>
                 </div>
@@ -28,7 +28,7 @@
             <div class="col-md col-sm-6 mb-4">
                 <div class="card bg-gradient-info text-white h-100 shadow">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title">Categories</h5>
+                        <h5 class="card-title">{{ __('home.categories') }}</h5>
                         <p class="card-text display-4 mb-0">{{ \App\Models\Category::count() }}</p>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
             <div class="col-md col-sm-6 mb-4">
                 <div class="card bg-gradient-success text-white h-100 shadow">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title">Products</h5>
+                        <h5 class="card-title">{{ __('home.products') }}</h5>
                         <p class="card-text display-4 mb-0">{{ \App\Models\Product::count() }}</p>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
             <div class="col-md col-sm-6 mb-4">
                 <div class="card bg-gradient-warning text-white h-100 shadow">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title">Orders</h5>
+                        <h5 class="card-title">{{ __('home.orders') }}</h5>
                         <p class="card-text display-4 mb-0">{{ \App\Models\Order::count() }}</p>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card shadow h-100">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Activities</h5>
+                        <h5 class="mb-0">{{ __('home.recent_activities') }}</h5>
                     </div>
                     <div class="card-body">
                         @php
@@ -148,21 +148,21 @@
                                             @switch($activity['type'])
                                                 @case('user')
                                                 @case('buyer')
-                                                    <p class="mb-0">Name: {{ $activity['name'] }}</p>
-                                                    <p class="mb-0">Email: {{ $activity['email'] }}</p>
+                                                    <p class="mb-0">{{ __('home.name') }}: {{ $activity['name'] }}</p>
+                                                    <p class="mb-0">{{ __('home.email') }}: {{ $activity['email'] }}</p>
                                                 @break
 
                                                 @case('order')
-                                                    <p class="mb-0">ID: {{ $activity['order_id'] }}</p>
-                                                    <p class="mb-0">Buyer: {{ $activity['buyer_name'] }}</p>
-                                                    <p class="mb-0">Total: Rp. {{ number_format($activity['total_price'], 2) }}
+                                                    <p class="mb-0">{{ __('home.id') }}: {{ $activity['order_id'] }}</p>
+                                                    <p class="mb-0">{{ __('home.buyer') }}: {{ $activity['buyer_name'] }}</p>
+                                                    <p class="mb-0">{{ __('home.total') }}: Rp. {{ number_format($activity['total_price'], 2) }}
                                                     </p>
                                                 @break
 
                                                 @case('product')
-                                                    <p class="mb-0">Product: {{ $activity['name'] }}</p>
-                                                    <p class="mb-0">Price: Rp. {{ number_format($activity['price'], 2) }}</p>
-                                                    <p class="mb-0">Updated by: {{ $activity['updated_by'] }}</p>
+                                                    <p class="mb-0">{{ __('home.product') }}: {{ $activity['name'] }}</p>
+                                                    <p class="mb-0">{{ __('home.price') }}: Rp. {{ number_format($activity['price'], 2) }}</p>
+                                                    <p class="mb-0">{{ __('home.updated_by') }}: {{ $activity['updated_by'] }}</p>
                                                 @break
                                             @endswitch
                                         </div>
@@ -170,11 +170,11 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-center my-3">No recent activities</p>
+                            <p class="text-center my-3">{{ __('home.no_recent_activities') }}</p>
                         @endif
                     </div>
                     <div class="card-footer text-center">
-                        <a href="#" class="btn btn-primary btn-sm">View All Activities</a>
+                        <a href="#" class="btn btn-primary btn-sm">{{ __('home.view_all_activities') }}</a>
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card shadow h-100">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Top Selling Products</h5>
+                        <h5 class="mb-0">{{ __('home.top_selling_products') }}</h5>
                     </div>
                     <div class="card-body">
                         @php
@@ -215,10 +215,10 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Product</th>
-                                            <th class="text-end">Quantity Sold</th>
-                                            <th class="text-end">Revenue</th>
-                                            <th class="text-end">% of Total Sales</th>
+                                            <th>{{ __('home.product') }}</th>
+                                            <th class="text-end">{{ __('home.quantity_sold') }}</th>
+                                            <th class="text-end">{{ __('home.revenue') }}</th>
+                                            <th class="text-end">{{ __('home.percent_of_total_sales') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -245,10 +245,10 @@
                                 </table>
                             </div>
                             <div class="mt-3">
-                                <strong>Total All Products Sold: {{ number_format($allSoldQuantity) }}</strong>
+                                <strong>{{ __('home.total_all_products_sold') }}: {{ number_format($allSoldQuantity) }}</strong>
                             </div>
                         @else
-                            <p class="text-center my-3">No product sales data available</p>
+                            <p class="text-center my-3">{{ __('home.no_product_sales_data') }}</p>
                         @endif
                     </div>
                 </div>
