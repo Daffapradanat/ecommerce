@@ -46,6 +46,7 @@
                         <tr>
                             <th>{{ __('category_list.name') }}</th>
                             <th>{{ __('category_list.slug') }}</th>
+                            <th>{{ __('category_list.description') }}</th>
                             <th>{{ __('category_list.product_count') }}</th>
                             <th>{{ __('category_list.actions') }}</th>
                         </tr>
@@ -129,6 +130,7 @@ $(document).ready(function() {
         columns: [
             {data: 'name', name: 'name'},
             {data: 'slug', name: 'slug'},
+            {data: 'description', name: 'description'},
             {data: 'products_count', name: 'products_count', searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false}
         ]

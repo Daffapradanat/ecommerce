@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\CategoriesImport;
@@ -17,37 +18,41 @@ class CategoryController extends Controller
     {
         if ($request->ajax()) {
             $search = $request->input('search.value');
-
-            $query = Category::withCount(['products' => function ($query) {
-                $query->whereNull('deleted_at');
-            }]);
-
+    
+            $query = Category::select('id', 'name', 'slug', 'description')
+                ->withCount(['products' => function ($query) {
+                    $query->whereNull('deleted_at');
+                }]);
+    
             if ($search) {
                 $query->where(function($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
-                          ->orWhere('slug', 'like', "%{$search}%");
+                          ->orWhere('slug', 'like', "%{$search}%")
+                          ->orWhere('description', 'like', "%{$search}%");
                 });
             }
-
+    
             return DataTables::of($query)
-            ->addColumn('action', function ($category) {
-                $actions = '';
-                if (Auth::user()->can('update', $category)) {
-                    $actions .= '<a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn-sm me-2">
-                                    <i class="fas fa-edit"></i>
-                                </a>';}
-                if (Auth::user()->can('delete', $category)) {
-                    $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-id="' . $category->id . '">
-                                    <i class="fas fa-trash"></i>
-                                </button>';}
-                return $actions;
-            })            
+                ->addColumn('action', function ($category) {
+                    $actions = '';
+                    if (Auth::user()->can('update', $category)) {
+                        $actions .= '<a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i>
+                                    </a>';
+                    }
+                    if (Auth::user()->can('delete', $category)) {
+                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-id="' . $category->id . '">
+                                        <i class="fas fa-trash"></i>
+                                    </button>';
+                    }
+                    return $actions;
+                })
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
+    
         return view('categories.index');
-    }
+    }       
 
     public function create()
     {

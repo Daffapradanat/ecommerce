@@ -12,6 +12,7 @@ use App\Notifications\NewProductNotification;
 use App\Notifications\ImportedProductsNotification;
 use App\Mail\NotificationEmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;

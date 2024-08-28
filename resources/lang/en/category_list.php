@@ -7,6 +7,7 @@ return [
     'categories' => 'Categories',
     'name' => 'Name',
     'slug' => 'Slug',
+    'description' => 'Description',
     'product_count' => 'Product Count',
     'actions' => 'Actions',
     'confirm_delete' => 'Confirm Delete',

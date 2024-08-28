@@ -7,6 +7,7 @@ return [
     'categories' => 'Kategori',
     'name' => 'Nama',
     'slug' => 'Slug',
+    'description' => 'Deskripsi',
     'product_count' => 'Jumlah Produk',
     'actions' => 'Aksi',
     'confirm_delete' => 'Konfirmasi Hapus',
