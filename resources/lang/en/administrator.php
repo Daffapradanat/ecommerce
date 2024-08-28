@@ -7,6 +7,8 @@ return [
     'administrator_account' => 'Administrator Account',
     'image' => 'Image',
     'name' => 'Name',
+    'users' => 'Administrator',
+    'buyers' => 'Buyers',
     'email' => 'Email',
     'role' => 'Role',
     'actions' => 'Actions',

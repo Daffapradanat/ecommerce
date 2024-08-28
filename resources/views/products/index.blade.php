@@ -5,9 +5,11 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h1 class="mt-4 mb-3 mb-md-0">{{ __('products.product_management') }}</h1>
         <div>
-            <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
-                <i class="fas fa-plus"></i> {{ __('products.add_new_product') }}
-            </a>
+            @if(Auth::user()->can('create', App\Models\Product::class))
+                <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus"></i> {{ __('products.add_new_product') }}
+                </a>
+            @endif
             <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-import"></i> {{ __('products.import') }}
             </button>
@@ -130,10 +132,6 @@ $(document).ready(function() {
             {data: 'action', name: 'action', orderable: false, searchable: false}
         ]
     });
-
-    // $('#category, #stock_status').change(function() {
-    //     table.draw();
-    // });
 
     $('#category, #stock_status').change(function() {
         table.ajax.reload();

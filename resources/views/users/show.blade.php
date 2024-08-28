@@ -48,9 +48,11 @@
                         <a href="{{ route('users.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> {{ __('administrator.back_to_list') }}
                         </a>
-                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">
-                            <i class="fas fa-edit"></i> {{ __('administrator.edit') }}
-                        </a>
+                        @if(Auth::user()->can('update', $user))
+                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> {{ __('administrator.edit') }}
+                            </a>
+                        @endif                    
                     </div>
                 </div>
             </div>

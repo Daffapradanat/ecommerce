@@ -32,19 +32,17 @@ class BuyerController extends Controller
                     }
                 })
                 ->addColumn('action', function ($buyer) {
-                    $viewBtn = '<a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
+                    $actions = '';
+                    $actions .= '<a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
                                     <i class="fas fa-eye"></i>
-                                </a>';
-
-                    $deleteBtn = '';
-                    if ($buyer->status !== 'deleted') {
-                        $deleteBtn = '<button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
+                                 </a>';
+                    if (Auth::user()->can('delete', $buyer) && $buyer->status !== 'deleted') {
+                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
                                         <i class="fas fa-trash"></i>
-                                      </button>';
+                                     </button>';
                     }
-
-                    return '<div class="d-flex justify-content-start align-items-center">' . $viewBtn . $deleteBtn . '</div>';
-                })
+                    return '<div class="d-flex justify-content-start align-items-center">' . $actions . '</div>';
+                })                
                 ->rawColumns(['image', 'action'])
                 ->make(true);
         }

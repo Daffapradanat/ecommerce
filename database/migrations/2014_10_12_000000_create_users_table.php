@@ -22,7 +22,29 @@ return new class extends Migration
         DB::table('roles')->insert([
             [
                 'name' => 'superadmin',
-                'permissions' => json_encode(['products', 'orders', 'categories', 'roles', 'users']),
+                'permissions' => json_encode([
+                    'products',
+                    'products.create',
+                    'products.edit',
+                    'products.delete',
+                    'orders',
+                    'categories',
+                    'categories.create',
+                    'categories.edit',
+                    'categories.delete',
+                    'roles',
+                    'roles.create',
+                    'roles.edit',
+                    'roles.delete',
+                    'users',
+                    'users.create',
+                    'users.edit',
+                    'users.delete',
+                    'buyers',
+                    'buyers.create',
+                    'buyers.edit',
+                    'buyers.delete'
+                ]),
                 'created_at' => now(),
                 'updated_at' => now()
             ],

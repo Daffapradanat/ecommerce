@@ -1,9 +1,14 @@
-<a href="{{ route('roles.edit', $role) }}" class="btn btn-warning btn-sm me-2">
-    <i class="fas fa-edit"></i>
-</a>
-<button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $role->id }}">
-    <i class="fas fa-trash"></i>
-</button>
+@if(Auth::user()->can('roles.edit', $role))
+    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning btn-sm me-2">
+        <i class="fas fa-edit"></i>
+    </a>
+@endif
+
+@if(Auth::user()->can('roles.delete', $role))
+    <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $role->id }}">
+        <i class="fas fa-trash"></i>
+    </button>
+@endif
 
 <!-- Modal for deleting the role -->
 <div class="modal fade" id="deleteModal{{ $role->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $role->id }}" aria-hidden="true">

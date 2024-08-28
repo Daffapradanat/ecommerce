@@ -56,26 +56,34 @@
                         <a href="{{ route('buyer.index') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> {{ __('buyer.back_to_list') }}
                         </a>
+                
                         @if($buyer->status === 'deleted')
-                            <form action="{{ route('buyer.restore', $buyer->id) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-undo me-1"></i> {{ __('buyer.restore') }}
-                                </button>
-                            </form>
+                            @if(Auth::user()->can('restore', $buyer))
+                                <form action="{{ route('buyer.restore', $buyer->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-undo me-1"></i> {{ __('buyer.restore') }}
+                                    </button>
+                                </form>
+                            @endif
                         @else
                             <div>
-                                <a href="{{ route('buyer.edit', $buyer->id) }}" class="btn btn-warning me-2">
-                                    <i class="fas fa-edit me-1"></i>
-                                </a>
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                    <i class="fas fa-trash me-1"></i>
-                                </button>
+                                @if(Auth::user()->can('update', $buyer))
+                                    <a href="{{ route('buyer.edit', $buyer->id) }}" class="btn btn-warning me-2">
+                                        <i class="fas fa-edit me-1"></i>
+                                    </a>
+                                @endif
+                                
+                                @if(Auth::user()->can('delete', $buyer))
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <i class="fas fa-trash me-1"></i>
+                                    </button>
+                                @endif
                             </div>
                         @endif
                     </div>
-                </div>
+                </div>                
 
                 @if($buyer->status !== 'deleted')
                 <!-- Delete Modal -->

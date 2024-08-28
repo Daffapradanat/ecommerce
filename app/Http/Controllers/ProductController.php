@@ -67,19 +67,24 @@ class ProductController extends Controller
                     return $product->category->name;
                 })
                 ->addColumn('action', function ($product) {
-                    return '
-                        <div class="btn-group" role="group">
-                            <a href="'.route('products.show', $product->id).'" class="btn btn-info btn-sm me-2">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="'.route('products.edit', $product->id).'" class="btn btn-warning btn-sm me-2">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$product->id.'">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    ';
+                    $actions = '';
+
+                    $actions .= '<a href="'.route('products.show', $product->id).'" class="btn btn-info btn-sm me-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>';
+
+                    if (Auth::user()->can('update', $product)) {
+                        $actions .= '<a href="'.route('products.edit', $product->id).'" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i>
+                                    </a>';
+                    }
+
+                    if (Auth::user()->can('delete', $product)) {
+                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$product->id.'">
+                                        <i class="fas fa-trash"></i>
+                                    </button>';
+                    }
+                    return $actions;
                 })
                 ->filterColumn('category', function ($query, $keyword) {
                     $query->whereHas('category', function ($q) use ($keyword) {

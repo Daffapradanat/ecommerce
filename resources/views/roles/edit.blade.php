@@ -13,7 +13,8 @@
                         @if(isset($role))
                             @method('PUT')
                         @endif
-                        <div class="form-group row">
+
+                        <div class="form-group row mb-3">
                             <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('administrator.role_name') }}</label>
                             <div class="col-md-6">
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $role->name ?? '') }}" required autofocus>
@@ -29,15 +30,34 @@
                             <label class="col-md-4 col-form-label text-md-right">{{ __('administrator.permissions') }}</label>
                             <div class="col-md-6">
                                 @php
-                                    $permissions = ['products', 'orders', 'categories', 'roles', 'users', 'buyers',];
+                                    $permissionGroups = [
+                                        'products' => ['create', 'edit', 'delete'],
+                                        'orders' => [],
+                                        'categories' => ['create', 'edit', 'delete'],
+                                        'roles' => ['create','edit','delete'],
+                                        'users' => ['create', 'edit', 'delete'],
+                                        'buyers' => ['create', 'edit', 'delete']
+                                    ];
                                 @endphp
-                                @foreach($permissions as $permission)
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $permission }}" id="{{ $permission }}"
-                                            {{ isset($role) && in_array($permission, $role->permissions ?? []) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="{{ $permission }}">
-                                            {{ ucfirst($permission) }}
-                                        </label>
+
+                                @foreach($permissionGroups as $group => $actions)
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $group }}" id="{{ $group }}"
+                                                {{ isset($role) && in_array($group, $role->permissions ?? []) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="{{ $group }}">
+                                                {{ __("administrator.$group") }}
+                                            </label>
+                                        </div>
+                                        @foreach($actions as $action)
+                                            <div class="form-check ml-4">
+                                                <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $group }}.{{ $action }}" id="{{ $group }}.{{ $action }}"
+                                                    {{ isset($role) && in_array("$group.$action", $role->permissions ?? []) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="{{ $group }}.{{ $action }}">
+                                                    {{ __("administrator.$action") }}
+                                                </label>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @endforeach
                             </div>
@@ -57,3 +77,28 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const groupCheckboxes = document.querySelectorAll('input[type="checkbox"]:not([id*="."])');
+    groupCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const group = this.id;
+            const subCheckboxes = document.querySelectorAll(`input[type="checkbox"][id^="${group}."]`);
+            subCheckboxes.forEach(subCheckbox => {
+                subCheckbox.checked = this.checked;
+                subCheckbox.disabled = !this.checked;
+            });
+        });
+
+        // Initial state
+        const group = checkbox.id;
+        const subCheckboxes = document.querySelectorAll(`input[type="checkbox"][id^="${group}."]`);
+        subCheckboxes.forEach(subCheckbox => {
+            subCheckbox.disabled = !checkbox.checked;
+        });
+    });
+});
+</script>
+@endpush

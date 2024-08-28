@@ -7,6 +7,8 @@ return [
     'administrator_account' => 'Akun Administrator',
     'image' => 'Gambar',
     'name' => 'Nama',
+    'users' => 'Administrator',
+    'buyers' => 'Pembeli',
     'email' => 'Email',
     'role' => 'Peran',
     'actions' => 'Tindakan',

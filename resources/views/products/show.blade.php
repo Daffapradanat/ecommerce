@@ -77,11 +77,16 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="{{ route('products.index') }}" class="btn btn-secondary">{{ __('products.back_to_list') }}</a>
                         <div>
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning me-2">{{ __('products.edit') }}</a>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                {{ __('products.delete') }}
-                            </button>
-                        </div>
+                            @if(Auth::user()->can('update', $product))
+                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning me-2">{{ __('products.edit') }}</a>
+                            @endif
+                        
+                            @if(Auth::user()->can('delete', $product))
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    {{ __('products.delete') }}
+                                </button>
+                            @endif
+                        </div>                        
                     </div>
                 </div>
             </div>

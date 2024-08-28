@@ -3,7 +3,10 @@
 @section('content')
 <div class="container">
     <h1>{{ __('administrator.roles') }}</h1>
-    <a href="{{ route('roles.create') }}" class="btn btn-primary mb-3">{{ __('administrator.create_new_role') }}</a>
+    @if(Auth::user()->can('roles.create'))
+        <a href="{{ route('roles.create') }}" class="btn btn-primary mb-3">{{ __('administrator.create_new_role') }}</a>
+    @endif
+
 
     @if (session('success'))
         <div class="alert alert-success">

@@ -270,12 +270,14 @@
                                     <p>{{ __('messages.admin') }}</p>
                                 </a>
                             </li>
+                            @endif  
+                            @if(in_array('buyers', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">
                                 <a href="{{ route('buyer.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-users"></i>
                                     <p>{{ __('messages.buyer') }}</p>
                                 </a>
-                            </li>
+                            </li>                          
                             @endif
                             @if(in_array('orders', Auth::user()->role->permissions ?? []))
                             <li class="nav-item">

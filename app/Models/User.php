@@ -38,6 +38,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Role::class);
     }
 
+    public function can($permission, $arguments = [])
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->role && in_array($permission, $this->role->permissions ?? []);
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->role && $this->role->name === 'superadmin';
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailNotification);

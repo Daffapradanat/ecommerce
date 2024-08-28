@@ -10,7 +10,9 @@ class CheckPermission
     public function handle(Request $request, Closure $next, $permission)
     {
         if (!$request->user() || !$request->user()->role || !in_array($permission, $request->user()->role->permissions ?? [])) {
-            abort(403, 'Unauthorized action.');
+            $request->session()->flash('error', 'Unauthorized action.');
+
+            return redirect()->to('lobby');
         }
 
         return $next($request);
