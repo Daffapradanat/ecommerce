@@ -50,13 +50,41 @@ return new class extends Migration
             ],
             [
                 'name' => 'admin',
-                'permissions' => json_encode(['products', 'orders', 'categories']),
+                'permissions' => json_encode([
+                    'products',
+                    'products.create',
+                    'products.edit',
+                    'products.delete',
+                    'orders',
+                    'categories',
+                    'categories.create',
+                    'categories.edit',
+                    'categories.delete',
+                    'roles',
+                    'roles.create',
+                    'roles.edit',
+                    'roles.delete',
+                    'buyers',
+                    'buyers.create',
+                    'buyers.edit',
+                    'buyers.delete'
+                ]),
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'name' => 'user',
-                'permissions' => json_encode(['products', 'orders']),
+                'permissions' => json_encode([
+                    'products',
+                    'products.create',
+                    'products.edit',
+                    'products.delete',
+                    'orders',
+                    'categories',
+                    'categories.create',
+                    'categories.edit',
+                    'categories.delete'
+                ]),
                 'created_at' => now(),
                 'updated_at' => now()
             ],
