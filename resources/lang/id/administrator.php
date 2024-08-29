@@ -5,6 +5,7 @@ return [
     'add_new_administrator' => 'Tambah Administrator Baru',
     'export_users' => 'Ekspor Pengguna',
     'administrator_account' => 'Akun Administrator',
+    'restore' => 'Pulihkan',
     'image' => 'Gambar',
     'name' => 'Nama',
     'users' => 'Administrator',

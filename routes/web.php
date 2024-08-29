@@ -100,10 +100,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
-
     // User Routes
     Route::middleware(['check.permission:users'])->group(function () {
         Route::resource('users', UserController::class);
@@ -118,7 +114,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Buyer Routes
-    Route::middleware(['check.permission:users'])->group(function () {
+    Route::middleware(['check.permission:buyers'])->group(function () {
         Route::resource('buyer', BuyerController::class);
         Route::prefix('buyer')->name('buyer.')->group(function () {
             Route::get('/export', [BuyerController::class, 'export'])->name('export');
@@ -130,4 +126,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['check.permission:images'])->group(function () {
         Route::resource('image', ImageController::class);
     });
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
 });

@@ -69,22 +69,26 @@ class ProductController extends Controller
                 })
                 ->addColumn('action', function ($product) {
                     $actions = '';
+                    $user = Auth::user();
+                    $canUpdate = $user->can('update', $product);
+                    $canDelete = $user->can('delete', $product);
+
+                    \Log::info("User {$user->id} permissions for product {$product->id}: update: " . ($canUpdate ? 'yes' : 'no') . ", delete: " . ($canDelete ? 'yes' : 'no'));
 
                     $actions .= '<a href="'.route('products.show', $product->id).'" class="btn btn-info btn-sm me-2">
                                     <i class="fas fa-eye"></i>
                                 </a>';
 
-                    if (Auth::user()->can('update', $product)) {
-                        $actions .= '<a href="'.route('products.edit', $product->id).'" class="btn btn-warning btn-sm me-2">
-                                        <i class="fas fa-edit"></i>
-                                    </a>';
-                    }
-
-                    if (Auth::user()->can('delete', $product)) {
-                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$product->id.'">
-                                        <i class="fas fa-trash"></i>
-                                    </button>';
-                    }
+                        if (Auth::user()->can('products.edit')) {
+                            $actions .= '<a href="'.route('products.edit', $product->id).'" class="btn btn-warning btn-sm me-2">
+                                            <i class="fas fa-edit"></i>
+                                        </a>';
+                        }
+                        if (Auth::user()->can('products.delete')) {
+                            $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="'.$product->id.'">
+                                            <i class="fas fa-trash"></i>
+                                        </button>';
+                        }
                     return $actions;
                 })
                 ->filterColumn('category', function ($query, $keyword) {

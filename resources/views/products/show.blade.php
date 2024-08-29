@@ -77,16 +77,17 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="{{ route('products.index') }}" class="btn btn-secondary">{{ __('products.back_to_list') }}</a>
                         <div>
-                            @if(Auth::user()->can('update', $product))
-                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning me-2">{{ __('products.edit') }}</a>
+                            @if(Auth::user()->can('products.edit'))
+                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm me-2">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                             @endif
-                        
-                            @if(Auth::user()->can('delete', $product))
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                    {{ __('products.delete') }}
+                            @if(Auth::user()->can('products.delete'))
+                                <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}" data-id="{{ $product->id }}">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             @endif
-                        </div>                        
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,19 +104,19 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {{ __('products.sure_delete_product') }} "{{ $product->name }}"?
+                {{ __('products.sure_delete_product') }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('products.cancel') }}</button>
-                <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline">
+                <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">{{ __('products.delete') }}</button>
+                    <button type="submit" class="btn btn-danger">{{ __('products.delete_product') }}</button>
                 </form>
             </div>
         </div>
     </div>
-</div>
+</div>  
 @endsection
 
 @push('styles')

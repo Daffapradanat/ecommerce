@@ -6,11 +6,11 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
             <h1 class="mt-4 mb-3 mb-md-0">{{ __('administrator.administrator_management') }}</h1>
             <div>
-                @if(Auth::user()->can('create', App\Models\User::class))
+                @if(Auth::user()->can('users.create'))
                     <a href="{{ route('users.create') }}" class="btn btn-primary me-2">
                         <i class="fas fa-user-plus"></i> {{ __('administrator.add_new_administrator') }}
                     </a>
-                @endif            
+                @endif
                 <a href="{{ route('users.export') }}" class="btn btn-info">
                     <i class="fas fa-file-export"></i> {{ __('administrator.export_users') }}
                 </a>
@@ -67,17 +67,18 @@
                                     <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm me-2">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @if(Auth::user()->can('update', $user))
+                                    @if(Auth::user()->can('users.update'))
                                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm me-2">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     @endif
-                                    @if(Auth::user()->can('delete', $user))
+
+                                    @if(Auth::user()->can('users.delete'))
                                         <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $user->id }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     @endif
-                                </div>                                
+                                </div>
                             </td>
                         </tr>
                         @endforeach

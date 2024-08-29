@@ -13,7 +13,7 @@ class ProductsTableSeeder extends Seeder
         $faker = Faker::create();
         $categories = DB::table('categories')->pluck('id')->toArray();
 
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             DB::table('products')->insert([
                 'name' => $faker->word,
                 'description' => $faker->sentence,

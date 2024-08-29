@@ -44,7 +44,24 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        return $this->role && in_array($permission, $this->role->permissions ?? []);
+        if ($this->role) {
+            $permissions = is_array($this->role->permissions) ? $this->role->permissions : json_decode($this->role->permissions, true);
+
+            if (in_array($permission, $permissions)) {
+                return true;
+            }
+
+            $parts = explode('.', $permission);
+            while (count($parts) > 0) {
+                array_pop($parts);
+                $wildcardPermission = implode('.', $parts) . '.*';
+                if (in_array($wildcardPermission, $permissions)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function isSuperAdmin()

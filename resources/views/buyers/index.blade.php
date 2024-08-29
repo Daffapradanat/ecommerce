@@ -14,11 +14,11 @@
                 <h1 class="display-4">{{ __('buyer.buyer_list') }}</h1>
             </div>
             <div class="col-md-6 text-md-end">
-                @if(Auth::user()->can('create', App\Models\Buyer::class))
+                @if(Auth::user()->can('buyers.create'))
                     <a href="{{ route('buyer.create') }}" class="btn btn-primary me-2">
                         <i class="fas fa-user-plus"></i> {{ __('buyer.add_new_buyer') }}
                     </a>
-                @endif            
+                @endif
                 <a href="{{ route('buyer.export') }}" class="btn btn-info">
                     <i class="fas fa-file-export"></i> {{ __('buyer.export_buyers') }}
                 </a>

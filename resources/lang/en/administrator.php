@@ -5,6 +5,7 @@ return [
     'add_new_administrator' => 'Add New Administrator',
     'export_users' => 'Export Users',
     'administrator_account' => 'Administrator Account',
+    'restore' => 'Restore',
     'image' => 'Image',
     'name' => 'Name',
     'users' => 'Administrator',

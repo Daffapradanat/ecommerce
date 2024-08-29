@@ -37,13 +37,13 @@ class BuyerController extends Controller
                     $actions .= '<a href="' . route('buyer.show', $buyer->id) . '" class="btn btn-info btn-sm me-2">
                                     <i class="fas fa-eye"></i>
                                  </a>';
-                    if (Auth::user()->can('delete', $buyer) && $buyer->status !== 'deleted') {
+                        if (Auth::user()->can('buyers.delete') && $buyer->status !== 'deleted') {
                         $actions .= '<button type="button" class="btn btn-danger btn-sm me-0 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-buyer-id="' . $buyer->id . '">
                                         <i class="fas fa-trash"></i>
-                                     </button>';
+                                    </button>';
                     }
                     return '<div class="d-flex justify-content-start align-items-center">' . $actions . '</div>';
-                })                
+                })
                 ->rawColumns(['image', 'action'])
                 ->make(true);
         }
@@ -58,7 +58,6 @@ class BuyerController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:buyers',

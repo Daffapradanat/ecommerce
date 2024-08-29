@@ -18,12 +18,12 @@ class CategoryController extends Controller
     {
         if ($request->ajax()) {
             $search = $request->input('search.value');
-    
+
             $query = Category::select('id', 'name', 'slug', 'description')
                 ->withCount(['products' => function ($query) {
                     $query->whereNull('deleted_at');
                 }]);
-    
+
             if ($search) {
                 $query->where(function($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -31,17 +31,18 @@ class CategoryController extends Controller
                           ->orWhere('description', 'like', "%{$search}%");
                 });
             }
-    
+
             return DataTables::of($query)
                 ->addColumn('action', function ($category) {
                     $actions = '';
-                    if (Auth::user()->can('update', $category)) {
+                    if (Auth::user()->can('categories.edit')) {
                         $actions .= '<a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn-sm me-2">
                                         <i class="fas fa-edit"></i>
                                     </a>';
                     }
-                    if (Auth::user()->can('delete', $category)) {
-                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-id="' . $category->id . '">
+
+                    if (Auth::user()->can('categories.delete')) {
+                        $actions .= '<button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $category->id . '">
                                         <i class="fas fa-trash"></i>
                                     </button>';
                     }
@@ -50,9 +51,9 @@ class CategoryController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-    
+
         return view('categories.index');
-    }       
+    }
 
     public function create()
     {

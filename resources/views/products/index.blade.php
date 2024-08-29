@@ -5,7 +5,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h1 class="mt-4 mb-3 mb-md-0">{{ __('products.product_management') }}</h1>
         <div>
-            @if(Auth::user()->can('create', App\Models\Product::class))
+            @if(Auth::user()->can('products.create'))
                 <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
                     <i class="fas fa-plus"></i> {{ __('products.add_new_product') }}
                 </a>

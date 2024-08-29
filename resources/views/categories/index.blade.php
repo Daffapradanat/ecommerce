@@ -7,11 +7,11 @@
             <h1 class="display-4">{{ __('category_list.category_list') }}</h1>
         </div>
         <div class="col-md-6 text-md-end">
-            @if(Auth::user()->can('create', App\Models\Category::class))
+            @if(Auth::user()->can('categories.create'))
                 <a href="{{ route('categories.create') }}" class="btn btn-primary me-2">
                     <i class="fas fa-plus"></i> {{ __('category_list.create_new_category') }}
                 </a>
-            @endif        
+            @endif
             <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-import"></i> {{ __('category_list.import') }}
             </button>

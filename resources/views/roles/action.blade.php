@@ -1,10 +1,10 @@
-@if(Auth::user()->can('roles.edit', $role))
+@if(Auth::user()->can('roles.edit'))
     <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning btn-sm me-2">
         <i class="fas fa-edit"></i>
     </a>
 @endif
 
-@if(Auth::user()->can('roles.delete', $role))
+@if(Auth::user()->can('roles.delete'))
     <button type="button" class="btn btn-danger btn-sm me-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $role->id }}">
         <i class="fas fa-trash"></i>
     </button>
