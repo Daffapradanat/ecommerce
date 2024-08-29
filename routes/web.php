@@ -82,44 +82,121 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Category Routes
     Route::middleware(['check.permission:categories'])->group(function () {
-        Route::resource('categories', CategoryController::class);
         Route::prefix('categories')->name('categories.')->group(function () {
             Route::post('/import', [CategoryController::class, 'import'])->name('import');
             Route::get('/export', [CategoryController::class, 'export'])->name('export');
             Route::get('/template', [CategoryController::class, 'downloadTemplate'])->name('template');
         });
+
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+
+        Route::middleware(['check.permission:categories.create'])->group(function () {
+            Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+            Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        });
+
+        Route::middleware(['check.permission:categories.edit'])->group(function () {
+            Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+            Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        });
+
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
+            ->name('categories.destroy')
+            ->middleware('check.permission:categories.delete');
     });
 
     // Product Routes
     Route::middleware(['check.permission:products'])->group(function () {
-        Route::resource('products', ProductController::class);
         Route::prefix('products')->name('products.')->group(function () {
             Route::post('/import', [ProductController::class, 'import'])->name('import');
             Route::get('/export', [ProductController::class, 'export'])->name('export');
             Route::get('/download-template', [ProductController::class, 'downloadTemplate'])->name('download.template');
         });
+
+        Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+
+        Route::middleware(['check.permission:products.create'])->group(function () {
+            Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        });
+
+        Route::middleware(['check.permission:products.edit'])->group(function () {
+            Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+            Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        });
+
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])
+            ->name('products.destroy')
+            ->middleware('check.permission:products.delete');
     });
 
     // User Routes
     Route::middleware(['check.permission:users'])->group(function () {
-        Route::resource('users', UserController::class);
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/export', [UserController::class, 'export'])->name('export');
         });
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+
+        Route::middleware(['check.permission:users.create'])->group(function () {
+            Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+            Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        });
+
+        Route::middleware(['check.permission:users.edit'])->group(function () {
+            Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+            Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        });
+
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])
+            ->name('users.destroy')
+            ->middleware('check.permission:users.delete');
     });
 
     // Role Routes
     Route::middleware(['check.permission:roles'])->group(function () {
-        Route::resource('roles', RoleController::class);
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/{role}', [RoleController::class, 'show'])->name('roles.show');
+
+        Route::middleware(['check.permission:roles.create'])->group(function () {
+            Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
+            Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        });
+
+        Route::middleware(['check.permission:roles.edit'])->group(function () {
+            Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+            Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        });
+
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
+            ->name('roles.destroy')
+            ->middleware('check.permission:roles.delete');
     });
 
     // Buyer Routes
     Route::middleware(['check.permission:buyers'])->group(function () {
-        Route::resource('buyer', BuyerController::class);
         Route::prefix('buyer')->name('buyer.')->group(function () {
             Route::get('/export', [BuyerController::class, 'export'])->name('export');
             Route::patch('{buyer}/restore', [BuyerController::class, 'restore'])->name('restore');
         });
+        Route::get('/buyer', [BuyerController::class, 'index'])->name('buyer.index');
+        Route::get('/buyer/{buyer}', [BuyerController::class, 'show'])->name('buyer.show');
+
+        Route::middleware(['check.permission:buyers.create'])->group(function () {
+            Route::get('/buyer/create', [BuyerController::class, 'create'])->name('buyer.create');
+            Route::post('/buyer', [BuyerController::class, 'store'])->name('buyer.store');
+        });
+
+        Route::middleware(['check.permission:buyers.edit'])->group(function () {
+            Route::get('/buyer/{buyer}/edit', [BuyerController::class, 'edit'])->name('buyer.edit');
+            Route::put('/buyer/{buyer}', [BuyerController::class, 'update'])->name('buyer.update');
+        });
+
+        Route::delete('/buyer/{buyer}', [BuyerController::class, 'destroy'])
+            ->name('buyer.destroy')
+            ->middleware('check.permission:buyers.delete');
     });
 
     // Image Routes
